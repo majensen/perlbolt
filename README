@@ -1,0 +1,8 @@
+Bolt - Neo4j server agent using Bolt protocol
+
+To install:
+ $ perl Build.PL
+ $ ./Build
+ $ ./Build test
+ $ ./Build install
+
