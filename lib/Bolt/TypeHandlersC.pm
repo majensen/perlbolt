@@ -92,7 +92,6 @@ neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
   Newx(k0,len+1,char);
   strncpy(k0,k,len);
   *(k0+len) = 0;
-  printf("%d %s\n",len,k0);
   return neo4j_string(k0);
 }
 
@@ -408,7 +407,9 @@ HV* neo4j_node_to_HV( neo4j_value_t value ) {
   labels = neo4j_node_labels(value);
   props_hv = neo4j_map_to_HV(neo4j_node_properties(value));
   hv_stores(hv, "_node", newSViv( (IV) id ));
-  hv_stores(hv, "_labels", neo4j_value_to_SV(labels));
+  if (neo4j_list_length(labels)) {
+    hv_stores(hv, "_labels", neo4j_value_to_SV(labels));
+  }
   hv_iterinit(props_hv);
   while ((v = hv_iternextsv(props_hv, &k, &retlen))) {
     hv_store(hv, k, retlen, v, 0);
@@ -427,13 +428,15 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   reln_id = neo4j_identity_value(neo4j_relationship_identity(value));
   start_id = neo4j_identity_value(neo4j_relationship_start_node_identity(value));
   end_id = neo4j_identity_value(neo4j_relationship_end_node_identity(value));
-  printf("type: %s\n", neo4j_string_to_alloc_str( neo4j_relationship_type(value)));
   type = neo4j_string_to_SVpv(neo4j_relationship_type(value));
   props_hv = neo4j_map_to_HV(neo4j_relationship_properties(value));
   hv_stores(hv, "_relationship", newSViv( (IV) reln_id ));
   hv_stores(hv, "_start", newSViv( (IV) start_id ));
-  hv_stores(hv, "_end", newSViv( (IV) end_id )); 
-  hv_stores(hv, "_type", type);
+  hv_stores(hv, "_end", newSViv( (IV) end_id ));
+  SvPV(type,retlen);
+  if (retlen) {
+    hv_stores(hv, "_type", type);
+  }
   hv_iterinit(props_hv);
   while ((v = hv_iternextsv(props_hv, &k, &retlen))) {
     hv_store(hv, k, retlen, v, 0);
