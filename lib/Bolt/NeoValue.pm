@@ -1,4 +1,4 @@
-package t::NeoValue;
+package Bolt::NeoValue;
 use lib '../lib';
 use lib '../../lib';
 use Bolt::TypeHandlersC;
@@ -7,7 +7,7 @@ use Inline C => <<'END_NEOVALUE_C';
 
 #include <neo4j-client.h>
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
-#define NVCLASS "t::NeoValue"
+#define NVCLASS "Bolt::NeoValue"
 extern neo4j_value_t SV_to_neo4j_value(SV*);
 extern SV *neo4j_value_to_SV(neo4j_value_t);
 struct neovalue {
@@ -50,5 +50,25 @@ void DESTROY(SV *obj) {
 
 END_NEOVALUE_C
 
+sub of {
+  my ($class, @args) = @_;
+  my @ret;
+  for (@args) {
+    push @ret, $class->_new_from_perl($_);
+  }
+  return @ret;
+}
+
+sub is {
+  my ($class, @args) = @_;
+  my @ret;
+  for (@args) {
+    push @ret, $_->_as_perl;
+  }
+  return @ret;
+}
+
+sub new {shift->of(@_)}
+sub are {shift->is(@_)}
 1;
 

@@ -1,9 +1,13 @@
 Build.PL
 try.pl
 MANIFEST
-MYMETA.yml
 README
-MYMETA.json
-lib/Bolt/TypeHandlersC.pm
+t/001_useok.t
+t/002_types.t
+t/003_stream.t
+t/BoltFile.pm
 lib/Bolt.pm
+lib/Bolt/NeoValue.pm
+lib/Bolt/TypeHandlersC.pm
+
 

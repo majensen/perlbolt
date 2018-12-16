@@ -15,7 +15,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url )
 						 NEO4J_INSECURE);
   if (connection == NULL) {
     neo4j_perror(stderr, errno, "Connection failed");
-    return (SV *)NULL;
+    return &PL_sv_undef;
   }
   else {
     cxn = newSViv((IV) connection);
@@ -37,8 +37,9 @@ use Inline C => <<'END_BOLT_CXN_C';
 #include <neo4j-client.h>
 #define RSCLASS  "Bolt::ResultStream"
 #define PARMCLASS "Bolt::Parameters"
+#define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
-SV *run_query( SV *cxn_ref, const char *cypher_query, SV *params_ref)
+SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 {
   neo4j_result_stream_t *res_stream;
   SV *rs;
@@ -46,19 +47,22 @@ SV *run_query( SV *cxn_ref, const char *cypher_query, SV *params_ref)
   neo4j_connection_t *cxn;
   neo4j_value_t params_p;
   // extract connection
-  cxn = (neo4j_connection_t*) SvIV(SvRV(cxn_ref));
+  cxn = C_PTR_OF(cxn_ref,neo4j_connection_t);
   // extract params
-  if (SvOK(params_ref)) {
-    params_p = *((neo4j_value_t*) SvIV(SvRV(params_ref)));
-    res_stream = neo4j_run(cxn, cypher_query, params_p);
+  if (params_ref && SvOK(params_ref)) {
+    params_p = *C_PTR_OF(params_ref,neo4j_value_t);
+    if ( neo4j_type(params_p) != NEO4J_MAP ) { // ignore
+      params_p = neo4j_null;
+    }
   }
   else {
-    res_stream = neo4j_run(cxn, cypher_query, neo4j_null);
+    params_p = neo4j_null;
   }
+  res_stream = neo4j_run(cxn, cypher_query, params_p);
 
   if (res_stream == NULL) {
     neo4j_perror(stderr, errno, "Failed to run statement");
-    return (SV *) NULL;
+    return &PL_sv_undef;
   }
   else {
     rs = newSViv((IV) res_stream);
@@ -72,7 +76,7 @@ SV *run_query( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 void reset_ (SV *cxn_ref) 
 {
   int rc;
-  rc = neo4j_reset( (neo4j_connection_t *)SvIV(SvRV(cxn_ref)) );
+  rc = neo4j_reset( C_PTR_OF(cxn_ref,neo4j_connection_t) );
   if (rc < 0) {
     neo4j_perror(stderr,errno,"Problem resetting connection");
   } 
@@ -81,7 +85,7 @@ void reset_ (SV *cxn_ref)
 
 void DESTROY (SV *cxn_ref)
 {
-  neo4j_close( (neo4j_connection_t *)SvIV(SvRV(cxn_ref)) );
+  neo4j_close( C_PTR_OF(cxn_ref,neo4j_connection_t) );
   return;
 }
 
@@ -97,6 +101,7 @@ use Inline C => <<'END_BOLT_RS_C';
 #define RSCLASS  "Bolt::ResultStream"
 #define RCLASS  "Bolt::Result"
 #define PARMCLASS "Bolt::Parameters"
+#define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
 struct neo4j_rs_result {
   neo4j_result_stream_t *rs;
@@ -111,13 +116,13 @@ SV *fetch_next_ (SV *rs_ref) {
   neo4j_result_t *result;
   neo4j_rs_result_t *rs_result;
   neo4j_result_stream_t *rs;
-  rs = (neo4j_result_stream_t *) SvIV(SvRV(rs_ref));
+  rs = C_PTR_OF(rs_ref,neo4j_result_stream_t);
   result = neo4j_fetch_next(rs);
   if (result == NULL) {
     if (errno) {
       neo4j_perror(stderr,errno,"Fetch failed");
     }
-    return (SV *) NULL;
+    return &PL_sv_undef;
   }
   Newx(rs_result, 1, neo4j_rs_result_t);
   rs_result->rs = rs;
@@ -130,14 +135,14 @@ SV *fetch_next_ (SV *rs_ref) {
 }
 
 int nfields_(SV *rs_ref) {
-  return neo4j_nfields((neo4j_result_stream_t *)SvIV(SvRV(rs_ref)));
+  return neo4j_nfields( C_PTR_OF(rs_ref,neo4j_result_stream_t) );
 }
 
 void fieldnames_ (SV *rs_ref) {
   neo4j_result_stream_t *rs;
   int nfields;
   int i;
-  rs = (neo4j_result_stream_t *)SvIV(SvRV(rs_ref));
+  rs = C_PTR_OF(rs_ref,neo4j_result_stream_t);
   nfields = neo4j_nfields(rs);
   Inline_Stack_Vars;
   Inline_Stack_Reset;
@@ -148,7 +153,7 @@ void fieldnames_ (SV *rs_ref) {
 }
 
 void DESTROY (SV *rs_ref) {
-  neo4j_close_results((neo4j_result_stream_t *)SvIV(SvRV(rs_ref)));
+  neo4j_close_results(C_PTR_OF(rs_ref,neo4j_result_stream_t));
   return;
 }
 
@@ -183,6 +188,7 @@ use Bolt::TypeHandlersC;
 use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
 use Inline C => <<'END_BOLT_R_C';
 #include <neo4j-client.h>
+#define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
 // neo4j_type_t neo4j_type( neo4j_value_t value ) - integer code
 // const char* neo4j_fieldname (neo4j_result_stream_t *, unsigned int idx)
@@ -198,7 +204,7 @@ struct neo4j_rs_result {
 typedef struct neo4j_rs_result neo4j_rs_result_t;
 
 int nfields_(SV *r_ref) {
-  return neo4j_nfields( ((neo4j_rs_result_t *) SvIV(SvRV(r_ref)))->rs );
+  return neo4j_nfields( C_PTR_OF(r_ref,neo4j_rs_result_t)->rs );
 }
 
 int _r_nfields_(neo4j_rs_result_t *rsr) {

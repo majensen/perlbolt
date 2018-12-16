@@ -1,4 +1,5 @@
 package Bolt::TypeHandlersC;
+
 our $VERSION = '0.01';
 #define this_is_ignored /**
 use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g';
@@ -7,6 +8,7 @@ use Inline C => <<'END_TYPE_HANDLERS_C';
 
 #include <neo4j-client.h>
 #include <string.h>
+
 
 struct neo4j_struct
 {
