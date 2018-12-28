@@ -1,10 +1,15 @@
-package Bolt;
+package Neo4j::Bolt;
 our $VERSION = "0.01";
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
+#use lib '../lib';
+use lib 'blib';
+use Inline info;
+use Inline 
+  C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
+
 use Inline C => <<'END_BOLT_C';
 #include <neo4j-client.h>
 
-#define CXNCLASS "Bolt::Cxn"
+#define CXNCLASS "Neo4j::Bolt::Cxn"
 
 SV* connect_ ( const char* classname, const char* neo4j_url )
 {
@@ -30,14 +35,17 @@ END_BOLT_C
 
 1;
 
-package Bolt::Cxn;
+package Neo4j::Bolt::Cxn;
 
 use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
+
+
 use Inline C => <<'END_BOLT_CXN_C';
 #include <neo4j-client.h>
-#define RSCLASS  "Bolt::ResultStream"
-#define PARMCLASS "Bolt::Parameters"
+#define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
+
+neo4j_value_t SV_to_neo4j_value(SV *sv);
 
 SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 {
@@ -49,14 +57,12 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
   // extract connection
   cxn = C_PTR_OF(cxn_ref,neo4j_connection_t);
   // extract params
-  if (params_ref && SvOK(params_ref)) {
-    params_p = *C_PTR_OF(params_ref,neo4j_value_t);
-    if ( neo4j_type(params_p) != NEO4J_MAP ) { // ignore
-      params_p = neo4j_null;
-    }
+  if (SvROK(params_ref) && (SvTYPE(SvRV(params_ref))==SVt_PVHV)) {
+    params_p = SV_to_neo4j_value(params_ref);
   }
   else {
-    params_p = neo4j_null;
+    perror("Parameter arg must be a hash reference\n");
+    return &PL_sv_undef;
   }
   res_stream = neo4j_run(cxn, cypher_query, params_p);
 
@@ -93,14 +99,15 @@ END_BOLT_CXN_C
 
 1;
 
-package Bolt::ResultStream;
+package Neo4j::Bolt::ResultStream;
 
 use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
+
+
 use Inline C => <<'END_BOLT_RS_C';
 #include <neo4j-client.h>
-#define RSCLASS  "Bolt::ResultStream"
-#define RCLASS  "Bolt::Result"
-#define PARMCLASS "Bolt::Parameters"
+#define RSCLASS  "Neo4j::Bolt::ResultStream"
+#define RCLASS  "Neo4j::Bolt::Result"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
 struct neo4j_rs_result {
@@ -109,29 +116,46 @@ struct neo4j_rs_result {
 };
 
 typedef struct neo4j_rs_result neo4j_rs_result_t;
+SV* neo4j_value_to_SV( neo4j_value_t value);
 
-SV *fetch_next_ (SV *rs_ref) {
+void fetch_next_ (SV *rs_ref) {
   SV *r;
   SV *r_ref;
+  SV *perl_value;
   neo4j_result_t *result;
-  neo4j_rs_result_t *rs_result;
   neo4j_result_stream_t *rs;
+  neo4j_value_t value;
+  int i,n;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+
   rs = C_PTR_OF(rs_ref,neo4j_result_stream_t);
+  n = neo4j_nfields(rs);
+  if (!n) {
+    if (errno) {
+      neo4j_perror(stderr,errno,"Result stream");
+    }
+    else {
+     Inline_Stack_Done;
+     return;
+    }
+  }  
   result = neo4j_fetch_next(rs);
   if (result == NULL) {
     if (errno) {
       neo4j_perror(stderr,errno,"Fetch failed");
     }
-    return &PL_sv_undef;
+    Inline_Stack_Done;
+    return;
   }
-  Newx(rs_result, 1, neo4j_rs_result_t);
-  rs_result->rs = rs;
-  rs_result->r = result;
-  r = newSViv((IV) rs_result);
-  r_ref = newRV_noinc(r);
-  sv_bless(r_ref, gv_stashpv(RCLASS, GV_ADD));
-  SvREADONLY_on(r);
-  return r_ref;
+
+  for (i=0; i<n; i++) {
+    value = neo4j_result_field(result, i);
+    perl_value = neo4j_value_to_SV(value);
+    Inline_Stack_Push( perl_value );
+  }
+  Inline_Stack_Done;
+  return;
 }
 
 int nfields_(SV *rs_ref) {
@@ -161,9 +185,8 @@ END_BOLT_RS_C
 
 1;
 
-package Bolt::Result;
+package Neo4j::Bolt::Result;
 use lib '../lib';
-use Bolt::TypeHandlersC;
 
 # building libneo4j-client
 # adding function prototypes to neo4j-client.h.in to expose them in the
@@ -173,6 +196,9 @@ use Bolt::TypeHandlersC;
 #   neo4j_value_t neo4j_identity(long long);               
 #   neo4j_value_t neo4j_node(const neo4j_value_t*);	      
 #   neo4j_value_t neo4j_relationship(const neo4j_value_t*);
+
+# or link the static archive
+#   myextlib => "/usr/local/lib/libneo4j-client.a"
 
 # ./configure --without-tls<FIXME> --disable-tools
 
@@ -184,6 +210,8 @@ use Bolt::TypeHandlersC;
 # return an array of perly values (each of which may be a hash)
 # return an array of fieldnames in order (suitable for creating set of keys
 #  for a hash of returned values)
+
+require Neo4j::Bolt::TypeHandlersC;
 
 use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto';
 use Inline C => <<'END_BOLT_R_C';
@@ -223,3 +251,46 @@ void DESTROY (SV *r_ref) {
 
 END_BOLT_R_C
 1;
+
+=head1 NAME
+
+Neo4j::Bolt - query Neo4j using Bolt protocol
+
+=head1 SYNOPSIS
+
+ use Neo4j::Bolt;
+ $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+ $stream = $cxn->run_query_(
+   "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
+   {} # parameter hash required
+ );
+ @names = $stream->fieldnames_;
+ while ( my @row = $stream->fetch_next_ ) {
+   print "For label '$row[0]' there are $row[1] nodes.\n";
+ }
+ $stream = $cxn->run_query_(
+   "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
+   {} # parameter hash required
+ );
+ while ( my @row = $stream->fetch_next_ ) {
+   print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
+ }
+
+
+=head1 DESCRIPTION
+
+L<Neo4j::Bolt> is a Perl wrapper around Chris Leishmann's excellent
+L<libneo4j-client|https://github.com/cleishm/libneo4j-client> library
+implementing the Neo4j L<Bolt|https://boltprotocol.org/> network
+protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
+
+=head1 AUTHOR
+
+ Mark A. Jensen
+ CPAN: MAJENSEN
+ majensen -at- cpan -dot- org
+
+=head1 LICENSE
+
+
+=cut

@@ -1,13 +1,23 @@
-package Bolt::TypeHandlersC;
+package Neo4j::Bolt::TypeHandlersC;
 
-our $VERSION = '0.01';
+
 #define this_is_ignored /**
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g';
+use Inline info;
+use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a';
+
+BEGIN {
+  $Neo4j::Bolt::TypeHandlersC::VERSION = '0.01';
+}
+
 use Inline C => <<'END_TYPE_HANDLERS_C';
 # define this_is_also_ignored **/
 
 #include <neo4j-client.h>
 #include <string.h>
+
+extern neo4j_value_t neo4j_identity(long long);               
+extern neo4j_value_t neo4j_node(const neo4j_value_t*);	      
+extern neo4j_value_t neo4j_relationship(const neo4j_value_t*);
 
 
 struct neo4j_struct
@@ -57,12 +67,13 @@ SV* neo4j_bytes_to_SVpv( neo4j_value_t value );
 SV* neo4j_float_to_SVnv( neo4j_value_t value );
 SV* neo4j_int_to_SViv( neo4j_value_t value );
 SV* neo4j_string_to_SVpv( neo4j_value_t value );
-SV* neo4j_value_to_SV( neo4j_value_t value );
 HV* neo4j_node_to_HV( neo4j_value_t value );
 HV* neo4j_relationship_to_HV( neo4j_value_t value );
 AV* neo4j_path_to_AV( neo4j_value_t value);
 AV* neo4j_list_to_AV( neo4j_value_t value );
 HV* neo4j_map_to_HV( neo4j_value_t value );
+SV* neo4j_value_to_SV( neo4j_value_t value );
+
 long long neo4j_identity_value(neo4j_value_t value);
 char *neo4j_string_to_alloc_str(neo4j_value_t value);
 
@@ -456,3 +467,4 @@ AV* neo4j_path_to_AV( neo4j_value_t value) {
 END_TYPE_HANDLERS_C
   1;
  #**/
+

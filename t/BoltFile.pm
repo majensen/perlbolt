@@ -1,9 +1,14 @@
 package t::BoltFile;
-use Inline C => Config => LIBS  => "-L/usr/local/lib -lneo4j-client -lssl -lcrypto", INC => "-I$ENV{HOME}/Code/libneo4j-client/lib/src -I$ENV{HOME}/Code/libneo4j-client/lib", myextlib => "$ENV{HOME}/Code/libneo4j-client/lib/src/libneo4j_client.a";
+use Inline info;
+use Inline C => Config => LIBS  => "-lneo4j-client -lssl -lcrypto",
+  INC => "-I$ENV{LIBNEO4J}/lib/src",
+  myextlib => "/usr/local/lib/libneo4j-client.a";
+
 use Inline C => <<'END_BOLTFILE_C';
 
 #include <neo4j-client.h>
-#include "src/memory.h"
+#include <memory.h>
+#include <iostream.h>
 #include <posix_iostream.h>
 #include <serialization.h>
 #include <deserialization.h>

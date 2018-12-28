@@ -1,13 +1,13 @@
-package Bolt::NeoValue;
-use lib '../lib';
-use lib '../../lib';
-use Bolt::TypeHandlersC;
-use Inline C => Config => LIBS  => '-L/usr/local/lib -lneo4j-client -lssl -lcrypto', INC => "-I$ENV{HOME}/Code/libneo4j-client/lib/src -I$ENV{HOME}/Code/libneo4j-client/lib";
+package Neo4j::Bolt::NeoValue;
+#use lib '../lib';
+#use lib '../../lib';
+
+use Inline C => Config => LIBS  => '-lneo4j-client -lssl -lcrypto';
 use Inline C => <<'END_NEOVALUE_C';
 
 #include <neo4j-client.h>
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
-#define NVCLASS "Bolt::NeoValue"
+#define NVCLASS "Neo4j::Bolt::NeoValue"
 extern neo4j_value_t SV_to_neo4j_value(SV*);
 extern SV *neo4j_value_to_SV(neo4j_value_t);
 struct neovalue {
@@ -49,6 +49,8 @@ void DESTROY(SV *obj) {
 }
 
 END_NEOVALUE_C
+
+require Neo4j::Bolt::TypeHandlersC;
 
 sub of {
   my ($class, @args) = @_;

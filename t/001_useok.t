@@ -1,9 +1,11 @@
 use Test::More;
+use Module::Build;
 use lib '../lib';
 use strict;
 
-use_ok("Bolt::TypeHandlersC");
-use_ok("Bolt::NeoValue");
-use_ok("Bolt");
+use_ok("Neo4j::Bolt");
+use_ok("Neo4j::Bolt::TypeHandlersC");
+use_ok("Neo4j::Bolt::NeoValue");
+
 
 done_testing;
