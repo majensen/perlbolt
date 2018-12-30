@@ -1,13 +1,13 @@
 package Neo4j::Bolt::TypeHandlersC;
-
+BEGIN {
+  our $VERSION = "0.01";
+}
 
 #define this_is_ignored /**
-use Inline info;
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a';
 
-BEGIN {
-  $Neo4j::Bolt::TypeHandlersC::VERSION = '0.01';
-}
+use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a',
+  version => $VERSION,
+  name => __PACKAGE__;
 
 use Inline C => <<'END_TYPE_HANDLERS_C';
 # define this_is_also_ignored **/

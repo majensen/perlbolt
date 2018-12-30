@@ -1,8 +1,14 @@
 package Neo4j::Bolt::NeoValue;
 #use lib '../lib';
 #use lib '../../lib';
+BEGIN {
+  our $VERSION = "0.01";
+  require Neo4j::Bolt::TypeHandlersC;
+}
 
-use Inline C => Config => LIBS  => '-lneo4j-client -lssl -lcrypto';
+use Inline C => Config => LIBS  => '-lneo4j-client -lssl -lcrypto',
+  version => $VERSION,
+  name => __PACKAGE__;
 use Inline C => <<'END_NEOVALUE_C';
 
 #include <neo4j-client.h>

@@ -1,7 +1,9 @@
 package t::BoltFile;
-use Inline info;
+use File::Spec;
+use t::BoltFile::Config;
+
 use Inline C => Config => LIBS  => "-lneo4j-client -lssl -lcrypto",
-  INC => "-I$ENV{LIBNEO4J}/lib/src",
+	     INC => "-I".File::Spec->catdir($t::BoltFile::Config::libneo_loc // '/usr/local','lib','src'),
   myextlib => "/usr/local/lib/libneo4j-client.a";
 
 use Inline C => <<'END_BOLTFILE_C';
@@ -15,7 +17,7 @@ use Inline C => <<'END_BOLTFILE_C';
 #include <stdio.h>
 #define NEO4J_DEFAULT_MPOOL_BLOCK_SIZE 128
 #define BFCLASS "t::BoltFile"
-#define NVCLASS "Bolt::NeoValue"
+#define NVCLASS "Neo4j::Bolt::NeoValue"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
 struct bolt_file {
@@ -102,7 +104,6 @@ void DESTROY(SV* obj) {
 }
 
 END_BOLTFILE_C
-
 
 sub write_values {
   my ($self,@vals) = @_;

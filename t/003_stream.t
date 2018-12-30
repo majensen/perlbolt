@@ -2,31 +2,14 @@ use Test::More;
 use Module::Build;
 use Try::Tiny;
 use Fcntl;
-use lib '..';
-use lib '../lib';
 use File::Spec;
 use Neo4j::Bolt;
 use Neo4j::Bolt::NeoValue;
-
-my $build;
-BEGIN {
-  try {
-    $build = Module::Build->current;
-  } catch {
-    1;
-  };
-  
-  $build ? $ENV{LIBNEO4J} = $build->notes('libneo4j_loc') : 1;
-
-  diag $ENV{LIBNEO4J},"\n";
-
-}
-
-use_ok('t::BoltFile');
+use t::BoltFile;
 
 my $dir = (-e 't' ? 't' : '.');
 
-my $testf = File::Spec->catfile($dir,"samples","stream_test.blt");
+my $testf = File::Spec->catfile($dir,"stream_test.blt");
 
 ok my $bf = t::BoltFile->open_bf($testf,O_WRONLY | O_CREAT), "open bolt file";
 

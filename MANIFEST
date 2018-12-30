@@ -4,9 +4,13 @@ MANIFEST
 README
 lib/Neo4j/Bolt.pm
 lib/Neo4j/Bolt/NeoValue.pm
+lib/Neo4j/Bolt/Cxn.pm
+lib/Neo4j/Bolt/ResultStream.pm
 lib/Neo4j/Bolt/TypeHandlersC.pm
 t/001_useok.t
 t/002_types.t
 t/003_stream.t
 t/004_query.t
 t/BoltFile.pm
+META.yml
+META.json

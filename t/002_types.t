@@ -1,5 +1,4 @@
 use Test::More;
-use lib '..';
 use Neo4j::Bolt::NeoValue;
 
 diag "create neo4j_values from SVs";

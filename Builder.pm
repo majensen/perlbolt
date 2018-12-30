@@ -1,4 +1,6 @@
 package Builder;
+use File::Spec;
+use Try::Tiny;
 use base 'Module::Build';
 __PACKAGE__->add_property( 'inline_modules' );
 
@@ -14,4 +16,24 @@ sub ACTION_build {
   }
 }
 
+sub ACTION_test {
+  my $self = shift;
+  my $dir = File::Spec->catdir(qw/t BoltFile/);
+  if (-d 't') {
+    unless (-d $dir) {
+      mkdir $dir;
+    }
+    unless (-e File::Spec->catfile($dir,'Config.pm')) {
+      try {
+	open my $cf, ">", File::Spec->catfile($dir,'Config.pm') or die $!;
+	my $loc = $self->notes('libneo_loc') // '/usr/local';
+	print $cf "package t::BoltFile::Config;\n\$libneo_loc='$loc';\n1;\n";
+	close $cf;
+      } catch {
+	printf STDERR "Builder failed to create t::BoltFile::Config: $_\n";
+      };
+    }
+  }
+  $self->SUPER::ACTION_test;
+}
 1;

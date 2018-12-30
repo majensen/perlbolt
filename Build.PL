@@ -17,12 +17,15 @@ my $build = Builder->new(
   inline_modules => [
     'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
+    'Neo4j::Bolt::Cxn',
+    'Neo4j::Bolt::ResultStream',
     'Neo4j::Bolt',
   ],
  );
 
 $build->add_to_cleanup("_Inline");
-#$build->notes( libneo_loc => $build->prompt("Enter local libneo4j-client build directory: ","."));
+
+$build->notes(libneo_loc => $build->prompt("Enter local libneo4j-client build directory: ","."));
 
 $build->create_build_script;
 

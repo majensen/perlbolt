@@ -1,5 +1,4 @@
 use Test::More;
-use lib '../lib';
 use Neo4j::Bolt;
 use strict;
 
