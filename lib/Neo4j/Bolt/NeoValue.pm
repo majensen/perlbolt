@@ -56,8 +56,6 @@ void DESTROY(SV *obj) {
 
 END_NEOVALUE_C
 
-require Neo4j::Bolt::TypeHandlersC;
-
 sub of {
   my ($class, @args) = @_;
   my @ret;

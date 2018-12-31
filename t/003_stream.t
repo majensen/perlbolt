@@ -1,6 +1,5 @@
 use Test::More;
 use Module::Build;
-use Try::Tiny;
 use Fcntl;
 use File::Spec;
 use Neo4j::Bolt;

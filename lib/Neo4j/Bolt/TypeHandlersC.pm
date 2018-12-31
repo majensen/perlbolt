@@ -5,7 +5,7 @@ BEGIN {
 
 #define this_is_ignored /**
 
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a',
+use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a', ccflagsex => '-Wno-comment',
   version => $VERSION,
   name => __PACKAGE__;
 
@@ -13,6 +13,7 @@ use Inline C => <<'END_TYPE_HANDLERS_C';
 # define this_is_also_ignored **/
 
 #include <neo4j-client.h>
+
 #include <string.h>
 
 extern neo4j_value_t neo4j_identity(long long);               
@@ -99,11 +100,11 @@ neo4j_value_t SVnv_to_neo4j_float (SV *sv) {
 }
 
 neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
-  int len;
+  STRLEN len;
   char *k0,*k;
   k = SvPV(sv,len);
   Newx(k0,len+1,char);
-  strncpy(k0,k,len);
+  strncpy(k0,k,(size_t) len);
   *(k0+len) = 0;
   return neo4j_string(k0);
 }
@@ -126,7 +127,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
       return AV_to_neo4j_list( (AV*) thing );
     }
     else if (t == SVt_PVHV) { //hash
-      // determine if is a map, node, reln, or path
+      // determine if is a map, node, or reln
       hv = (HV *)thing;
       if (hv_exists(hv, "_node", 5)) { // node
         return HV_to_neo4j_node(hv);
@@ -157,6 +158,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
      return neo4j_null;
    }
   }
+ return neo4j_null;
 }
 
 neo4j_value_t AV_to_neo4j_list(AV *av) {
@@ -185,7 +187,7 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   Newx(map_ents,HvTOTALKEYS(hv),neo4j_map_entry_t);
   hv_iterinit(hv);
   n=0;
-  while (ent = hv_iternext(hv)) {
+  while ((ent = hv_iternext(hv))) {
     k = hv_iterkey(ent,&retlen);
     Newx(k0,retlen+1,char);
     strncpy(k0,k,retlen);
@@ -358,8 +360,8 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
   } else if ( the_type ==  NEO4J_MAP) {
     return newRV_noinc( (SV*)neo4j_map_to_HV( value ));
   } else if ( the_type == NEO4J_PATH ){
-    warn("TODO - type NEO4J_PATH -- returned undef\n");
-    return newSV(0);
+    return newRV_noinc( (SV*)neo4j_path_to_AV( value ));
+
   } else if ( the_type ==  NEO4J_STRING) {
     // TODO : Deal with UTF-8
     return neo4j_string_to_SVpv(value);
@@ -385,7 +387,7 @@ AV* neo4j_list_to_AV( neo4j_value_t value ) {
 HV* neo4j_map_to_HV( neo4j_value_t value ) {
   int i,n;
   char *ks;
-  neo4j_map_entry_t *entry;
+  const neo4j_map_entry_t *entry;
   HV *hv;
   SV *sv;
   hv = newHV();
@@ -435,6 +437,7 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   HV *hv, *props_hv;
   char *k;
   SV *type,*v;
+  STRLEN len;
   I32 retlen;
   long long reln_id,start_id,end_id;
   hv = newHV();
@@ -446,7 +449,8 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   hv_stores(hv, "_relationship", newSViv( (IV) reln_id ));
   hv_stores(hv, "_start", newSViv( (IV) start_id ));
   hv_stores(hv, "_end", newSViv( (IV) end_id ));
-  SvPV(type,retlen);
+  SvPV(type,len);
+  retlen = (I32) len;
   if (retlen) {
     hv_stores(hv, "_type", type);
   }
@@ -459,7 +463,32 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
 }
 
 AV* neo4j_path_to_AV( neo4j_value_t value) {
-  return (AV *) &PL_sv_undef;
+  int i,n,last_node_id,node_id;
+  AV* av;
+  struct neo4j_struct *v;
+  _Bool dir;
+  SV* rel_sv;
+  neo4j_value_t node;
+  av = newAV();
+  n = neo4j_path_length(value);
+  node = neo4j_path_get_node(value, 0);
+  av_push(av, neo4j_value_to_SV( node ));
+  last_node_id = neo4j_identity_value( neo4j_node_identity(node) );
+  if (n==0) {
+    return av;
+  } else {
+    for (i=1; i<=n; i++) {
+      node = neo4j_path_get_node(value,i);
+      node_id = neo4j_identity_value( neo4j_node_identity(node) );
+      rel_sv = neo4j_value_to_SV(neo4j_path_get_relationship(value,i-1,&dir));
+      hv_stores( (HV*) SvRV(rel_sv), "_start", newSViv( (IV) (dir ? last_node_id : node_id)));
+      hv_stores( (HV*) SvRV(rel_sv), "_end", newSViv( (IV) (dir ? node_id : last_node_id)));
+      av_push(av, rel_sv);
+      av_push(av, neo4j_value_to_SV(node));
+      last_node_id = node_id;
+    }
+    return av;
+  }
 }
 
 
