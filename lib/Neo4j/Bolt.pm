@@ -1,15 +1,18 @@
 package Neo4j::Bolt;
 BEGIN {
   our $VERSION = "0.01";
+  eval 'require Neo4j::Bolt::Config; 1';
+  print $Neo4j::Bolt::Config::extl,"<\n";
 }
 use Inline 
-  C => Config => LIBS => '-lneo4j-client -lssl -lcrypto',
+  C => Config =>
+  LIBS => $Neo4j::Bolt::Config::extl,
+  INC => $Neo4j::Bolt::Config::extc,  
   version => $VERSION,
   name => __PACKAGE__;
 
 use Inline C => <<'END_BOLT_C';
 #include <neo4j-client.h>
-
 #define CXNCLASS "Neo4j::Bolt::Cxn"
 
 SV* connect_ ( const char* classname, const char* neo4j_url )

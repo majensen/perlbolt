@@ -15,6 +15,10 @@ unless (defined $build) {
   plan skip_all => "No build context. Run tests with ./Build test.";
 }
 
+unless (defined $build->notes('db_url')) {
+  plan skip_all => "Local db tests not requested.";
+}
+
 ok my $cxn = Neo4j::Bolt->connect_($build->notes('db_url'));
 ok my $stream = $cxn->run_query_(
   "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",

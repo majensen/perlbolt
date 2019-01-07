@@ -1,10 +1,13 @@
 package t::BoltFile;
 use File::Spec;
-use t::BoltFile::Config;
-
-use Inline C => Config => LIBS  => "-lneo4j-client -lssl -lcrypto",
-	     INC => "-I".File::Spec->catdir($t::BoltFile::Config::libneo_loc // '/usr/local','lib','src'),
-  myextlib => "/usr/local/lib/libneo4j-client.a";
+BEGIN {
+  use lib 'lib';
+  eval 'require Neo4j::Bolt::Config; 1';
+}
+use Inline C => Config =>
+  LIBS  => $Neo4j::Bolt::Config::extl,
+  INC => $Neo4j::Bolt::Config::extc,
+  myextlib => $Neo4j::Bolt::Config::liba;
 
 use Inline C => <<'END_BOLTFILE_C';
 

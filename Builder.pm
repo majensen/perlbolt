@@ -14,6 +14,20 @@ __PACKAGE__->add_property( 'inline_modules' );
 sub ACTION_build {
   my $self = shift;
   my $mod_ver = $self->dist_version;
+  my $libdir = '/usr/local/lib';
+  open my $cf, ">", File::Spec->catfile($self->base_dir,qw/lib Neo4j Bolt Config.pm/) or die $!;
+  my $liba = "$libdir/libneo4j-client.a";
+  for my $L (@{$self->extra_linker_flags}) {
+    if ($L =~ /^-L(.*)$/) {
+      my $l = $1;
+      $liba =~ s/$libdir\//$l/;
+    }
+  }
+
+  my $extl = join(" ", @{$self->extra_linker_flags});
+  my $extc = join(" ", @{$self->extra_compiler_flags});
+  print $cf "package Neo4j::Bolt::Config;\n\$extl = '$extl';\n\$extc = '$extc';\n\$liba='$liba';\n1;\n";
+  close $cf;
   $self->SUPER::ACTION_build;
   for my $m (@{$self->inline_modules}) {
     # this is an undocumented function (_INSTALL_) of Inline
@@ -23,29 +37,18 @@ sub ACTION_build {
 		      "-MInline=Config,name,$m,version,$mod_ver",
 		      "-M$m", "-e", "1", $mod_ver, 'blib/arch');
   }
+
+
 }
 
-sub ACTION_test {
-  my $self = shift;
-  my $dir = File::Spec->catdir(qw/t BoltFile/);
-  if (-d 't') {
-    unless (-d $dir) {
-      mkdir $dir;
-    }
-    unless (-e File::Spec->catfile($dir,'Config.pm')) {
-      # this is in order to set a user-provided variable early enough
-      # that "use Inline => C => Config => ..." can see it in
-      # t/BoltFile.pm
-      try {
-	open my $cf, ">", File::Spec->catfile($dir,'Config.pm') or die $!;
-	my $loc = $self->notes('libneo_loc') // '/usr/local';
-	print $cf "package t::BoltFile::Config;\n\$libneo_loc='$loc';\n1;\n";
-	close $cf;
-      } catch {
-	printf STDERR "Builder failed to create t::BoltFile::Config: $_\n";
-      };
-    }
-  }
-  $self->SUPER::ACTION_test;
-}
+ sub ACTION_test {
+   my $self = shift;
+   unless (-d File::Spec->catdir(qw/blib arch auto Neo4j Bolt/)) {
+     $self->depends_on('build');
+   }
+   $self->SUPER::ACTION_test;
+ }
+
+
+
 1;

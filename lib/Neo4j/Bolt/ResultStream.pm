@@ -1,8 +1,11 @@
 package Neo4j::Bolt::ResultStream;
 BEGIN {
   our $VERSION = "0.01";
+  eval 'require Neo4j::Bolt::Config; 1';
 }
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto',
+use Inline C => Config =>
+  LIBS => $Neo4j::Bolt::Config::extl,
+  INC => $Neo4j::Bolt::Config::extc,  
   version => $VERSION,
   name => __PACKAGE__;
 

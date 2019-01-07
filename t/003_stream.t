@@ -4,6 +4,13 @@ use Fcntl;
 use File::Spec;
 use Neo4j::Bolt;
 use Neo4j::Bolt::NeoValue;
+
+BEGIN {
+  unless (Module::Build->current->notes('libneo_loc')) {
+    plan skip_all => "libneo4j-client build directory not set; skipping";
+  }
+}
+
 use t::BoltFile;
 
 my $dir = (-e 't' ? 't' : '.');

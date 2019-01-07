@@ -40,7 +40,7 @@ is $v->_neotype, "Relationship", "Relationship with no type";
 is_deeply $v->_as_perl,{ _relationship => 154732534, _start => 53243, _end => 235367},"roundtrip";
 
 TODO: {
-  local $TODO = "need to implement paths";
+  local $TODO = "Implement paths";
   $v = Neo4j::Bolt::NeoValue->_new_from_perl( [ {_node => 1234}, {_relationship=>523, _start => 1234, _end => 5678, _type => "try"}, {_node => 5678} ] );
   is $v->_neotype, "Path", "Path";
 }

@@ -1,11 +1,17 @@
 package Neo4j::Bolt::TypeHandlersC;
 BEGIN {
   our $VERSION = "0.01";
+  eval 'require Neo4j::Bolt::Config; 1';
 }
 
 #define this_is_ignored /**
 
-use Inline C => Config => LIBS => '-lneo4j-client -lssl -lcrypto' => optimize => '-g', myextlib => '/usr/local/lib/libneo4j-client.a', ccflagsex => '-Wno-comment',
+use Inline C => Config =>
+  LIBS => $Neo4j::Bolt::Config::extl,
+  INC => $Neo4j::Bolt::Config::extc,
+  optimize => '-g',
+  myextlib => $Neo4j::Bolt::Config::liba,
+  ccflagsex => '-Wno-comment',
   version => $VERSION,
   name => __PACKAGE__;
 
