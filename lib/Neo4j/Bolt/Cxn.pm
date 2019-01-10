@@ -72,6 +72,38 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
 =head1 SYNOPSIS
 
+ use Neo4j::Bolt;
+ $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+ $stream = $cxn->run_query_(
+   "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
+   {} # parameter hash required
+ );
+
+=head1 DESCRIPTION
+
+L<Neo4j::Bolt::Cxn> is a container for a Bolt connection, instantiated by
+a call to C<Neo4j::Bolt::connect_()>.
+
+=head1 METHODS
+
+=over
+
+=item run_query_( $cypher_query )
+
+Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
+the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
+to retrieve query results as Perl types and structures.
+
+=item reset_()
+
+Send a RESET message to the Neo4j server. According to the L<Bolt
+protocol|https://boltprotocol.org/v1/>, this should force any currently
+processing query to abort, forget any pending queries, clear any 
+failure state, dispose of outstanding result records, and roll back 
+the current transaction.
+
+=back
+
 =head1 AUTHOR
 
  Mark A. Jensen
@@ -79,6 +111,12 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
  majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+This software is Copyright (c) 2019 by Mark A. Jensen.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
 
 =cut
 

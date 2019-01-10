@@ -16,12 +16,6 @@ use Inline C => <<'END_BOLT_RS_C';
 #define RCLASS  "Neo4j::Bolt::Result"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
-struct neo4j_rs_result {
-  neo4j_result_stream_t *rs;
-  neo4j_result_t *r;
-};
-
-typedef struct neo4j_rs_result neo4j_rs_result_t;
 SV* neo4j_value_to_SV( neo4j_value_t value);
 
 void fetch_next_ (SV *rs_ref) {
@@ -95,7 +89,44 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
 
 =head1 SYNOPSIS
 
+ use Neo4j::Bolt;
+ $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
 
+ $stream = $cxn->run_query_(
+   "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
+   {} # parameter hash required
+ );
+ while ( my @row = $stream->fetch_next_ ) {
+   print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
+ }
+
+=head1 DESCRIPTION
+
+L<Neo4j::Bolt::ResultStream> objects are created by a successful query 
+performed on a L<Neo4j::Bolt::Cxn>. They are iterated to obtain the rows
+of the response as Perl arrays (not arrayrefs).
+
+=head1 METHODS
+
+=over
+
+=item fetch_next_()
+
+Obtain the next row of results as an array. Returns false when done.
+
+=item fieldnames_()
+
+Obtain the column names of the response as an array.
+
+=item nfields_()
+
+Obtain the number of fields in the response row as an integer.
+
+=back
+
+=head1 SEE ALSO
+
+L<Neo4j::Bolt>, L<Neo4j::Bolt::Cxn>.
 
 =head1 AUTHOR
 
@@ -104,6 +135,12 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
  majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+This software is Copyright (c) 2019 by Mark A. Jensen.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
 
 =cut
 

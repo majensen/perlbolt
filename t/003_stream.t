@@ -20,7 +20,7 @@ my $testf = File::Spec->catfile($dir,"stream_test.blt");
 ok my $bf = t::BoltFile->open_bf($testf,O_WRONLY | O_CREAT), "open bolt file";
 
 my @nv = Neo4j::Bolt::NeoValue->of(
-  { _node => 1534, prop1 => 3, prop2 => "pseudo" },
+  { _node => 1534, prop1 => 3, prop2 => "pseudo", _labels => ['thing'] },
   15,
   "a string",
   { _relationship => 343, _start => 1534, _end => 58, _type => "has_foo"},
@@ -31,7 +31,7 @@ ok $bf->write_values(@nv), "write neo values";
 #$bf->close_bf;
 
 my $bff = t::BoltFile->open_bf($testf,O_RDONLY);
-is_deeply $bff->_read_value->_as_perl,{ _node => 1534, prop1 => 3, prop2 => "pseudo" }, "read node value";
+is_deeply $bff->_read_value->_as_perl,{ _node => 1534, prop1 => 3, prop2 => "pseudo", _labels => ['thing'] }, "read node value";
 is $bff->_read_value->_as_perl,15, "read integer";
 is $bff->_read_value->_as_perl,"a string", "read string";
 is_deeply $bff->_read_value->_as_perl,{ _relationship => 343, _start => 1534, _end => 58, _type => "has_foo"}, "read relationship";

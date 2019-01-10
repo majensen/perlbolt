@@ -1,4 +1,5 @@
 package Neo4j::Bolt;
+
 BEGIN {
   our $VERSION = "0.01";
   eval 'require Neo4j::Bolt::Config; 1';
@@ -65,13 +66,31 @@ Neo4j::Bolt - query Neo4j using Bolt protocol
    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
  }
 
-
 =head1 DESCRIPTION
 
 L<Neo4j::Bolt> is a Perl wrapper around Chris Leishmann's excellent
 L<libneo4j-client|https://github.com/cleishm/libneo4j-client> library
 implementing the Neo4j L<Bolt|https://boltprotocol.org/> network
 protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
+
+=head1 METHODS
+
+=over 
+
+=item connect_($url)
+
+Class method, connect to Neo4j server. The URL scheme must be C<'bolt'>, as in
+
+  $cxn = bolt://localhost:7687
+
+Returns object of type L<Neo4j::Bolt::Cxn>, which accepts Cypher queries and
+returns a L<Neo4j::Bolt::ResultStream>.
+
+=back
+
+=head1 SEE ALSO
+
+L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 AUTHOR
 
@@ -80,6 +99,12 @@ protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
  majensen -at- cpan -dot- org
 
 =head1 LICENSE
+
+This software is Copyright (c) 2019 by Mark A. Jensen.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
 
 
 =cut

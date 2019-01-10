@@ -17,7 +17,7 @@ my $build = Builder->new(
   dist_version_from => "lib/Neo4j/Bolt.pm",
   dist_abstract => "Neo4j server agent using Bolt protocol",
   configure_requires => {
-    'Module::Build' => 0,
+    'Module::Build' => '0.36_14',
     'ExtUtils::CChecker' => 0,
     'Try::Tiny' => 0,
   },
@@ -28,6 +28,7 @@ my $build = Builder->new(
     'Inline' => 0,
     'Try::Tiny' => 0,
   },
+  license => 'Apache_2_0',
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [
     # note: the commented modules get built automatically as require'd deps
