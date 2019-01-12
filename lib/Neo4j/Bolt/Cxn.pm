@@ -88,11 +88,13 @@ a call to C<Neo4j::Bolt::connect_()>.
 
 =over
 
-=item run_query_( $cypher_query )
+=item run_query_( $cypher_query, $param_hash )
 
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
-to retrieve query results as Perl types and structures.
+to retrieve query results as Perl types and structures. C<$param_hash> is
+a hashref of the form C<{ param => $value, ... }>. If there are no params
+to be set, use C<{}>.
 
 =item reset_()
 
