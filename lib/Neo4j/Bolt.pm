@@ -73,6 +73,41 @@ L<libneo4j-client|https://github.com/cleishm/libneo4j-client> library
 implementing the Neo4j L<Bolt|https://boltprotocol.org/> network
 protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
 
+=head2 Return Types
+
+L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made 
+via a L<Neo4j::Bolt::Cxn>. These rows are simple arrays of scalars and/or
+references. These represent Neo4j types according to the following:
+
+ Neo4j type       Perl representation
+ ----- ----       ---- --------------
+ Null             undef
+ Bool             scalar (0 or 1)
+ Int              scalar
+ Float            scalar
+ String           scalar
+ Bytes            scalar
+ List             arrayref
+ Map              hashref
+ Node             hashref
+ Relationship     hashref
+ Path             arrayref of hashrefs
+
+Nodes, Relationships and Paths are represented in L<Rest::Neo4p> "as_simple()"
+formats:
+
+ Node:
+ { _node => $node_id, _labels => [ $label1, $label2, ...],
+   prop1 => $value1, prop2 => $value2, ...}
+
+ Relationship:
+ { _relationship => $reln_id, 
+   _start => $start_node_id, _end => $end_node_id,
+   prop1 => $value1, prop2 => $value2, ...}
+
+ Path:
+ [ $node1, $reln12, $node2, $reln23, $node3,...]
+
 =head1 METHODS
 
 =over 

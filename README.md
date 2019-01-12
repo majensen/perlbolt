@@ -206,6 +206,16 @@ data to Perl representations.
 [Neo4j::Bolt](https://metacpan.org/pod/Neo4j::Bolt), [Neo4j::Bolt::Value](https://metacpan.org/pod/Neo4j::Bolt::Value), [Inline::C](https://metacpan.org/pod/Inline::C), 
 [libneo4j-client API](http://neo4j-client.net/doc/latest/neo4j-client_8h.html).
 
+# CONTRIBUTORS
+
+Thanks to 
+
+=over
+
+=item * Arne Johannessen (@johannessen)
+
+=back
+
 # AUTHOR
 
     Mark A. Jensen
