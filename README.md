@@ -85,6 +85,10 @@ formats:
     CPAN: MAJENSEN
     majensen -at- cpan -dot- org
 
+# CONTRIBUTORS
+
+- Arne Johannessen (@johannessen)
+
 # LICENSE
 
 This software is Copyright (c) 2019 by Mark A. Jensen.

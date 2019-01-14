@@ -133,6 +133,14 @@ L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
  CPAN: MAJENSEN
  majensen -at- cpan -dot- org
 
+=head1 CONTRIBUTORS
+
+=over
+
+=item Arne Johannessen (@johannessen)
+
+=back
+
 =head1 LICENSE
 
 This software is Copyright (c) 2019 by Mark A. Jensen.
