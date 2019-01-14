@@ -28,6 +28,9 @@ my $build = Builder->new(
     'Inline' => 0,
     'Try::Tiny' => 0,
   },
+  recommends => {
+    Pod::Markdown => 0,
+   },
   license => 'Apache_2_0',
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [

@@ -1,9 +1,11 @@
 package Builder;
 use File::Spec;
+use File::Find;
 use Try::Tiny;
 use base 'Module::Build';
 __PACKAGE__->add_property( 'inline_modules' );
 
+my $have_p2m = eval "require Pod::Markdown; 1";
 # These are kludges to get Inline to create Inline modules that
 # * have dependencies on one another
 # * Module::Build can test and install properly
@@ -49,6 +51,44 @@ sub ACTION_build {
    $self->SUPER::ACTION_test;
  }
 
-
+ sub ACTION_author_tasks {
+   my $self = shift;
+   my ($action, $subaction) = @ARGV;
+   if ($subaction eq 'readme') {
+     unless ($have_p2m) {
+       print "Don't have Pod::Markdown\n";
+       return;
+     }
+     # slurp all POD into README.md as markdown;
+     find (
+       sub {
+	 return unless $_ =~ /^(.*)\.pm$/;
+	 my ($name) = $1;
+	 die unless defined $name;
+	 my $mdstr = '';
+	 my $p2m = Pod::Markdown->new();
+	 $p2m->local_module_url_prefix('github::');
+	 $p2m->local_module_re(qr/^Neo4j::/);
+	 $p2m->output_string(\$mdstr);
+	 $p2m->parse_file($_);
+	 $mdstr =~ s{(\][(]github::[^)]*[)])}
+		    {
+		      $_ = $1;
+		      s|github::|/lib/|;
+		      s|::|/|g;
+		      s|[)]$|.md)|;
+		      $_
+		    }eg;
+	 if (length $mdstr > 1) {
+	   open my $mdf, '>', "$name.md" or die $!;
+	   print $mdf $mdstr;
+	   close $mdf;
+	 }
+       },
+       File::Spec->catdir($self->base_dir,'lib')
+      );
+     
+   }
+ }
 
 1;
