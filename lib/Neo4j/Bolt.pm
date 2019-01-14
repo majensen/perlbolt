@@ -93,7 +93,7 @@ references. These represent Neo4j types according to the following:
  Relationship     hashref
  Path             arrayref of hashrefs
 
-Nodes, Relationships and Paths are represented in L<Rest::Neo4p> "as_simple()"
+Nodes, Relationships and Paths are represented in L<REST::Neo4p> "as_simple()"
 formats:
 
  Node:
