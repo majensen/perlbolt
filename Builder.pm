@@ -59,7 +59,7 @@ sub ACTION_build {
        print "Don't have Pod::Markdown\n";
        return;
      }
-     # slurp all POD into README.md as markdown;
+     # write POD as <Module>.md in relevant lib/ subdirs
      find (
        sub {
 	 return unless $_ =~ /^(.*)\.pm$/;
@@ -88,6 +88,12 @@ sub ACTION_build {
        File::Spec->catdir($self->base_dir,'lib')
       );
      
+   }
+   # use the dist-version-from .pm's .md as README.md
+   if ($self->dist_version_from) {
+     my $mdf = $self->dist_version_from;
+     $mdf =~ s/\.pm/\.md/;
+     $self->copy_if_modified( from => $mdf, to => 'README.md' );
    }
  }
 
