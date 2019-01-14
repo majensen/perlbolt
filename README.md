@@ -49,7 +49,7 @@ references. These represent Neo4j types according to the following:
     Relationship     hashref
     Path             arrayref of hashrefs
 
-Nodes, Relationships and Paths are represented in [Rest::Neo4p](https://metacpan.org/pod/Rest::Neo4p) "as\_simple()"
+Nodes, Relationships and Paths are represented in [REST::Neo4p](https://metacpan.org/pod/REST::Neo4p) "as\_simple()"
 formats:
 
     Node:
