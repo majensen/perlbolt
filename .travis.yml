@@ -19,9 +19,9 @@ before_install:
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
   - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list
   # libneo4j-client
-  - sudo add-apt-repository ppa:cleishm/neo4j
+  - echo $'\n' | sudo add-apt-repository ppa:cleishm/neo4j
   - sudo apt-get update -qq
-  - sudo apt-get install libneo4j-client-dev
+  - sudo apt-get install -y libneo4j-client-dev
   - dpkq-query -L libneo4j-client-dev
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
