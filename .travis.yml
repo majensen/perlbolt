@@ -1,0 +1,5 @@
+language: perl
+
+script:
+  - echo "stub"
+  
