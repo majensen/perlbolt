@@ -17,8 +17,7 @@ env:
 before_install:
   # neo4j pkgs
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
-  - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a
-  /etc/apt/sources.list
+  - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list
   # libneo4j-client
   - sudo add-apt-repository ppa:cleishm/neo4j
   - sudo apt-get update -qq
@@ -35,8 +34,7 @@ install:
   - sleep 20
 
   # need to change pass on first access
-  - |
-    curl -u neo4j:neo4j -d '{"password":"j4oen"}' -X POST -H 'Accept:application/json'-H'Content-Type:application/json' http://localhost:7474/user/neo4j/password
+  - curl -u neo4j:neo4j -d '{"password":"j4oen"}' -X POST -H 'Accept:application/json' -H'Content-Type:application/json' http://localhost:7474/user/neo4j/password
   
 #before_script:
 #  - sudo neo4j start
