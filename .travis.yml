@@ -27,8 +27,8 @@ before_install:
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
 install:
-  - yes | sudo apt-get install daemon oracle-java8-installer
-  - sudo update-java-alternatives -s java-8-oracle
+#  - yes | sudo apt-get install daemon oracle-java8-installer
+#  - sudo update-java-alternatives -s java-8-oracle
   - java -version
   - echo N | sudo apt-get -y install neo4j=$NEO4J_VER
   - sleep 20
