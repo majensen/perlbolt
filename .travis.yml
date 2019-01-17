@@ -1,4 +1,51 @@
+
 language: perl
+perl:
+  - "5.26"
+  # - "5.24"
+  # - "5.22"
+  # - "5.20"
+  # - "5.18"
+
+env:
+  - NEO4J_VER=3.0.3
+  # - NEO4J_VER=2.3.3
+  # - NEO4J_VER=2.2.8  
+  # - NEO4J_VER=2.1.8
+  # - NEO4J_VER=2.0.4
+  # - NEO4J_VER=1.9.5
+
+before_install:
+  # neo4j pkgs
+  - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
+  - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a
+  /etc/apt/sources.list
+  # libneo4j-client
+  - sudo add-apt-repository ppa:cleishm/neo4j
+  - sudo apt-get update -qq
+  - sudo apt-get install libneo4j-client-dev
+  - dpkq-query -L libneo4j-client-dev
+  # perl pkgs
+  - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
+
+install:
+  - yes | sudo apt-get install daemon oracle-java8-installer
+  - sudo update-java-alternatives -s java-8-oracle
+  - java -version
+  - echo N | sudo apt-get -y install neo4j=$NEO4J_VER
+  - sleep 20
+
+  # need to change pass on first access
+  - curl -u neo4j:neo4j -d '{"password":"j4oen"}' -X POST -H 'Accept:application/json' -H'Content-Type:application/json' http://localhost:7474/user/neo4j/password
+  
+#before_script:
+#  - sudo neo4j start
+
+script:
+  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen$'\n' | perl Build.PL
+  - ./Build 
+  - ./Build test
+# - work 
 
 script:
   - echo "stub"
