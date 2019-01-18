@@ -49,11 +49,13 @@ $build->add_to_cleanup("_Inline");
 $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 
 # look for libneo4j-client
+$cc->push_extra_linker_flags(split(/\s+/, $ENV{LDFLAGS}),'-lneo4j-client');
+$cc->push_extra_compiler_flags(split(/\s+/, $ENV{CFLAGS}));
 open my $errh, '>&STDERR';
 open STDERR, '>/tmp/xxx_try_bolt_compile_run';
 unless (
   $cc->try_compile_run(source => $code_cc,
-		       extra_linker_flags => ['-lneo4j-client'],)
+		      )
  ) {
   try {
     print "Neo4j::Bolt requires the libneo4j-client library and the header file 'neo4j-client.h'.\n";
@@ -77,7 +79,8 @@ open STDERR, '>&', $errh;
 unless (grep /^-lneo4j-client$/,@{$cc->extra_linker_flags}) {
   $cc->push_extra_linker_flags('-lneo4j-client');
 }
-
+$build->notes(lf => $cc->extra_linker_flags);
+$build->notes(cf => $cc->extra_compiler_flags);
 $build->notes(libneo_loc => $build->prompt("Enter local libneo4j-client build directory (req'd for some tests, RET to skip): ",undef));
 if ($build->notes('libneo_loc')) {
   unless (-e File::Spec->catfile($build->notes('libneo_loc'),'lib','src','iostream.h')) {

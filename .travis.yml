@@ -13,7 +13,8 @@ env:
   # - NEO4J_VER=2.1.8
   # - NEO4J_VER=2.0.4
   # - NEO4J_VER=1.9.5
-
+  - LDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+  - CFLAGS="-I/usr/include"
 before_install:
   # neo4j pkgs
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
@@ -40,6 +41,6 @@ install:
 #  - sudo neo4j start
 
 script:
-  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen$'\n' | perl Build.PL
+  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen | perl Build.PL
   - ./Build 
   - ./Build test
