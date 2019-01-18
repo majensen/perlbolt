@@ -5,16 +5,14 @@ perl:
   # - "5.22"
   # - "5.20"
   # - "5.18"
-
 env:
-  - NEO4J_VER=3.0.3
+  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/lib/x86_64-linux-gnu" CFLAGS="-I/usr/include"
   # - NEO4J_VER=2.3.3
   # - NEO4J_VER=2.2.8  
   # - NEO4J_VER=2.1.8
   # - NEO4J_VER=2.0.4
   # - NEO4J_VER=1.9.5
-  - LDFLAGS="-L/usr/lib/x86_64-linux-gnu"
-  - CFLAGS="-I/usr/include"
+
 before_install:
   # neo4j pkgs
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
