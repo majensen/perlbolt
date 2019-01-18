@@ -22,7 +22,9 @@ sub ACTION_build {
   for my $L (@{$self->extra_linker_flags}) {
     if ($L =~ /^-L(.*)$/) {
       my $l = $1;
-      $liba =~ s/$libdir\//$l/;
+      $liba =~ s/$libdir\///;
+      $liba = File::Spec->catfile($l, $liba);
+      last if -e $liba;
     }
   }
 
