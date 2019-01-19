@@ -29,6 +29,8 @@ before_install:
   - sudo make install
   - popd
   - ls -lh /usr/local/lib
+  - rm /usr/local/lib/libneo4j-client.so.11
+  - cp /usr/local/lib/libneo4j-client.so.11.2.0 /usr/local/lib/libneo4j-client.so.11
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
