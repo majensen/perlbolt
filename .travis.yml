@@ -6,7 +6,7 @@ perl:
   # - "5.20"
   # - "5.18"
 env:
-  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/lib/x86_64-linux-gnu" CFLAGS="-I/usr/include"
+  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include"
   # - NEO4J_VER=2.3.3
   # - NEO4J_VER=2.2.8  
   # - NEO4J_VER=2.1.8
