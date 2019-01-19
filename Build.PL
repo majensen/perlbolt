@@ -51,8 +51,8 @@ $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 # look for libneo4j-client
 $cc->push_extra_linker_flags(split(/\s+/, $ENV{LDFLAGS}),'-lneo4j-client');
 $cc->push_extra_compiler_flags(split(/\s+/, $ENV{CFLAGS}));
-open my $errh, '>&STDERR';
-open STDERR, '>/tmp/xxx_try_bolt_compile_run';
+#open my $errh, '>&STDERR';
+#open STDERR, '>/tmp/xxx_try_bolt_compile_run';
 unless (
   $cc->try_compile_run(source => $code_cc,
 		      )
@@ -72,8 +72,8 @@ unless (
     exit(1);
   };
 }
-unlink '>/tmp/xxx_try_bolt_compile_run';
-open STDERR, '>&', $errh;
+#unlink '>/tmp/xxx_try_bolt_compile_run';
+#open STDERR, '>&', $errh;
 
 #add libraries if needed
 unless (grep /^-lneo4j-client$/,@{$cc->extra_linker_flags}) {
