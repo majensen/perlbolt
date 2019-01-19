@@ -23,11 +23,12 @@ before_install:
   #  - sudo apt-get install -y libneo4j-client-dev
   #  - dpkg-query -L libneo4j-client-dev
   - git clone https://github.com/cleishm/libneo4j-client.git
-  - cd libneo4j-client
+  - pushd libneo4j-client
   - ./autogen.sh
   - ./configure --disable-tools --prefix /usr/local
   - make clean check
-  - sudo make install  
+  - sudo make install
+  - popd
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
