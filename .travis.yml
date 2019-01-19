@@ -6,7 +6,7 @@ perl:
   # - "5.20"
   # - "5.18"
 env:
-  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include"
+  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   # - NEO4J_VER=2.3.3
   # - NEO4J_VER=2.2.8  
   # - NEO4J_VER=2.1.8
@@ -28,9 +28,6 @@ before_install:
   - ./configure --disable-tools --prefix /usr/local
   - sudo make install
   - popd
-  - ls -lh /usr/local/lib
-  - sudo rm /usr/local/lib/libneo4j-client.so.11
-  - sudo cp /usr/local/lib/libneo4j-client.so.11.2.0 /usr/local/lib/libneo4j-client.so.11
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
