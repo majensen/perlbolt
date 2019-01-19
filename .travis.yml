@@ -26,9 +26,9 @@ before_install:
   - pushd libneo4j-client
   - ./autogen.sh
   - ./configure --disable-tools --prefix /usr/local
-  - make clean check
   - sudo make install
   - popd
+  - ls -lh /usr/local/lib
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
