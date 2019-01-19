@@ -19,7 +19,7 @@ before_install:
   - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list
   # libneo4j-client
   #  - echo $'\n' | sudo add-apt-repository ppa:cleishm/neo4j
-  # - sudo apt-get update -qq
+  - sudo apt-get update -qq
   #  - sudo apt-get install -y libneo4j-client-dev
   #  - dpkg-query -L libneo4j-client-dev
   - git clone https://github.com/cleishm/libneo4j-client.git
