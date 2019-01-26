@@ -37,10 +37,10 @@ my $build = Builder->new(
     # note: the commented modules get built automatically as require'd deps
     # all can be uncommented, but Inline will redundantly compile, build, and
     # erase them from blib/lib/auto...
-#    'Neo4j::Bolt::TypeHandlersC',
+    'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
-#    'Neo4j::Bolt::Cxn',
-#    'Neo4j::Bolt::ResultStream',
+    'Neo4j::Bolt::Cxn',
+    'Neo4j::Bolt::ResultStream',
     'Neo4j::Bolt',
   ],
  );
