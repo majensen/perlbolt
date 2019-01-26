@@ -3,7 +3,7 @@ BEGIN {
   our $VERSION = "0.01";
   eval 'require Neo4j::Bolt::Config; 1';
 }
-
+use Inline 'global';
 use Inline C => Config =>
   LIBS => $Neo4j::Bolt::Config::extl,
   INC => $Neo4j::Bolt::Config::extc,
