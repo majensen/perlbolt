@@ -1,6 +1,7 @@
 use Test::More;
 use Module::Build;
 use Try::Tiny;
+use URI::bolt;
 use Neo4j::Bolt;
 use strict;
 
@@ -19,7 +20,13 @@ unless (defined $build->notes('db_url')) {
   plan skip_all => "Local db tests not requested.";
 }
 
-ok my $cxn = Neo4j::Bolt->connect_($build->notes('db_url'));
+my $url = URI->new($build->notes('db_url'));
+
+if ($build->notes('db_user')) {
+  $url->userinfo($build->notes('db_user').':'.$build->notes('db_pass'));
+}
+
+ok my $cxn = Neo4j::Bolt->connect_($url->as_string);
 ok my $stream = $cxn->run_query_(
   "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
   {}
