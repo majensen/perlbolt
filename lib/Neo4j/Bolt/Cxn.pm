@@ -21,7 +21,7 @@ struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
-  struct neo4j_failure_details *failure_details;
+  const struct neo4j_failure_details *failure_details;
   char *eval_errcode;
   char *eval_errmsg;
   int errnum;
@@ -46,7 +46,10 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 {
   neo4j_result_stream_t *res_stream;
   rs_obj_t *rs_obj;
-  char buf[BUFLEN];
+  const char *evalerr, *evalmsg;
+  char *climsg;
+  char *s, *t;
+  int fail;
   SV *rs;
   SV *rs_ref;
   neo4j_connection_t *cxn;
@@ -63,12 +66,35 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     return &PL_sv_undef;
   }
   res_stream = neo4j_run(cxn, cypher_query, params_p);
+  fail = neo4j_check_failure(res_stream);
   rs_obj->res_stream = res_stream;
   if (res_stream == NULL) {
     rs_obj->succeed=0;
     rs_obj->fail=1;
     rs_obj->errnum = errno;
-    rs_obj->strerror = neo4j_strerror( errno, buf, BUFLEN );
+    Newx(climsg, BUFLEN, char);
+    neo4j_strerror(errno, climsg, BUFLEN);
+    rs_obj->strerror = climsg;
+  } else if (fail) {
+      rs_obj->succeed=0;
+      rs_obj->fail=1;
+      rs_obj->errnum = errno;
+      if (fail == NEO4J_STATEMENT_EVALUATION_FAILED) {
+        rs_obj->failure_details = neo4j_failure_details(res_stream);
+        evalerr = neo4j_error_code(res_stream);
+        Newx(s, strlen(evalerr)+1,char);
+        rs_obj->eval_errcode = strcpy(s,evalerr);
+        evalmsg = neo4j_error_message(res_stream);
+        Newx(t, strlen(evalmsg)+1,char);
+        rs_obj->eval_errmsg = strcpy(t,evalmsg);
+      } else {
+        Newx(climsg, BUFLEN, char);
+        neo4j_strerror(errno, climsg, BUFLEN);
+        rs_obj->strerror = climsg;
+      }
+  } else {
+    rs_obj->succeed=1;
+    rs_obj->fail=0;
   }
   rs = newSViv((IV) rs_obj);
   rs_ref = newRV_noinc(rs);

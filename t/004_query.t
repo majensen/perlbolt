@@ -31,6 +31,8 @@ ok my $stream = $cxn->run_query_(
   "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
   {}
  ), 'label count query';
+ok $stream->success_, "Succeeded";
+ok !$stream->failure_, "Not failure";
 ok my @names = $stream->fieldnames_;
 is_deeply \@names, [qw/lbl ct/], 'col names';
 my $total_nodes = 0;

@@ -21,7 +21,7 @@ struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
-  struct neo4j_failure_details *failure_details;
+  const struct neo4j_failure_details *failure_details;
   char *eval_errcode;
   char *eval_errmsg;
   int errnum;
@@ -48,7 +48,7 @@ void fetch_next_ (SV *rs_ref) {
   neo4j_result_stream_t *rs;
   neo4j_value_t value;
   int i,n;
-  char buf[BUFLEN];
+  char *climsg;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
 
@@ -61,7 +61,9 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->succeed = 0;
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
-      rs_obj->strerror = neo4j_strerror(errno, buf, BUFLEN);
+      Newx(climsg, BUFLEN, char);
+      neo4j_strerror(errno, climsg, BUFLEN);
+      rs_obj->strerror = climsg;
     }
     Inline_Stack_Done;
     return;
@@ -73,7 +75,9 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->succeed = 0;
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
-      rs_obj->strerror = neo4j_strerror(errno, buf, BUFLEN);
+      Newx(climsg, BUFLEN, char);
+      neo4j_strerror(errno, climsg, BUFLEN);
+      rs_obj->strerror = climsg;
     }
     Inline_Stack_Done;
     return;
@@ -106,7 +110,24 @@ void fieldnames_ (SV *rs_ref) {
   return;
 }
 
+int success_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->succeed;
+}
+int failure_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->fail;
+}
 
+SV *err_info_ (SV *rs_ref) {
+  rs_obj_t *rs_obj;
+  HV *hv;
+  rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+  hv = newHV();
+  hv_stores(hv, "eval_errcode", rs_obj->eval_errcode ? newSVpv(rs_obj->eval_errcode, strlen(rs_obj->eval_errcode)) : &PL_sv_undef );
+  hv_stores(hv, "eval_errmsg", rs_obj->eval_errmsg ? newSVpv(rs_obj->eval_errmsg, strlen(rs_obj->eval_errmsg)) : &PL_sv_undef );
+  hv_stores(hv, "client_errmsg", rs_obj->strerror ? newSVpv(rs_obj->strerror, strlen(rs_obj->strerror)): &PL_sv_undef );
+  hv_stores(hv, "client_errno", newSViv((IV) rs_obj->errnum));
+  return newRV_noinc( (SV*) hv );
+}
 
 void DESTROY (SV *rs_ref) {
   neo4j_close_results(C_PTR_OF(rs_ref,rs_obj_t)->res_stream);
