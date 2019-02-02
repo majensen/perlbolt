@@ -13,16 +13,45 @@ use Inline C => <<'END_BOLT_CXN_C';
 #include <neo4j-client.h>
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
+#define BUFLEN 100
 
 neo4j_value_t SV_to_neo4j_value(SV *sv);
+
+struct rs_obj {
+  neo4j_result_stream_t *res_stream;
+  int succeed;
+  int fail;
+  struct neo4j_failure_details *failure_details;
+  char *eval_errcode;
+  char *eval_errmsg;
+  int errnum;
+  const char *strerror;
+};
+
+typedef struct rs_obj rs_obj_t;
+
+void new_rs_obj (rs_obj_t **rs_obj) {
+  Newx(*rs_obj, 1, rs_obj_t);
+  (*rs_obj)->succeed = -1;  
+  (*rs_obj)->fail = -1;  
+  (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
+  (*rs_obj)->eval_errcode = (char *) NULL;
+  (*rs_obj)->eval_errmsg = (char *) NULL;
+  (*rs_obj)->errnum = 0;
+  (*rs_obj)->strerror = (char *) NULL;
+  return;
+}
 
 SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 {
   neo4j_result_stream_t *res_stream;
+  rs_obj_t *rs_obj;
+  char buf[BUFLEN];
   SV *rs;
   SV *rs_ref;
   neo4j_connection_t *cxn;
   neo4j_value_t params_p;
+  new_rs_obj(&rs_obj);
   // extract connection
   cxn = C_PTR_OF(cxn_ref,neo4j_connection_t);
   // extract params
@@ -34,18 +63,18 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     return &PL_sv_undef;
   }
   res_stream = neo4j_run(cxn, cypher_query, params_p);
-
+  rs_obj->res_stream = res_stream;
   if (res_stream == NULL) {
-    neo4j_perror(stderr, errno, "Failed to run statement");
-    return &PL_sv_undef;
+    rs_obj->succeed=0;
+    rs_obj->fail=1;
+    rs_obj->errnum = errno;
+    rs_obj->strerror = neo4j_strerror( errno, buf, BUFLEN );
   }
-  else {
-    rs = newSViv((IV) res_stream);
-    rs_ref = newRV_noinc(rs);
-    sv_bless(rs_ref, gv_stashpv(RSCLASS, GV_ADD));
-    SvREADONLY_on(rs);
-    return rs_ref;
-  }
+  rs = newSViv((IV) rs_obj);
+  rs_ref = newRV_noinc(rs);
+  sv_bless(rs_ref, gv_stashpv(RSCLASS, GV_ADD));
+  SvREADONLY_on(rs);
+  return rs_ref;
 }
 
 void reset_ (SV *cxn_ref) 
