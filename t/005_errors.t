@@ -47,6 +47,9 @@ SKIP: {
   like $stream->err_info_->{eval_errcode}, qr/SyntaxError/, "got syntax error code";
   ok !$stream->err_info_->{client_errno};
   ok !$stream->err_info_->{client_errmsg};
+  diag "eval_errcode: ".$stream->err_info_->{eval_errcode};
+  diag "client_errno: ".$stream->err_info_->{client_errno};
+  diag "client_errmsg: ".$stream->err_info_->{client_errmsg};
 }
 
 done_testing;
