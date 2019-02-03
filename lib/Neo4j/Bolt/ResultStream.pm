@@ -62,8 +62,7 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
       Newx(climsg, BUFLEN, char);
-      neo4j_strerror(errno, climsg, BUFLEN);
-      rs_obj->strerror = climsg;
+      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
     }
     Inline_Stack_Done;
     return;
@@ -76,8 +75,7 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
       Newx(climsg, BUFLEN, char);
-      neo4j_strerror(errno, climsg, BUFLEN);
-      rs_obj->strerror = climsg;
+      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
     }
     Inline_Stack_Done;
     return;

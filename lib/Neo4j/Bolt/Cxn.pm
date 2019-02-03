@@ -90,8 +90,8 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     rs_obj->fail=1;
     rs_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, climsg, BUFLEN);
-    rs_obj->strerror = climsg;
+    rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
+
   } else if (fail) {
       rs_obj->succeed=0;
       rs_obj->fail=1;
@@ -106,8 +106,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
         rs_obj->eval_errmsg = strcpy(t,evalmsg);
       } else {
         Newx(climsg, BUFLEN, char);
-        neo4j_strerror(errno, climsg, BUFLEN);
-        rs_obj->strerror = climsg;
+        rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
       }
   } else {
     rs_obj->succeed=1;
@@ -144,8 +143,7 @@ void reset_ (SV *cxn_ref)
   if (rc < 0) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, climsg, BUFLEN);
-    cxn_obj->strerror = climsg;
+    cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
   } 
   return;
 }
