@@ -11,11 +11,21 @@ use Inline C => Config => LIBS => $Neo4j::Bolt::Config::extl,
   
 use Inline C => <<'END_BOLT_CXN_C';
 #include <neo4j-client.h>
+#include <errno.h>
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 #define BUFLEN 100
 
 neo4j_value_t SV_to_neo4j_value(SV *sv);
+
+struct cxn_obj {
+  neo4j_connection_t *connection;
+  int connected;
+  int errnum;
+  const char *strerror;
+};
+
+typedef struct cxn_obj cxn_obj_t;
 
 struct rs_obj {
   neo4j_result_stream_t *res_stream;
@@ -45,6 +55,7 @@ void new_rs_obj (rs_obj_t **rs_obj) {
 SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
 {
   neo4j_result_stream_t *res_stream;
+  cxn_obj_t *cxn_obj;
   rs_obj_t *rs_obj;
   const char *evalerr, *evalmsg;
   char *climsg;
@@ -56,7 +67,13 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
   neo4j_value_t params_p;
   new_rs_obj(&rs_obj);
   // extract connection
-  cxn = C_PTR_OF(cxn_ref,neo4j_connection_t);
+  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
+  if (!cxn_obj->connected) {
+    cxn_obj->errnum = ENOTCONN;
+    cxn_obj->strerror = "Not connected";
+    return &PL_sv_undef;    
+  }
+
   // extract params
   if (SvROK(params_ref) && (SvTYPE(SvRV(params_ref))==SVt_PVHV)) {
     params_p = SV_to_neo4j_value(params_ref);
@@ -65,7 +82,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     perror("Parameter arg must be a hash reference\n");
     return &PL_sv_undef;
   }
-  res_stream = neo4j_run(cxn, cypher_query, params_p);
+  res_stream = neo4j_run(cxn_obj->connection, cypher_query, params_p);
   fail = neo4j_check_failure(res_stream);
   rs_obj->res_stream = res_stream;
   if (res_stream == NULL) {
@@ -103,19 +120,39 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
   return rs_ref;
 }
 
+int connected(SV *cxn_ref) {
+  return C_PTR_OF(cxn_ref,cxn_obj_t)->connected;
+}
+
+SV *err_info_ (SV *cxn_ref) {
+  cxn_obj_t *cxn_obj;
+  HV *hv;
+  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
+  hv = newHV();
+  hv_stores(hv, "client_errno", newSViv((IV) cxn_obj->errnum));
+  hv_stores(hv, "client_errmsg", cxn_obj->strerror ? newSVpv(cxn_obj->strerror, strlen(cxn_obj->strerror)): &PL_sv_undef );
+  return newRV_noinc( (SV*) hv );
+}
+
 void reset_ (SV *cxn_ref) 
 {
   int rc;
-  rc = neo4j_reset( C_PTR_OF(cxn_ref,neo4j_connection_t) );
+  char *climsg;
+  cxn_obj_t *cxn_obj;
+  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
+  rc = neo4j_reset( cxn_obj->connection );
   if (rc < 0) {
-    neo4j_perror(stderr,errno,"Problem resetting connection");
+    cxn_obj->errnum = errno;
+    Newx(climsg, BUFLEN, char);
+    neo4j_strerror(errno, climsg, BUFLEN);
+    cxn_obj->strerror = climsg;
   } 
   return;
 }
 
 void DESTROY (SV *cxn_ref)
 {
-  neo4j_close( C_PTR_OF(cxn_ref,neo4j_connection_t) );
+  neo4j_close( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
   return;
 }
 

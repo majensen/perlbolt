@@ -15,25 +15,49 @@ use Inline
 use Inline C => <<'END_BOLT_C';
 #include <neo4j-client.h>
 #define CXNCLASS "Neo4j::Bolt::Cxn"
+#define BUFLEN 100
+
+struct cxn_obj {
+  neo4j_connection_t *connection;
+  int connected;
+  int errnum;
+  const char *strerror;
+};
+
+typedef struct cxn_obj cxn_obj_t;
+
+void new_cxn_obj(cxn_obj_t **cxn_obj) {
+  Newx(*cxn_obj, 1, cxn_obj_t);
+  (*cxn_obj)->connection = (neo4j_connection_t *)NULL;
+  (*cxn_obj)->connected = 0;
+  (*cxn_obj)->errnum = 0;
+  (*cxn_obj)->strerror = (char *)NULL;
+  return;
+}
 
 SV* connect_ ( const char* classname, const char* neo4j_url )
 {
   SV *cxn;
   SV *cxn_ref;
+  cxn_obj_t *cxn_obj;
+  char *climsg;
+  new_cxn_obj(&cxn_obj);
   neo4j_client_init();
-  neo4j_connection_t *connection = neo4j_connect(neo4j_url,NULL,
+  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,
 						 NEO4J_INSECURE);
-  if (connection == NULL) {
-    neo4j_perror(stderr, errno, "Connection failed");
-    return &PL_sv_undef;
+  if (cxn_obj->connection == NULL) {
+    cxn_obj->errnum = errno;
+    Newx(climsg, BUFLEN, char);
+    neo4j_strerror(errno, climsg, BUFLEN);
+    cxn_obj->strerror = climsg;
+  } else {
+    cxn_obj->connected = 1;
   }
-  else {
-    cxn = newSViv((IV) connection);
-    cxn_ref = newRV_noinc(cxn);
-    sv_bless(cxn_ref, gv_stashpv(CXNCLASS, GV_ADD));
-    SvREADONLY_on(cxn);
-    return cxn_ref;
-  }
+  cxn = newSViv((IV) cxn_obj);
+  cxn_ref = newRV_noinc(cxn);
+  sv_bless(cxn_ref, gv_stashpv(CXNCLASS, GV_ADD));
+  SvREADONLY_on(cxn);
+  return cxn_ref;
 }
 
 END_BOLT_C
