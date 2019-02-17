@@ -34,10 +34,10 @@ void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
   rs_obj->succeed = -1;  
   rs_obj->fail = -1;  
   rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
-  rs_obj->eval_errcode = (char *) NULL;
-  rs_obj->eval_errmsg = (char *) NULL;
+  rs_obj->eval_errcode = "";
+  rs_obj->eval_errmsg = "";
   rs_obj->errnum = 0;
-  rs_obj->strerror = (char *) NULL;
+  rs_obj->strerror = "";
   return;
 }
 
@@ -62,8 +62,7 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
       Newx(climsg, BUFLEN, char);
-      neo4j_strerror(errno, climsg, BUFLEN);
-      rs_obj->strerror = climsg;
+      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
     }
     Inline_Stack_Done;
     return;
@@ -76,8 +75,7 @@ void fetch_next_ (SV *rs_ref) {
       rs_obj->fail = 1;
       rs_obj->errnum = errno;
       Newx(climsg, BUFLEN, char);
-      neo4j_strerror(errno, climsg, BUFLEN);
-      rs_obj->strerror = climsg;
+      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
     }
     Inline_Stack_Done;
     return;
@@ -116,17 +114,17 @@ int success_ (SV *rs_ref) {
 int failure_ (SV *rs_ref) {
  return C_PTR_OF(rs_ref,rs_obj_t)->fail;
 }
-
-SV *err_info_ (SV *rs_ref) {
-  rs_obj_t *rs_obj;
-  HV *hv;
-  rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
-  hv = newHV();
-  hv_stores(hv, "eval_errcode", rs_obj->eval_errcode ? newSVpv(rs_obj->eval_errcode, strlen(rs_obj->eval_errcode)) : &PL_sv_undef );
-  hv_stores(hv, "eval_errmsg", rs_obj->eval_errmsg ? newSVpv(rs_obj->eval_errmsg, strlen(rs_obj->eval_errmsg)) : &PL_sv_undef );
-  hv_stores(hv, "client_errmsg", rs_obj->strerror ? newSVpv(rs_obj->strerror, strlen(rs_obj->strerror)): &PL_sv_undef );
-  hv_stores(hv, "client_errno", newSViv((IV) rs_obj->errnum));
-  return newRV_noinc( (SV*) hv );
+int client_errnum_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->errnum;
+}
+const char *server_errcode_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->eval_errcode;
+}
+const char *server_errmsg_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->eval_errmsg;
+}
+const char *client_errmsg_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->strerror;
 }
 
 void DESTROY (SV *rs_ref) {

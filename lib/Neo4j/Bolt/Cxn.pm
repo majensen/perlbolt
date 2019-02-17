@@ -45,10 +45,10 @@ void new_rs_obj (rs_obj_t **rs_obj) {
   (*rs_obj)->succeed = -1;  
   (*rs_obj)->fail = -1;  
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
-  (*rs_obj)->eval_errcode = (char *) NULL;
-  (*rs_obj)->eval_errmsg = (char *) NULL;
+  (*rs_obj)->eval_errcode = "";
+  (*rs_obj)->eval_errmsg = "";
   (*rs_obj)->errnum = 0;
-  (*rs_obj)->strerror = (char *) NULL;
+  (*rs_obj)->strerror = "";
   return;
 }
 
@@ -90,8 +90,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     rs_obj->fail=1;
     rs_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, climsg, BUFLEN);
-    rs_obj->strerror = climsg;
+    rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
   } else if (fail) {
       rs_obj->succeed=0;
       rs_obj->fail=1;
@@ -106,8 +105,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
         rs_obj->eval_errmsg = strcpy(t,evalmsg);
       } else {
         Newx(climsg, BUFLEN, char);
-        neo4j_strerror(errno, climsg, BUFLEN);
-        rs_obj->strerror = climsg;
+        rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
       }
   } else {
     rs_obj->succeed=1;
@@ -124,17 +122,15 @@ int connected(SV *cxn_ref) {
   return C_PTR_OF(cxn_ref,cxn_obj_t)->connected;
 }
 
-SV *err_info_ (SV *cxn_ref) {
-  cxn_obj_t *cxn_obj;
-  HV *hv;
-  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
-  hv = newHV();
-  hv_stores(hv, "client_errno", newSViv((IV) cxn_obj->errnum));
-  hv_stores(hv, "client_errmsg", cxn_obj->strerror ? newSVpv(cxn_obj->strerror, strlen(cxn_obj->strerror)): &PL_sv_undef );
-  return newRV_noinc( (SV*) hv );
+int errnum_(SV *cxn_ref) {
+  return C_PTR_OF(cxn_ref,cxn_obj_t)->errnum;
 }
 
-void reset_ (SV *cxn_ref) 
+const char *errmsg_(SV *cxn_ref) {
+  return C_PTR_OF(cxn_ref,cxn_obj_t)->strerror;
+}
+
+void reset_ (SV *cxn_ref)
 {
   int rc;
   char *climsg;
@@ -144,8 +140,7 @@ void reset_ (SV *cxn_ref)
   if (rc < 0) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, climsg, BUFLEN);
-    cxn_obj->strerror = climsg;
+    cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
   } 
   return;
 }
