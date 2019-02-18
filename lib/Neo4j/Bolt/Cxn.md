@@ -56,7 +56,7 @@ a call to `Neo4j::Bolt::connect_()`.
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::ResultStream](/lib/Neo4j/ResultStream.md).
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).
 
 # AUTHOR
 

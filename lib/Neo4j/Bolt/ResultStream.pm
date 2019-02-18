@@ -173,7 +173,7 @@ then the stream has not yet been accessed.
 =item client_errnum_(), client_errmsg_(), server_errcode_(),
 server_errmsg_()
 
-If C<$stream->failure_> is true, these will indicate what happened.
+If C<$stream-E<gt>failure_> is true, these will indicate what happened.
 
 If the error occurred within the C<libneo4j-client> code,
 C<client_errnum_()> will provide the C<errno> and C<client_errmsg_()>

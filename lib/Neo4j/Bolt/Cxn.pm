@@ -232,7 +232,7 @@ C<Neo4j::Bolt::connect_()>, which would be weird.
 
 =head1 SEE ALSO
 
-L<Neo4j::Bolt>, L<Neo4j::ResultStream>.
+L<Neo4j::Bolt>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 AUTHOR
 

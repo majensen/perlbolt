@@ -51,7 +51,7 @@ of the response as Perl arrays (not arrayrefs).
 - client\_errnum\_(), client\_errmsg\_(), server\_errcode\_(),
 server\_errmsg\_()
 
-    If `$stream-`failure\_> is true, these will indicate what happened.
+    If `$stream->failure_` is true, these will indicate what happened.
 
     If the error occurred within the `libneo4j-client` code,
     `client_errnum_()` will provide the `errno` and `client_errmsg_()`
