@@ -1,6 +1,7 @@
 package Neo4j::Bolt::ResultStream;
 BEGIN {
   our $VERSION = "0.01";
+  require Neo4j::Bolt::Cxn;
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline C => Config =>
@@ -17,6 +18,7 @@ use Inline C => <<'END_BOLT_RS_C';
 #define BUFLEN 100
 
 SV* neo4j_value_to_SV( neo4j_value_t value);
+
 struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
@@ -29,17 +31,9 @@ struct rs_obj {
 };
 
 typedef struct rs_obj rs_obj_t;
-
-void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
-  rs_obj->succeed = -1;  
-  rs_obj->fail = -1;  
-  rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
-  rs_obj->eval_errcode = "";
-  rs_obj->eval_errmsg = "";
-  rs_obj->errnum = 0;
-  rs_obj->strerror = "";
-  return;
-}
+void new_rs_obj (rs_obj_t **rs_obj);
+void reset_errstate_rs_obj (rs_obj_t *rs_obj);
+int update_errstate_rs_obj (rs_obj_t *rs_obj);
 
 void fetch_next_ (SV *rs_ref) {
   SV *perl_value;
@@ -47,40 +41,30 @@ void fetch_next_ (SV *rs_ref) {
   neo4j_result_t *result;
   neo4j_result_stream_t *rs;
   neo4j_value_t value;
-  int i,n;
-  char *climsg;
+  int i,n,fail;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
 
   rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+  reset_errstate_rs_obj(rs_obj);
+
   rs = rs_obj->res_stream;
   n = neo4j_nfields(rs);
   if (!n) {
-    if (errno) {
-      reset_errstate_rs_obj(rs_obj);
-      rs_obj->succeed = 0;
-      rs_obj->fail = 1;
-      rs_obj->errnum = errno;
-      Newx(climsg, BUFLEN, char);
-      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
+    fail = update_errstate_rs_obj(rs_obj);
+    if (fail) {
+      Inline_Stack_Done;
+      return;
     }
-    Inline_Stack_Done;
-    return;
   }  
   result = neo4j_fetch_next(rs);
   if (result == NULL) {
     if (errno) {
-      reset_errstate_rs_obj(rs_obj);
-      rs_obj->succeed = 0;
-      rs_obj->fail = 1;
-      rs_obj->errnum = errno;
-      Newx(climsg, BUFLEN, char);
-      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
+      fail = update_errstate_rs_obj(rs_obj);
     }
     Inline_Stack_Done;
     return;
   }
-
   for (i=0; i<n; i++) {
     value = neo4j_result_field(result, i);
     perl_value = neo4j_value_to_SV(value);

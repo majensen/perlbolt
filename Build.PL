@@ -40,8 +40,8 @@ my $build = Builder->new(
     # erase them from blib/lib/auto...
 #    'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
-#    'Neo4j::Bolt::Cxn',
-#    'Neo4j::Bolt::ResultStream',
+    'Neo4j::Bolt::Cxn',
+    'Neo4j::Bolt::ResultStream',
     'Neo4j::Bolt',
   ],
  );
