@@ -20,10 +20,9 @@ before_install:
   - sudo apt-get update -qq
   # fetch a constant tag
   - git clone https://github.com/cleishm/libneo4j-client.git
-  - git checkout master
+  - pushd libneo4j-client
   - git fetch --tags --all
   - git checkout tags/v2.2.0 -b v2.2.0
-  - pushd libneo4j-client
   - ./autogen.sh
   # --with-pic key for Inline::C compile later
   - ./configure --disable-tools --with-pic --prefix /usr/local
