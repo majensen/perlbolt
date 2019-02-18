@@ -134,6 +134,10 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
  while ( my @row = $stream->fetch_next_ ) {
    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
  }
+ # check that the stream emptied cleanly...
+ if ( $stream->failure_ ) {
+   print STDERR "Uh oh: ".($stream->client_errmsg_ || $stream->server_errmsg_);
+ }
 
 =head1 DESCRIPTION
 
@@ -156,6 +160,29 @@ Obtain the column names of the response as an array.
 =item nfields_()
 
 Obtain the number of fields in the response row as an integer.
+
+=item success_(), failure_()
+
+Use these to check whether fetch_next() succeeded. They indicate the 
+current error state of the result stream. If 
+
+  $stream->success_ == $stream->failure_ == -1
+
+then the stream has not yet been accessed.
+
+=item client_errnum_(), client_errmsg_(), server_errcode_(),
+server_errmsg_()
+
+If C<$stream->failure_> is true, these will indicate what happened.
+
+If the error occurred within the C<libneo4j-client> code,
+C<client_errnum_()> will provide the C<errno> and C<client_errmsg_()>
+the associated error message. This is a probably a good time to file a
+bug report.
+
+If the error occurred at the server, C<server_errcode_()> and
+C<server_errmsg_()> will contain information sent by the server. In
+particular, Cypher syntax errors will appear here.
 
 =back
 

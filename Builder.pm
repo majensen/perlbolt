@@ -56,7 +56,7 @@ sub ACTION_build {
  sub ACTION_author_tasks {
    my $self = shift;
    my ($action, $subaction) = @ARGV;
-   if ($subaction eq 'readme') {
+   if ($subaction && ($subaction eq 'readme')) {
      unless ($have_p2m) {
        print "Don't have Pod::Markdown\n";
        return;
@@ -90,6 +90,10 @@ sub ACTION_build {
        File::Spec->catdir($self->base_dir,'lib')
       );
      
+   }
+   else {
+     print STDERR "Valid author tasks are:\n\treadme\n";
+     exit 1;
    }
    # use the dist-version-from .pm's .md as README.md
    if ($self->dist_version_from) {

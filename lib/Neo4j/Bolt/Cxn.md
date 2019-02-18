@@ -6,10 +6,17 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
     use Neo4j::Bolt;
     $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+    unless ($cxn->connected_) {
+      print STDERR "Problem connecting: ".$cxn->errmsg_;
+    }
     $stream = $cxn->run_query_(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
       {} # parameter hash required
     );
+    unless ($stream->suceeded_) {
+      print STDERR "Problem with query run: ".
+                    ($stream->client_errmsg_ || $stream->server_errmsg_);
+    }
 
 # DESCRIPTION
 
@@ -17,6 +24,10 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 a call to `Neo4j::Bolt::connect_()`.
 
 # METHODS
+
+- connected\_()
+
+    True if server connected successfully. If not, see [errnum\_](https://metacpan.org/pod/errnum_) and [errmsg\_](https://metacpan.org/pod/errmsg_).
 
 - run\_query\_( $cypher\_query, $param\_hash )
 
@@ -33,6 +44,19 @@ a call to `Neo4j::Bolt::connect_()`.
     processing query to abort, forget any pending queries, clear any 
     failure state, dispose of outstanding result records, and roll back 
     the current transaction.
+
+- errnum\_(), errmsg\_()
+
+    Current error state of the connection. If 
+
+        $cxn->connected_ == $cxn->errnum_ == 0
+
+    then you have a virgin Cxn object that came from someplace other than
+    `Neo4j::Bolt::connect_()`, which would be weird.
+
+# SEE ALSO
+
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::ResultStream](/lib/Neo4j/ResultStream.md).
 
 # AUTHOR
 
