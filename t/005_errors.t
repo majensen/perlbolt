@@ -2,6 +2,7 @@ use Test::More;
 use Module::Build;
 use Try::Tiny;
 use URI::bolt;
+use Cwd qw/getcwd/;
 use Neo4j::Bolt;
 use strict;
 
@@ -9,7 +10,10 @@ my $build;
 try {
   $build = Module::Build->current();
 } catch {
-  undef $build;
+  my $d = getcwd;
+  chdir '..';
+  $build = Module::Build->current();
+  chdir $d;
 };
 
 unless (defined $build) {
@@ -29,11 +33,11 @@ if ($build->notes('db_user')) {
 ok my $badcxn = Neo4j::Bolt->connect_("bolt://localhost:16444");
 ok !$badcxn->connected;
 $badcxn->run_query_("match (a) return count(a)",{});
-like $badcxn->err_info_->{client_errmsg}, qr/Not connected/, "client error msg correct";
+like $badcxn->errmsg_, qr/Not connected/, "client error msg correct";
 
 ok my $cxn = Neo4j::Bolt->connect_($url->as_string);
 unless ($cxn->connected) {
-  diag $cxn->err_info_->{client_errmsg};
+  diag $cxn->errmsg_;
 }
 
 SKIP: {
@@ -44,12 +48,8 @@ SKIP: {
    ), 'label count query';
   ok !$stream->success_, "Not Succeeded";
   ok $stream->failure_, "Failure";
-  like $stream->err_info_->{eval_errcode}, qr/SyntaxError/, "got syntax error code";
-  ok !$stream->err_info_->{client_errno};
-  ok !$stream->err_info_->{client_errmsg};
-  diag "eval_errcode: ".$stream->err_info_->{eval_errcode};
-  diag "client_errno: ".$stream->err_info_->{client_errno};
-  diag "client_errmsg: ".$stream->err_info_->{client_errmsg};
+  like $stream->server_errcode_, qr/SyntaxError/, "got syntax error code";
+
 }
 
 done_testing;

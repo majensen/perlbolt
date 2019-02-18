@@ -1,6 +1,7 @@
 package Neo4j::Bolt::ResultStream;
 BEGIN {
   our $VERSION = "0.01";
+  require Neo4j::Bolt::Cxn;
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline C => Config =>
@@ -17,6 +18,7 @@ use Inline C => <<'END_BOLT_RS_C';
 #define BUFLEN 100
 
 SV* neo4j_value_to_SV( neo4j_value_t value);
+
 struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
@@ -29,17 +31,9 @@ struct rs_obj {
 };
 
 typedef struct rs_obj rs_obj_t;
-
-void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
-  rs_obj->succeed = -1;  
-  rs_obj->fail = -1;  
-  rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
-  rs_obj->eval_errcode = (char *) NULL;
-  rs_obj->eval_errmsg = (char *) NULL;
-  rs_obj->errnum = 0;
-  rs_obj->strerror = (char *) NULL;
-  return;
-}
+void new_rs_obj (rs_obj_t **rs_obj);
+void reset_errstate_rs_obj (rs_obj_t *rs_obj);
+int update_errstate_rs_obj (rs_obj_t *rs_obj);
 
 void fetch_next_ (SV *rs_ref) {
   SV *perl_value;
@@ -47,40 +41,30 @@ void fetch_next_ (SV *rs_ref) {
   neo4j_result_t *result;
   neo4j_result_stream_t *rs;
   neo4j_value_t value;
-  int i,n;
-  char *climsg;
+  int i,n,fail;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
 
   rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+  reset_errstate_rs_obj(rs_obj);
+
   rs = rs_obj->res_stream;
   n = neo4j_nfields(rs);
   if (!n) {
-    if (errno) {
-      reset_errstate_rs_obj(rs_obj);
-      rs_obj->succeed = 0;
-      rs_obj->fail = 1;
-      rs_obj->errnum = errno;
-      Newx(climsg, BUFLEN, char);
-      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
+    fail = update_errstate_rs_obj(rs_obj);
+    if (fail) {
+      Inline_Stack_Done;
+      return;
     }
-    Inline_Stack_Done;
-    return;
   }  
   result = neo4j_fetch_next(rs);
   if (result == NULL) {
     if (errno) {
-      reset_errstate_rs_obj(rs_obj);
-      rs_obj->succeed = 0;
-      rs_obj->fail = 1;
-      rs_obj->errnum = errno;
-      Newx(climsg, BUFLEN, char);
-      rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
+      fail = update_errstate_rs_obj(rs_obj);
     }
     Inline_Stack_Done;
     return;
   }
-
   for (i=0; i<n; i++) {
     value = neo4j_result_field(result, i);
     perl_value = neo4j_value_to_SV(value);
@@ -114,17 +98,17 @@ int success_ (SV *rs_ref) {
 int failure_ (SV *rs_ref) {
  return C_PTR_OF(rs_ref,rs_obj_t)->fail;
 }
-
-SV *err_info_ (SV *rs_ref) {
-  rs_obj_t *rs_obj;
-  HV *hv;
-  rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
-  hv = newHV();
-  hv_stores(hv, "eval_errcode", rs_obj->eval_errcode ? newSVpv(rs_obj->eval_errcode, strlen(rs_obj->eval_errcode)) : &PL_sv_undef );
-  hv_stores(hv, "eval_errmsg", rs_obj->eval_errmsg ? newSVpv(rs_obj->eval_errmsg, strlen(rs_obj->eval_errmsg)) : &PL_sv_undef );
-  hv_stores(hv, "client_errmsg", rs_obj->strerror ? newSVpv(rs_obj->strerror, strlen(rs_obj->strerror)): &PL_sv_undef );
-  hv_stores(hv, "client_errno", newSViv((IV) rs_obj->errnum));
-  return newRV_noinc( (SV*) hv );
+int client_errnum_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->errnum;
+}
+const char *server_errcode_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->eval_errcode;
+}
+const char *server_errmsg_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->eval_errmsg;
+}
+const char *client_errmsg_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->strerror;
 }
 
 void DESTROY (SV *rs_ref) {
@@ -150,6 +134,10 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
  while ( my @row = $stream->fetch_next_ ) {
    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
  }
+ # check that the stream emptied cleanly...
+ if ( $stream->failure_ ) {
+   print STDERR "Uh oh: ".($stream->client_errmsg_ || $stream->server_errmsg_);
+ }
 
 =head1 DESCRIPTION
 
@@ -172,6 +160,29 @@ Obtain the column names of the response as an array.
 =item nfields_()
 
 Obtain the number of fields in the response row as an integer.
+
+=item success_(), failure_()
+
+Use these to check whether fetch_next() succeeded. They indicate the 
+current error state of the result stream. If 
+
+  $stream->success_ == $stream->failure_ == -1
+
+then the stream has not yet been accessed.
+
+=item client_errnum_(), client_errmsg_(), server_errcode_(),
+server_errmsg_()
+
+If C<$stream-E<gt>failure_> is true, these will indicate what happened.
+
+If the error occurred within the C<libneo4j-client> code,
+C<client_errnum_()> will provide the C<errno> and C<client_errmsg_()>
+the associated error message. This is a probably a good time to file a
+bug report.
+
+If the error occurred at the server, C<server_errcode_()> and
+C<server_errmsg_()> will contain information sent by the server. In
+particular, Cypher syntax errors will appear here.
 
 =back
 

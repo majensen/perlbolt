@@ -4,6 +4,7 @@ BEGIN {
   require Neo4j::Bolt::TypeHandlersC;
   eval 'require Neo4j::Bolt::Config; 1';
 }
+# use Inline 'global';
 use Inline C => Config => LIBS => $Neo4j::Bolt::Config::extl,
   INC => $Neo4j::Bolt::Config::extc,
   version => $VERSION,
@@ -39,17 +40,59 @@ struct rs_obj {
 };
 
 typedef struct rs_obj rs_obj_t;
+int update_errstate_rs_obj (rs_obj_t *rs_obj);
+void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 
 void new_rs_obj (rs_obj_t **rs_obj) {
   Newx(*rs_obj, 1, rs_obj_t);
   (*rs_obj)->succeed = -1;  
   (*rs_obj)->fail = -1;  
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
-  (*rs_obj)->eval_errcode = (char *) NULL;
-  (*rs_obj)->eval_errmsg = (char *) NULL;
+  (*rs_obj)->eval_errcode = "";
+  (*rs_obj)->eval_errmsg = "";
   (*rs_obj)->errnum = 0;
-  (*rs_obj)->strerror = (char *) NULL;
+  (*rs_obj)->strerror = "";
   return;
+}
+
+void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
+  rs_obj->succeed = -1;  
+  rs_obj->fail = -1;  
+  rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
+  rs_obj->eval_errcode = "";
+  rs_obj->eval_errmsg = "";
+  rs_obj->errnum = 0;
+  rs_obj->strerror = "";
+  return;
+}
+
+int update_errstate_rs_obj (rs_obj_t *rs_obj) {
+  const char *evalerr, *evalmsg;
+  char *climsg;
+  char *s, *t;
+  int fail;
+  fail = neo4j_check_failure(rs_obj->res_stream);
+  if (fail) {
+    rs_obj->succeed = 0;
+    rs_obj->fail = 1;
+    rs_obj->errnum = fail;
+    Newx(climsg, BUFLEN, char);
+    rs_obj->strerror = neo4j_strerror(fail, climsg, BUFLEN);
+    if (fail == NEO4J_STATEMENT_EVALUATION_FAILED) {
+      rs_obj->failure_details = neo4j_failure_details(rs_obj->res_stream);
+      evalerr = neo4j_error_code(rs_obj->res_stream);
+      Newx(s, strlen(evalerr)+1,char);
+      rs_obj->eval_errcode = strcpy(s,evalerr);
+      evalmsg = neo4j_error_message(rs_obj->res_stream);
+      Newx(t, strlen(evalmsg)+1,char);
+      rs_obj->eval_errmsg = strcpy(t,evalmsg);
+    }
+  }
+  else {
+    rs_obj->succeed = 1;
+    rs_obj->fail = 0;
+  }
+  return fail;
 }
 
 SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
@@ -83,35 +126,8 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     return &PL_sv_undef;
   }
   res_stream = neo4j_run(cxn_obj->connection, cypher_query, params_p);
-  fail = neo4j_check_failure(res_stream);
   rs_obj->res_stream = res_stream;
-  if (res_stream == NULL) {
-    rs_obj->succeed=0;
-    rs_obj->fail=1;
-    rs_obj->errnum = errno;
-    Newx(climsg, BUFLEN, char);
-    rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
-
-  } else if (fail) {
-      rs_obj->succeed=0;
-      rs_obj->fail=1;
-      rs_obj->errnum = errno;
-      if (fail == NEO4J_STATEMENT_EVALUATION_FAILED) {
-        rs_obj->failure_details = neo4j_failure_details(res_stream);
-        evalerr = neo4j_error_code(res_stream);
-        Newx(s, strlen(evalerr)+1,char);
-        rs_obj->eval_errcode = strcpy(s,evalerr);
-        evalmsg = neo4j_error_message(res_stream);
-        Newx(t, strlen(evalmsg)+1,char);
-        rs_obj->eval_errmsg = strcpy(t,evalmsg);
-      } else {
-        Newx(climsg, BUFLEN, char);
-        rs_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
-      }
-  } else {
-    rs_obj->succeed=1;
-    rs_obj->fail=0;
-  }
+  fail = update_errstate_rs_obj(rs_obj);
   rs = newSViv((IV) rs_obj);
   rs_ref = newRV_noinc(rs);
   sv_bless(rs_ref, gv_stashpv(RSCLASS, GV_ADD));
@@ -123,17 +139,15 @@ int connected(SV *cxn_ref) {
   return C_PTR_OF(cxn_ref,cxn_obj_t)->connected;
 }
 
-SV *err_info_ (SV *cxn_ref) {
-  cxn_obj_t *cxn_obj;
-  HV *hv;
-  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
-  hv = newHV();
-  hv_stores(hv, "client_errno", newSViv((IV) cxn_obj->errnum));
-  hv_stores(hv, "client_errmsg", cxn_obj->strerror ? newSVpv(cxn_obj->strerror, strlen(cxn_obj->strerror)): &PL_sv_undef );
-  return newRV_noinc( (SV*) hv );
+int errnum_(SV *cxn_ref) {
+  return C_PTR_OF(cxn_ref,cxn_obj_t)->errnum;
 }
 
-void reset_ (SV *cxn_ref) 
+const char *errmsg_(SV *cxn_ref) {
+  return C_PTR_OF(cxn_ref,cxn_obj_t)->strerror;
+}
+
+void reset_ (SV *cxn_ref)
 {
   int rc;
   char *climsg;
@@ -164,10 +178,17 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+ unless ($cxn->connected_) {
+   print STDERR "Problem connecting: ".$cxn->errmsg_;
+ }
  $stream = $cxn->run_query_(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
    {} # parameter hash required
  );
+ unless ($stream->suceeded_) {
+   print STDERR "Problem with query run: ".
+                 ($stream->client_errmsg_ || $stream->server_errmsg_);
+ }
 
 =head1 DESCRIPTION
 
@@ -177,6 +198,10 @@ a call to C<Neo4j::Bolt::connect_()>.
 =head1 METHODS
 
 =over
+
+=item connected_()
+
+True if server connected successfully. If not, see L<errnum_> and L<errmsg_>.
 
 =item run_query_( $cypher_query, $param_hash )
 
@@ -194,7 +219,20 @@ processing query to abort, forget any pending queries, clear any
 failure state, dispose of outstanding result records, and roll back 
 the current transaction.
 
+=item errnum_(), errmsg_()
+
+Current error state of the connection. If 
+
+ $cxn->connected_ == $cxn->errnum_ == 0
+
+then you have a virgin Cxn object that came from someplace other than
+C<Neo4j::Bolt::connect_()>, which would be weird.
+
 =back
+
+=head1 SEE ALSO
+
+L<Neo4j::Bolt>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 AUTHOR
 

@@ -1,6 +1,8 @@
 use Test::More;
 use Module::Build;
 use Try::Tiny;
+use blib;
+use Cwd;
 use URI::bolt;
 use Neo4j::Bolt;
 use strict;
@@ -9,7 +11,10 @@ my $build;
 try {
   $build = Module::Build->current();
 } catch {
-  undef $build;
+  my $d = getcwd;
+  chdir '..';
+  $build = Module::Build->current();
+  chdir $d;
 };
 
 unless (defined $build) {
