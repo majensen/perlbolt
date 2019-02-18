@@ -40,8 +40,8 @@ my $build = Builder->new(
     # erase them from blib/lib/auto...
 #    'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
-    'Neo4j::Bolt::Cxn',
-    'Neo4j::Bolt::ResultStream',
+#    'Neo4j::Bolt::Cxn',
+#    'Neo4j::Bolt::ResultStream',
     'Neo4j::Bolt',
   ],
  );
@@ -84,7 +84,8 @@ $build->notes(lf => $cc->extra_linker_flags);
 $build->notes(cf => $cc->extra_compiler_flags);
 $build->notes(libneo_loc => $build->prompt("Enter local libneo4j-client build directory (req'd for some tests, RET to skip): ",undef));
 if ($build->notes('libneo_loc')) {
-  unless (-e File::Spec->catfile($build->notes('libneo_loc'),'lib','src','iostream.h')) {
+  unless (-e File::Spec->catfile($build->notes('libneo_loc'),'lib','src','iostream.h') or
+-e File::Spec->catfile($build->notes('libneo_loc'),'src','lib','iostream.h')  ) {
     $build->notes(libneo_loc =>
 		    $build->prompt("That doesn't look like the libneo4j-client directory. Try again (or RET to skip): ",undef));
   }
@@ -92,7 +93,8 @@ if ($build->notes('libneo_loc')) {
 
 if ($build->notes('libneo_loc')) {
   $cc->push_extra_compiler_flags(
-    "-I".File::Spec->catdir($build->notes('libneo_loc'), qw/lib src/)
+    "-I".File::Spec->catdir($build->notes('libneo_loc'), qw/lib src/),
+    "-I".File::Spec->catdir($build->notes('libneo_loc'), qw/src lib/)    
      );
 }
 

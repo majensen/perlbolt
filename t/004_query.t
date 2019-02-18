@@ -33,7 +33,7 @@ if ($build->notes('db_user')) {
 
 ok my $cxn = Neo4j::Bolt->connect_($url->as_string), "attempt connection";
 unless ($cxn->connected) {
-  diag $cxn->err_info_->{client_errmsg};
+  diag $cxn->errmsg_;
 }
 
 SKIP: {

@@ -17,15 +17,15 @@ before_install:
   # neo4j pkgs
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
   - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list
-  # libneo4j-client
-  #  - echo $'\n' | sudo add-apt-repository ppa:cleishm/neo4j
   - sudo apt-get update -qq
-  #  - sudo apt-get install -y libneo4j-client-dev
-  #  - dpkg-query -L libneo4j-client-dev
+  # fetch a constant tag
   - git clone https://github.com/cleishm/libneo4j-client.git
+  - git fetch --tags
+  - git checkout tags/v2.2.0 -b v2.2.0
   - pushd libneo4j-client
   - ./autogen.sh
-  - ./configure --disable-tools --prefix /usr/local
+  # --with-pic key for Inline::C compile later
+  - ./configure --disable-tools --with-pic --prefix /usr/local
   - sudo make install
   - popd
   # perl pkgs

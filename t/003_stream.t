@@ -1,12 +1,29 @@
 use Test::More;
 use Module::Build;
+use lib '..';
+use blib;
+use Cwd;
+use Try::Tiny;
 use Fcntl;
 use File::Spec;
 use Neo4j::Bolt;
 use Neo4j::Bolt::NeoValue;
 
 BEGIN {
-  unless (Module::Build->current->notes('libneo_loc')) {
+  my $build;
+  try {
+    $build = Module::Build->current();
+  } catch {
+    my $d = getcwd;
+    chdir '..';
+    $build = Module::Build->current();
+    chdir $d;
+  };
+
+  unless (defined $build) {
+    plan skip_all => "No build context. Run tests with ./Build test.";
+  }
+  unless ($build->notes('libneo_loc')) {
     plan skip_all => "libneo4j-client build directory not set; skipping";
   }
 }

@@ -2,7 +2,7 @@ package t::BoltFile;
 use File::Spec;
 BEGIN {
   use lib 'lib';
-  eval 'require Neo4j::Bolt::Config; 1';
+  eval 'require Neo4j::Bolt::Config; 1' or die "Can't find config";
 }
 use Inline C => Config =>
   LIBS  => $Neo4j::Bolt::Config::extl,
@@ -48,6 +48,7 @@ SV* open_bf(const char *classname, const char *fn, int flags) {
     fprintf(stderr, "can't open bolt file %s : %s\n",bf->fn,strerror(errno));
     return &PL_sv_undef;
   }
+  //printf ("Hey dude\n");
   bf->fs = neo4j_posix_iostream(fd);
   if ( bf->fs == NULL ) {
     fprintf(stderr, "can't create neo4j_iostream (%s) : %s\n",bf->fn,strerror(errno));
@@ -111,7 +112,7 @@ END_BOLTFILE_C
 sub write_values {
   my ($self,@vals) = @_;
   for my $v (@vals) {
-    $self->_write_neovalue($v) or die "Barfed on write";
+    $self->_write_neovalue($v) or die "Barfed on write $!";
   }
   return 1;
 }
