@@ -1,6 +1,6 @@
 # NAME
 
-Neo4j::Bolt - query Neo4j using Bolt protocol
+Neo4j::Bolt - query Neo4j using Bolt protocol [![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
 
 # SYNOPSIS
 
