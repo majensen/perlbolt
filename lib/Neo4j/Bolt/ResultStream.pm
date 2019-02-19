@@ -19,11 +19,21 @@ use Inline C => <<'END_BOLT_RS_C';
 
 SV* neo4j_value_to_SV( neo4j_value_t value);
 
+struct rs_stats {
+  unsigned long long result_count;
+  unsigned long long available_after;
+  unsigned long long consumed_after;
+  struct neo4j_update_counts *update_counts;
+};
+
+typedef struct rs_stats rs_stats_t;
+
 struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
   const struct neo4j_failure_details *failure_details;
+  rs_stats_t *stats;
   char *eval_errcode;
   char *eval_errmsg;
   int errnum;
@@ -31,6 +41,7 @@ struct rs_obj {
 };
 
 typedef struct rs_obj rs_obj_t;
+
 void new_rs_obj (rs_obj_t **rs_obj);
 void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 int update_errstate_rs_obj (rs_obj_t *rs_obj);
@@ -41,6 +52,7 @@ void fetch_next_ (SV *rs_ref) {
   neo4j_result_t *result;
   neo4j_result_stream_t *rs;
   neo4j_value_t value;
+  struct neo4j_update_counts cts;
   int i,n,fail;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
@@ -61,6 +73,13 @@ void fetch_next_ (SV *rs_ref) {
   if (result == NULL) {
     if (errno) {
       fail = update_errstate_rs_obj(rs_obj);
+    } else {
+      // collect stats
+      cts = neo4j_update_counts(rs);
+      rs_obj->stats->result_count = neo4j_result_count(rs);
+      rs_obj->stats->available_after = neo4j_results_available_after(rs);
+      rs_obj->stats->consumed_after = neo4j_results_consumed_after(rs);
+      memcpy(rs_obj->stats->update_counts, &cts, sizeof(struct neo4j_update_counts));
     }
     Inline_Stack_Done;
     return;
@@ -111,8 +130,44 @@ const char *client_errmsg_ (SV *rs_ref) {
  return C_PTR_OF(rs_ref,rs_obj_t)->strerror;
 }
 
+UV result_count_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->stats->result_count;
+}
+UV available_after_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->stats->available_after;
+}
+UV consumed_after_ (SV *rs_ref) {
+ return C_PTR_OF(rs_ref,rs_obj_t)->stats->consumed_after;
+}
+
+void update_counts_ (SV *rs_ref) {
+  struct neo4j_update_counts *uc;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  uc = C_PTR_OF(rs_ref,rs_obj_t)->stats->update_counts;
+
+  Inline_Stack_Push( newSViv( (const UV) uc->nodes_created ));
+  Inline_Stack_Push( newSViv( (const UV) uc->nodes_deleted ));
+  Inline_Stack_Push( newSViv( (const UV) uc->relationships_created ));
+  Inline_Stack_Push( newSViv( (const UV) uc->relationships_deleted ));
+  Inline_Stack_Push( newSViv( (const UV) uc->properties_set ));
+  Inline_Stack_Push( newSViv( (const UV) uc->labels_added ));
+  Inline_Stack_Push( newSViv( (const UV) uc->labels_removed ));
+  Inline_Stack_Push( newSViv( (const UV) uc->indexes_added ));
+  Inline_Stack_Push( newSViv( (const UV) uc->indexes_removed ));
+  Inline_Stack_Push( newSViv( (const UV) uc->constraints_added ));
+  Inline_Stack_Push( newSViv( (const UV) uc->constraints_removed ));
+  Inline_Stack_Done;
+  return;
+}
+
 void DESTROY (SV *rs_ref) {
-  neo4j_close_results(C_PTR_OF(rs_ref,rs_obj_t)->res_stream);
+  rs_obj_t *rs_obj;
+  rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+  neo4j_close_results(rs_obj->res_stream);
+  Safefree(rs_obj->stats->update_counts);
+  Safefree(rs_obj->stats);
+  Safefree(rs_obj);
   return;
 }
 

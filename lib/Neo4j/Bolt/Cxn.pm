@@ -28,11 +28,21 @@ struct cxn_obj {
 
 typedef struct cxn_obj cxn_obj_t;
 
+struct rs_stats {
+  unsigned long long result_count;
+  unsigned long long available_after;
+  unsigned long long consumed_after;
+  struct neo4j_update_counts *update_counts;
+};
+
+typedef struct rs_stats rs_stats_t;
+
 struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
   const struct neo4j_failure_details *failure_details;
+  rs_stats_t *stats;
   char *eval_errcode;
   char *eval_errmsg;
   int errnum;
@@ -43,11 +53,25 @@ typedef struct rs_obj rs_obj_t;
 int update_errstate_rs_obj (rs_obj_t *rs_obj);
 void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 
+void new_rs_stats( rs_stats_t **stats ) {
+  struct neo4j_update_counts *uc;
+  Newx(uc, 1, struct neo4j_update_counts);
+  Newx(*stats, 1, rs_stats_t);
+  (*stats)->result_count = 0;
+  (*stats)->available_after = 0;
+  (*stats)->consumed_after = 0;
+  (*stats)->update_counts = uc;
+  return;
+}
+
 void new_rs_obj (rs_obj_t **rs_obj) {
+  rs_stats_t *stats;
   Newx(*rs_obj, 1, rs_obj_t);
+  new_rs_stats(&stats);
   (*rs_obj)->succeed = -1;  
   (*rs_obj)->fail = -1;  
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
+  (*rs_obj)->stats = stats;
   (*rs_obj)->eval_errcode = "";
   (*rs_obj)->eval_errmsg = "";
   (*rs_obj)->errnum = 0;
