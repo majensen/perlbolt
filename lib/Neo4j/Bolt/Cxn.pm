@@ -267,9 +267,8 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
  unless ($cxn->connected_) {
    print STDERR "Problem connecting: ".$cxn->errmsg_;
  }
- $stream = $cxn->run_query_(
+ $stream = $cxn->run_query(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
-   {} # parameter hash required
  );
  unless ($stream->suceeded_) {
    print STDERR "Problem with query run: ".
@@ -291,6 +290,30 @@ Methods ending with an underscore are XS functions.
 
 True if server connected successfully. If not, see L<errnum_> and L<errmsg_>.
 
+=item run_query($cypher_query, [$param_hash])
+
+Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
+the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
+to retrieve query results as Perl types and structures. C<$param_hash> is
+a hashref of the form C<{ param => $value, ... }>.
+
+=item send_query($cypher_query, [$param_hash])
+
+Send a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query to
+the server. All results (except error info) is discarded.
+
+=item do_query($cypher_query, [$param_hash])
+
+  ($stream, @rows) = do_query($cypher_query, [$param_hash]);
+  $stream = do_query($cypher_query, [$param_hash]);
+
+Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
+the server, and iterate the stream to retrieve all result
+rows. C<do_query> is convenient for running write queries (e.g.,
+C<CREATE (a:Bloog {prop1:"blarg"})>), since it returns the $stream
+with L<Neo4j::Bolt::ResultStream/update_counts> ready for reading.
+
+
 =item run_query_( $cypher_query, $param_hash, $send )
 
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
@@ -301,7 +324,9 @@ to be set, use C<{}>.
 
 If C<$send> is 1, run_query_ will simply send the query and discard
 any results (including query stats). Set C<$send> to 0 and follow up
-with L<fetch_next_()> to retrieve results.
+with L<Neo4j::Bolt::ResultStream/fetch_next_()> to retrieve results.
+
+Easier to use C<run_query>, C<send_query>, C<do_query>.
 
 =item reset_()
 

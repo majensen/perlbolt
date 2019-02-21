@@ -9,9 +9,8 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
     unless ($cxn->connected_) {
       print STDERR "Problem connecting: ".$cxn->errmsg_;
     }
-    $stream = $cxn->run_query_(
+    $stream = $cxn->run_query(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
-      {} # parameter hash required
     );
     unless ($stream->suceeded_) {
       print STDERR "Problem with query run: ".
@@ -25,17 +24,48 @@ a call to `Neo4j::Bolt::connect_()`.
 
 # METHODS
 
+Methods ending with an underscore are XS functions.
+
 - connected\_()
 
     True if server connected successfully. If not, see [errnum\_](https://metacpan.org/pod/errnum_) and [errmsg\_](https://metacpan.org/pod/errmsg_).
 
-- run\_query\_( $cypher\_query, $param\_hash )
+- run\_query($cypher\_query, \[$param\_hash\])
+
+    Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
+    the server. Returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md) which can be iterated
+    to retrieve query results as Perl types and structures. `$param_hash` is
+    a hashref of the form `{ param =` $value, ... }>.
+
+- send\_query($cypher\_query, \[$param\_hash\])
+
+    Send a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query to
+    the server. All results (except error info) is discarded.
+
+- do\_query($cypher\_query, \[$param\_hash\])
+
+        ($stream, @rows) = do_query($cypher_query, [$param_hash]);
+        $stream = do_query($cypher_query, [$param_hash]);
+
+    Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
+    the server, and iterate the stream to retrieve all result
+    rows. `do_query` is convenient for running write queries (e.g.,
+    `CREATE (a:Bloog {prop1:"blarg"})`), since it returns the $stream
+    with ["update\_counts" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#update_counts.md) ready for reading.
+
+- run\_query\_( $cypher\_query, $param\_hash, $send )
 
     Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
     the server. Returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md) which can be iterated
     to retrieve query results as Perl types and structures. `$param_hash` is
     a hashref of the form `{ param =` $value, ... }>. If there are no params
-    to be set, use `{}`.
+    to be set, use `{}`. 
+
+    If `$send` is 1, run\_query\_ will simply send the query and discard
+    any results (including query stats). Set `$send` to 0 and follow up
+    with ["fetch\_next\_()" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#fetch_next_.md) to retrieve results.
+
+    Easier to use `run_query`, `send_query`, `do_query`.
 
 - reset\_()
 

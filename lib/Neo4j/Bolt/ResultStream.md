@@ -27,13 +27,36 @@ of the response as Perl arrays (not arrayrefs).
 
 # METHODS
 
+Methods ending with an underscore are XS functions.
+
 - fetch\_next\_()
 
     Obtain the next row of results as an array. Returns false when done.
 
+- update\_counts()
+
+    If a write query is successful, returns a hashref containing the
+    numbers of items created or removed in the query. The keys indicate
+    the items, as follows:
+
+        nodes_created
+        nodes_deleted
+        relationships_created
+        relationships_deleted
+        properties_set
+        labels_added
+        labels_removed
+        indexes_added
+        indexes_removed
+        constraints_added
+        constraints_removed
+
+    If query is unsuccessful, or the stream is not completely fetched yet,
+    returns undef (check [server\_errmsg\_()](https://metacpan.org/pod/server_errmsg_\(\))).
+
 - fieldnames\_()
 
-    Obtain the column names of the response as an array.
+    Obtain the column names of the response as an array (not arrayref).
 
 - nfields\_()
 
