@@ -44,7 +44,7 @@ install:
 #  - sudo neo4j start
 
 script:
-  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen'\n'y | perl Build.PL
+  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen$'\n'y | perl Build.PL
   - cat _build/notes
   - ./Build 
   - ./Build test
