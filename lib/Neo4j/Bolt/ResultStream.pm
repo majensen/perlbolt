@@ -32,6 +32,7 @@ struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
+  int fetched;
   const struct neo4j_failure_details *failure_details;
   rs_stats_t *stats;
   char *eval_errcode;
@@ -58,6 +59,10 @@ void fetch_next_ (SV *rs_ref) {
   Inline_Stack_Reset;
 
   rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+  if (rs_obj->fetched == 1) {
+    Inline_Stack_Done;
+    return;
+  }
   reset_errstate_rs_obj(rs_obj);
 
   rs = rs_obj->res_stream;
@@ -74,6 +79,7 @@ void fetch_next_ (SV *rs_ref) {
     if (errno) {
       fail = update_errstate_rs_obj(rs_obj);
     } else {
+      rs_obj->fetched = 1;
       // collect stats
       cts = neo4j_update_counts(rs);
       rs_obj->stats->result_count = neo4j_result_count(rs);
@@ -131,19 +137,35 @@ const char *client_errmsg_ (SV *rs_ref) {
 }
 
 UV result_count_ (SV *rs_ref) {
- return C_PTR_OF(rs_ref,rs_obj_t)->stats->result_count;
+ if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
+   return C_PTR_OF(rs_ref,rs_obj_t)->stats->result_count;
+ } else {
+   return 0;
+ }
 }
 UV available_after_ (SV *rs_ref) {
- return C_PTR_OF(rs_ref,rs_obj_t)->stats->available_after;
+ if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
+   return C_PTR_OF(rs_ref,rs_obj_t)->stats->available_after;
+ } else {
+   return 0;
+ }
 }
 UV consumed_after_ (SV *rs_ref) {
- return C_PTR_OF(rs_ref,rs_obj_t)->stats->consumed_after;
+ if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
+   return C_PTR_OF(rs_ref,rs_obj_t)->stats->consumed_after;
+ } else {
+   return 0;
+ }
 }
 
 void update_counts_ (SV *rs_ref) {
   struct neo4j_update_counts *uc;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
+  if (C_PTR_OF(rs_ref,rs_obj_t)->fetched != 1) {
+    Inline_Stack_Done;
+    return;
+  }
   uc = C_PTR_OF(rs_ref,rs_obj_t)->stats->update_counts;
 
   Inline_Stack_Push( newSViv( (const UV) uc->nodes_created ));
@@ -172,6 +194,21 @@ void DESTROY (SV *rs_ref) {
 }
 
 END_BOLT_RS_C
+
+sub update_counts {
+  my $self = shift;
+  my %uc;
+  my @tags = qw/nodes_created nodes_deleted
+		relationships_created relationships_deleted
+		properties_set
+		labels_added labels_removed
+		indexes_added indexes_removed
+		constraints_added constraints_removed/;
+  my @vals = $self->update_counts_;
+  return unless @vals;
+  @uc{@tags} = @vals;
+  return \%uc;
+}
 
 =head1 NAME
 
@@ -202,15 +239,38 @@ of the response as Perl arrays (not arrayrefs).
 
 =head1 METHODS
 
+Methods ending with an underscore are XS functions.
+
 =over
 
 =item fetch_next_()
 
 Obtain the next row of results as an array. Returns false when done.
 
+=item update_counts()
+
+If a write query is successful, returns a hashref containing the
+numbers of items created or removed in the query. The keys indicate
+the items, as follows:
+
+ nodes_created
+ nodes_deleted
+ relationships_created
+ relationships_deleted
+ properties_set
+ labels_added
+ labels_removed
+ indexes_added
+ indexes_removed
+ constraints_added
+ constraints_removed
+
+If query is unsuccessful, or the stream is not completely fetched yet,
+returns undef (check L<server_errmsg_()>).
+
 =item fieldnames_()
 
-Obtain the column names of the response as an array.
+Obtain the column names of the response as an array (not arrayref).
 
 =item nfields_()
 

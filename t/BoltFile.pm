@@ -112,6 +112,7 @@ END_BOLTFILE_C
 sub write_values {
   my ($self,@vals) = @_;
   for my $v (@vals) {
+    next unless defined $v;
     $self->_write_neovalue($v) or die "Barfed on write $!";
   }
   return 1;

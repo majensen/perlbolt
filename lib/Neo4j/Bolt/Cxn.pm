@@ -19,6 +19,7 @@ use Inline C => <<'END_BOLT_CXN_C';
 
 neo4j_value_t SV_to_neo4j_value(SV *sv);
 
+
 struct cxn_obj {
   neo4j_connection_t *connection;
   int connected;
@@ -41,6 +42,7 @@ struct rs_obj {
   neo4j_result_stream_t *res_stream;
   int succeed;
   int fail;
+  int fetched;
   const struct neo4j_failure_details *failure_details;
   rs_stats_t *stats;
   char *eval_errcode;
@@ -53,9 +55,25 @@ typedef struct rs_obj rs_obj_t;
 int update_errstate_rs_obj (rs_obj_t *rs_obj);
 void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 
+void new_rs_uc( struct neo4j_update_counts **uc) {
+  Newx(*uc, 1, struct neo4j_update_counts);
+  (*uc)->nodes_created=0;
+  (*uc)->nodes_deleted=0;
+  (*uc)->relationships_created=0;
+  (*uc)->relationships_deleted=0;
+  (*uc)->properties_set=0;
+  (*uc)->labels_added=0;
+  (*uc)->labels_removed=0;
+  (*uc)->indexes_added=0;
+  (*uc)->indexes_removed=0;
+  (*uc)->constraints_added=0;
+  (*uc)->constraints_removed=0;
+  return;
+}
+
 void new_rs_stats( rs_stats_t **stats ) {
   struct neo4j_update_counts *uc;
-  Newx(uc, 1, struct neo4j_update_counts);
+  new_rs_uc(&uc);
   Newx(*stats, 1, rs_stats_t);
   (*stats)->result_count = 0;
   (*stats)->available_after = 0;
@@ -70,6 +88,7 @@ void new_rs_obj (rs_obj_t **rs_obj) {
   new_rs_stats(&stats);
   (*rs_obj)->succeed = -1;  
   (*rs_obj)->fail = -1;  
+  (*rs_obj)->fetched = 0;
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
   (*rs_obj)->stats = stats;
   (*rs_obj)->eval_errcode = "";
@@ -99,6 +118,7 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   if (fail) {
     rs_obj->succeed = 0;
     rs_obj->fail = 1;
+    rs_obj->fetched = -1;
     rs_obj->errnum = fail;
     Newx(climsg, BUFLEN, char);
     rs_obj->strerror = neo4j_strerror(fail, climsg, BUFLEN);
@@ -119,7 +139,7 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   return fail;
 }
 
-SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
+SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
 {
   neo4j_result_stream_t *res_stream;
   cxn_obj_t *cxn_obj;
@@ -132,6 +152,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
   SV *rs_ref;
   neo4j_connection_t *cxn;
   neo4j_value_t params_p;
+  
   new_rs_obj(&rs_obj);
   // extract connection
   cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
@@ -149,9 +170,14 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref)
     perror("Parameter arg must be a hash reference\n");
     return &PL_sv_undef;
   }
-  res_stream = neo4j_run(cxn_obj->connection, cypher_query, params_p);
+  res_stream = (send >= 1 ?
+                neo4j_send(cxn_obj->connection, cypher_query, params_p) :
+                neo4j_run(cxn_obj->connection, cypher_query, params_p));
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
+  if (send >= 1) {
+    rs_obj->fetched = 1;
+  }
   rs = newSViv((IV) rs_obj);
   rs_ref = newRV_noinc(rs);
   sv_bless(rs_ref, gv_stashpv(RSCLASS, GV_ADD));
@@ -194,6 +220,42 @@ void DESTROY (SV *cxn_ref)
 
 END_BOLT_CXN_C
 
+sub run_query {
+  my $self = shift;
+  my ($query, $parms) = @_;
+  unless ($query) {
+    die "Arg 1 should be Cypher query string";
+  }
+  if ($parms && !(ref $parms == 'HASH')) {
+    die "Arg 2 should be a hashref of { param => $value, ... }";
+  }
+  return $self->run_query_($query, $parms ? $parms : {}, 0);
+}
+
+sub send_query {
+  my $self = shift;
+  my ($query, $parms) = @_;
+  unless ($query) {
+    die "Arg 1 should be Cypher query string";
+  }
+  if ($parms && !(ref $parms == 'HASH')) {
+    die "Arg 2 should be a hashref of { param => $value, ... }";
+  }
+  return $self->run_query_($query, $parms ? $parms : {}, 1);
+}
+
+sub do_query {
+  my $self = shift;
+  my $stream = $self->run_query(@_);
+  my @results;
+  if ($stream->success_) {
+    while (my @row = $stream->fetch_next_) {
+      push @results, [@row];
+    }
+  }
+  return wantarray ? ($stream, @results) : $stream;
+}
+
 =head1 NAME
 
 Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
@@ -221,19 +283,25 @@ a call to C<Neo4j::Bolt::connect_()>.
 
 =head1 METHODS
 
+Methods ending with an underscore are XS functions.
+
 =over
 
 =item connected_()
 
 True if server connected successfully. If not, see L<errnum_> and L<errmsg_>.
 
-=item run_query_( $cypher_query, $param_hash )
+=item run_query_( $cypher_query, $param_hash, $send )
 
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
 to retrieve query results as Perl types and structures. C<$param_hash> is
 a hashref of the form C<{ param => $value, ... }>. If there are no params
-to be set, use C<{}>.
+to be set, use C<{}>. 
+
+If C<$send> is 1, run_query_ will simply send the query and discard
+any results (including query stats). Set C<$send> to 0 and follow up
+with L<fetch_next_()> to retrieve results.
 
 =item reset_()
 

@@ -116,5 +116,10 @@ if ($build->y_n("Would you like to perform read-only tests on a local database?"
   }
 }
 
+if ($build->notes('db_url')) {
+  $build->notes('ok_add_delete', $build->y_n("Will you allow add/delete tests on your database (cruft added will be removed)"));
+}
+
+
 $build->create_build_script;
 

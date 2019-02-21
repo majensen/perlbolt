@@ -40,7 +40,7 @@ SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
-    {}
+    {},0
    ), 'label count query';
   ok $stream->success_, "Succeeded";
   ok !$stream->failure_, "Not failure";
@@ -54,13 +54,10 @@ SKIP: {
     $total_nodes += $row[1];
   }
   
-  ok $stream = $cxn->run_query_("MATCH (a) RETURN count(a)", {}), 'total count query';
+  ok $stream = $cxn->run_query("MATCH (a) RETURN count(a)"), 'total count query';
   is (($stream->fetch_next_)[0], $total_nodes, "total nodes check");
   
-  ok $stream = $cxn->run_query_(
-    "MATCH p = (a)-->(b) RETURN p LIMIT 1",
-    {}
-   ), 'path query';
+  ok $stream = $cxn->run_query("MATCH p = (a)-->(b) RETURN p LIMIT 1"), 'path query';
   
   my ($pth) = $stream->fetch_next_;
   is ref $pth, 'ARRAY', 'got path as ARRAY';
@@ -71,10 +68,7 @@ SKIP: {
   is $pth->[1]->{_start}, $pth->[0]->{_node}, 'relationship start correct';
   is $pth->[1]->{_end},$pth->[2]->{_node}, 'relationship end correct';
   
-  ok $stream = $cxn->run_query_(
-    "MATCH p = (a)<--(b) RETURN p LIMIT 1",
-    {}
-   ), 'path query 2';
+  ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   
   ($pth) = $stream->fetch_next_;
   is ref $pth, 'ARRAY', 'got path as ARRAY';
@@ -85,20 +79,37 @@ SKIP: {
   is $pth->[1]->{_end}, $pth->[0]->{_node}, 'relationship start correct';
   is $pth->[1]->{_start},$pth->[2]->{_node}, 'relationship end correct';
   
-  ok $stream = $cxn->run_query_(
-    "CALL db.labels()", {} ), 'call db.labels()';
+  ok $stream = $cxn->run_query("CALL db.labels()"), 'call db.labels()';
   my @lbl;
   while ( my @row = $stream->fetch_next_ ) {
     push @lbl, $row[0];
   }
   
   for (@lbl) {
-    ok $stream = $cxn->run_query_(
+    ok $stream = $cxn->run_query(
       'MATCH (a) WHERE $lbl in labels(a) RETURN count(a)',
-      { lbl => $_} ), 'query w/parameters';
+      { lbl => $_}), 'query w/parameters';
     my $ct = ($stream->fetch_next_)[0];
     cmp_ok( $ct, ">", 0, "label '$_' count positive ($ct)");
   }
+
+  SKIP : {
+    skip "Add/delete tests not requested", 1 unless $build->notes('ok_add_delete');
+    ok $stream = $cxn->do_query('CREATE (a:Boog:Frelb {prop1: "goob"})'), 'create a node and a property';
+    ok $stream->success_, 'q succeeds';
+#    $stream->fetch_next_;
+    is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added')}], [1,1,2];
+    ok $stream = $cxn->do_query( 'MATCH (a:Boog) REMOVE a:Boog'), 'remove a label';
+    ok $stream->success_, 'q succeeds';
+#    $stream->fetch_next_;
+    is $stream->update_counts->{labels_removed}, 1;
+    ok $stream = $cxn->do_query('MATCH (a:Frelb) WHERE a.prop1 = "goob" DELETE a'), 'delete them';
+    ok $stream->success_, 'q succeeds';    
+#    $stream->fetch_next_;
+    is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added','nodes_deleted')}], [0,0,0,1];    
+
+  }
+  
 }
   
   
