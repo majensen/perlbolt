@@ -299,6 +299,14 @@ If the error occurred at the server, C<server_errcode_()> and
 C<server_errmsg_()> will contain information sent by the server. In
 particular, Cypher syntax errors will appear here.
 
+=item result_counts_(), available_after_(), consumed_after_()
+
+These are performance numbers that the server provides after the 
+stream has been fetched out. result_counts_() is the number of rows
+returned, available_after_() is the time in ms it took the server to 
+provide the stream, and consumed_after_() is the time it took the 
+client (you) to pull them all.
+
 =back
 
 =head1 SEE ALSO

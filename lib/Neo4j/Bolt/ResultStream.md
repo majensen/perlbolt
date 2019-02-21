@@ -85,6 +85,14 @@ server\_errmsg\_()
     `server_errmsg_()` will contain information sent by the server. In
     particular, Cypher syntax errors will appear here.
 
+- result\_counts\_(), available\_after\_(), consumed\_after\_()
+
+    These are performance numbers that the server provides after the 
+    stream has been fetched out. result\_counts\_() is the number of rows
+    returned, available\_after\_() is the time in ms it took the server to 
+    provide the stream, and consumed\_after\_() is the time it took the 
+    client (you) to pull them all.
+
 # SEE ALSO
 
 [Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md).

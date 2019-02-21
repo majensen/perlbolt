@@ -35,12 +35,12 @@ Methods ending with an underscore are XS functions.
     Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
     the server. Returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md) which can be iterated
     to retrieve query results as Perl types and structures. `$param_hash` is
-    a hashref of the form `{ param =` $value, ... }>.
+    a hashref of the form `{ param => $value, ... }`.
 
 - send\_query($cypher\_query, \[$param\_hash\])
 
     Send a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query to
-    the server. All results (except error info) is discarded.
+    the server. All results (except error info) are discarded.
 
 - do\_query($cypher\_query, \[$param\_hash\])
 
@@ -50,8 +50,8 @@ Methods ending with an underscore are XS functions.
     Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
     the server, and iterate the stream to retrieve all result
     rows. `do_query` is convenient for running write queries (e.g.,
-    `CREATE (a:Bloog {prop1:"blarg"})`), since it returns the $stream
-    with ["update\_counts" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#update_counts.md) ready for reading.
+    `CREATE (a:Bloog {prop1:"blarg"})` ), since it returns the $stream
+    with ["update\_counts"](/lib/Neo4j/Bolt/ResultStream.md#update_counts) ready for reading.
 
 - run\_query\_( $cypher\_query, $param\_hash, $send )
 
@@ -63,7 +63,7 @@ Methods ending with an underscore are XS functions.
 
     If `$send` is 1, run\_query\_ will simply send the query and discard
     any results (including query stats). Set `$send` to 0 and follow up
-    with ["fetch\_next\_()" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#fetch_next_.md) to retrieve results.
+    with ["fetch\_next"](/lib/Neo4j/Bolt/ResultStream.md#fetch_next_) to retrieve results.
 
     Easier to use `run_query`, `send_query`, `do_query`.
 

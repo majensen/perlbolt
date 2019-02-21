@@ -295,12 +295,12 @@ True if server connected successfully. If not, see L<errnum_> and L<errmsg_>.
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
 to retrieve query results as Perl types and structures. C<$param_hash> is
-a hashref of the form C<{ param => $value, ... }>.
+a hashref of the form C<{ param =E<gt> $value, ... }>.
 
 =item send_query($cypher_query, [$param_hash])
 
 Send a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query to
-the server. All results (except error info) is discarded.
+the server. All results (except error info) are discarded.
 
 =item do_query($cypher_query, [$param_hash])
 
@@ -310,7 +310,7 @@ the server. All results (except error info) is discarded.
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server, and iterate the stream to retrieve all result
 rows. C<do_query> is convenient for running write queries (e.g.,
-C<CREATE (a:Bloog {prop1:"blarg"})>), since it returns the $stream
+C<CREATE (a:Bloog {prop1:"blarg"})> ), since it returns the $stream
 with L<Neo4j::Bolt::ResultStream/update_counts> ready for reading.
 
 
