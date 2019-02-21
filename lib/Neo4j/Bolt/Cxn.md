@@ -28,7 +28,8 @@ Methods ending with an underscore are XS functions.
 
 - connected\_()
 
-    True if server connected successfully. If not, see [errnum\_](https://metacpan.org/pod/errnum_) and [errmsg\_](https://metacpan.org/pod/errmsg_).
+    True if server connected successfully. If not, see errnum\_() and
+    errmsg\_() below.
 
 - run\_query($cypher\_query, \[$param\_hash\])
 
