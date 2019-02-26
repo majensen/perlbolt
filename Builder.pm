@@ -17,17 +17,19 @@ sub ACTION_build {
   my $self = shift;
   my $mod_ver = $self->dist_version;
   my $libdir = '/usr/local/lib';
+  my $liba;
   open my $cf, ">", File::Spec->catfile($self->base_dir,qw/lib Neo4j Bolt Config.pm/) or die $!;
-  my $liba = "$libdir/libneo4j-client.a";
+  my $lib = "libneo4j-client.a";
   for my $L (@{$self->extra_linker_flags}) {
-    if ($L =~ /^-L(.*)$/) {
+    if ($L =~ /^-L([^[:space:]]*)(?:\s+|$)/) {
       my $l = $1;
-      $liba =~ s/$libdir\///;
-      $liba = File::Spec->catfile($l, $liba);
+      $liba = File::Spec->catfile($l, $lib);
       last if -e $liba;
     }
   }
-
+  unless ($liba =~ m|/|) {
+    $liba = File::Spec->catfile($libdir, $lib);
+  }
   my $extl = join(" ", @{$self->extra_linker_flags});
   my $extc = join(" ", @{$self->extra_compiler_flags});
   print $cf "package Neo4j::Bolt::Config;\n\$extl = '$extl';\n\$extc = '$extc';\n\$liba='$liba';\n1;\n";

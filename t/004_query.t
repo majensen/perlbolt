@@ -31,9 +31,9 @@ if ($build->notes('db_user')) {
   $url->userinfo($build->notes('db_user').':'.$build->notes('db_pass'));
 }
 
-ok my $cxn = Neo4j::Bolt->connect_($url->as_string), "attempt connection";
+ok my $cxn = Neo4j::Bolt->connect($url->as_string), "attempt connection";
 unless ($cxn->connected) {
-  diag $cxn->errmsg_;
+  diag $cxn->errmsg;
 }
 
 SKIP: {
@@ -42,12 +42,12 @@ SKIP: {
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
     {},0
    ), 'label count query';
-  ok $stream->success_, "Succeeded";
-  ok !$stream->failure_, "Not failure";
-  ok my @names = $stream->fieldnames_;
+  ok $stream->success, "Succeeded";
+  ok !$stream->failure, "Not failure";
+  ok my @names = $stream->field_names;
   is_deeply \@names, [qw/lbl ct/], 'col names';
   my $total_nodes = 0;
-  while ( my @row = $stream->fetch_next_ ) {
+  while ( my @row = $stream->fetch_next ) {
     unless ($total_nodes) {
       is ref $row[0], 'ARRAY', 'got array for labels()';
     }
@@ -55,11 +55,11 @@ SKIP: {
   }
   
   ok $stream = $cxn->run_query("MATCH (a) RETURN count(a)"), 'total count query';
-  is (($stream->fetch_next_)[0], $total_nodes, "total nodes check");
+  is (($stream->fetch_next)[0], $total_nodes, "total nodes check");
   
   ok $stream = $cxn->run_query("MATCH p = (a)-->(b) RETURN p LIMIT 1"), 'path query';
   
-  my ($pth) = $stream->fetch_next_;
+  my ($pth) = $stream->fetch_next;
   is ref $pth, 'ARRAY', 'got path as ARRAY';
   is scalar @$pth, 3, 'path array length';
   ok defined $pth->[0]->{_node}, 'start node';
@@ -70,7 +70,7 @@ SKIP: {
   
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   
-  ($pth) = $stream->fetch_next_;
+  ($pth) = $stream->fetch_next;
   is ref $pth, 'ARRAY', 'got path as ARRAY';
   is scalar @$pth, 3, 'path array length';
   ok defined $pth->[0]->{_node}, 'start node';
@@ -81,7 +81,7 @@ SKIP: {
   
   ok $stream = $cxn->run_query("CALL db.labels()"), 'call db.labels()';
   my @lbl;
-  while ( my @row = $stream->fetch_next_ ) {
+  while ( my @row = $stream->fetch_next ) {
     push @lbl, $row[0];
   }
   
@@ -89,23 +89,23 @@ SKIP: {
     ok $stream = $cxn->run_query(
       'MATCH (a) WHERE $lbl in labels(a) RETURN count(a)',
       { lbl => $_}), 'query w/parameters';
-    my $ct = ($stream->fetch_next_)[0];
+    my $ct = ($stream->fetch_next)[0];
     cmp_ok( $ct, ">", 0, "label '$_' count positive ($ct)");
   }
 
   SKIP : {
     skip "Add/delete tests not requested", 1 unless $build->notes('ok_add_delete');
     ok $stream = $cxn->do_query('CREATE (a:Boog:Frelb {prop1: "goob"})'), 'create a node and a property';
-    ok $stream->success_, 'q succeeds';
+    ok $stream->success, 'q succeeds';
 #    $stream->fetch_next_;
     is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added')}], [1,1,2];
     ok $stream = $cxn->do_query( 'MATCH (a:Boog) REMOVE a:Boog'), 'remove a label';
-    ok $stream->success_, 'q succeeds';
-#    $stream->fetch_next_;
+    ok $stream->success, 'q succeeds';
+#    $stream->fetch_next;
     is $stream->update_counts->{labels_removed}, 1;
     ok $stream = $cxn->do_query('MATCH (a:Frelb) WHERE a.prop1 = "goob" DELETE a'), 'delete them';
-    ok $stream->success_, 'q succeeds';    
-#    $stream->fetch_next_;
+    ok $stream->success, 'q succeeds';    
+#    $stream->fetch_next;
     is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added','nodes_deleted')}], [0,0,0,1];    
 
   }

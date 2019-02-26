@@ -195,6 +195,16 @@ void DESTROY (SV *rs_ref) {
 
 END_BOLT_RS_C
 
+sub fetch_next { shift->fetch_next_ }
+sub nfields { shift->nfields_ }
+sub field_names { shift->fieldnames_ }
+sub success { shift->success_ }
+sub failure { shift->failure_ }
+sub client_errnum { shift-> client_errnum_ }
+sub client_errmsg { shift-> client_errmsg_ }
+sub server_errmsg { shift-> server_errmsg_ }
+sub server_errcode { shift-> server_errcode_ }
+
 sub update_counts {
   my $self = shift;
   my %uc;
@@ -219,15 +229,15 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
 
- $stream = $cxn->run_query_(
+ $stream = $cxn->run_query(
    "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
  );
- while ( my @row = $stream->fetch_next_ ) {
+ while ( my @row = $stream->fetch_next ) {
    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
  }
  # check that the stream emptied cleanly...
- if ( $stream->failure_ ) {
-   print STDERR "Uh oh: ".($stream->client_errmsg_ || $stream->server_errmsg_);
+ if ( $stream->failure ) {
+   print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
  }
 
 =head1 DESCRIPTION
@@ -238,11 +248,9 @@ of the response as Perl arrays (not arrayrefs).
 
 =head1 METHODS
 
-Methods ending with an underscore are XS functions.
-
 =over
 
-=item fetch_next_()
+=item fetch_next()
 
 Obtain the next row of results as an array. Returns false when done.
 
@@ -265,45 +273,54 @@ the items, as follows:
  constraints_removed
 
 If query is unsuccessful, or the stream is not completely fetched yet,
-returns undef (check L<server_errmsg_()>).
+returns undef (check L<server_errmsg()>).
 
-=item fieldnames_()
+=item field_names()
 
 Obtain the column names of the response as an array (not arrayref).
 
-=item nfields_()
+=item nfields()
 
 Obtain the number of fields in the response row as an integer.
 
-=item success_(), failure_()
+=item success(), failure()
 
 Use these to check whether fetch_next() succeeded. They indicate the 
 current error state of the result stream. If 
 
-  $stream->success_ == $stream->failure_ == -1
+  $stream->success == $stream->failure == -1
 
 then the stream has not yet been accessed.
 
-=item client_errnum_(), client_errmsg_(), server_errcode_(),
-server_errmsg_()
+=item client_errnum()
 
-If C<$stream-E<gt>failure_> is true, these will indicate what happened.
+=item client_errmsg()
+
+=item server_errcode()
+
+=item server_errmsg()
+
+If C<$stream-E<gt>failure> is true, these will indicate what happened.
 
 If the error occurred within the C<libneo4j-client> code,
-C<client_errnum_()> will provide the C<errno> and C<client_errmsg_()>
+C<client_errnum()> will provide the C<errno> and C<client_errmsg()>
 the associated error message. This is a probably a good time to file a
 bug report.
 
-If the error occurred at the server, C<server_errcode_()> and
-C<server_errmsg_()> will contain information sent by the server. In
+If the error occurred at the server, C<server_errcode()> and
+C<server_errmsg()> will contain information sent by the server. In
 particular, Cypher syntax errors will appear here.
 
-=item result_counts_(), available_after_(), consumed_after_()
+=item result_counts_()
+
+=item available_after()
+
+=item consumed_after()
 
 These are performance numbers that the server provides after the 
-stream has been fetched out. result_counts_() is the number of rows
-returned, available_after_() is the time in ms it took the server to 
-provide the stream, and consumed_after_() is the time it took the 
+stream has been fetched out. result_counts() is the number of rows
+returned, available_after() is the time in ms it took the server to 
+provide the stream, and consumed_after() is the time it took the 
 client (you) to pull them all.
 
 =back

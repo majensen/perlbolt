@@ -1,11 +1,13 @@
 # NAME
 
-Neo4j::Bolt - query Neo4j using Bolt protocol [![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
+Neo4j::Bolt - query Neo4j using Bolt protocol
+
+[![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
 
 # SYNOPSIS
 
     use Neo4j::Bolt;
-    $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+    $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
     $stream = $cxn->run_query_(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
       {} # parameter hash required

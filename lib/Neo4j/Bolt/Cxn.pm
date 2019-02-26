@@ -220,6 +220,10 @@ void DESTROY (SV *cxn_ref)
 
 END_BOLT_CXN_C
 
+sub errnum { shift->errnum_ }
+sub errmsg { shift->errmsg_ }
+sub reset_cxn { shift->reset_ }
+
 sub run_query {
   my $self = shift;
   my ($query, $parms) = @_;
@@ -264,31 +268,29 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
- unless ($cxn->connected_) {
+ unless ($cxn->connected) {
    print STDERR "Problem connecting: ".$cxn->errmsg_;
  }
  $stream = $cxn->run_query(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
  );
- unless ($stream->suceeded_) {
+ unless ($stream->suceeded) {
    print STDERR "Problem with query run: ".
-                 ($stream->client_errmsg_ || $stream->server_errmsg_);
+                 ($stream->client_errmsg || $stream->server_errmsg);
  }
 
 =head1 DESCRIPTION
 
 L<Neo4j::Bolt::Cxn> is a container for a Bolt connection, instantiated by
-a call to C<Neo4j::Bolt::connect_()>.
+a call to C<Neo4j::Bolt::connect()>.
 
 =head1 METHODS
 
-Methods ending with an underscore are XS functions.
-
 =over
 
-=item connected_()
+=item connected()
 
-True if server connected successfully. If not, see L<errnum_> and L<errmsg_>.
+True if server connected successfully. If not, see L<errnum> and L<errmsg>.
 
 =item run_query($cypher_query, [$param_hash])
 
@@ -328,7 +330,7 @@ with L<Neo4j::Bolt::ResultStream/fetch_next_()> to retrieve results.
 
 Easier to use C<run_query>, C<send_query>, C<do_query>.
 
-=item reset_()
+=item reset_cxn()
 
 Send a RESET message to the Neo4j server. According to the L<Bolt
 protocol|https://boltprotocol.org/v1/>, this should force any currently
@@ -336,14 +338,14 @@ processing query to abort, forget any pending queries, clear any
 failure state, dispose of outstanding result records, and roll back 
 the current transaction.
 
-=item errnum_(), errmsg_()
+=item errnum(), errmsg()
 
 Current error state of the connection. If 
 
- $cxn->connected_ == $cxn->errnum_ == 0
+ $cxn->connected == $cxn->errnum == 0
 
 then you have a virgin Cxn object that came from someplace other than
-C<Neo4j::Bolt::connect_()>, which would be weird.
+C<Neo4j::Bolt::connect()>, which would be weird.
 
 =back
 

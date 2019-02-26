@@ -30,14 +30,14 @@ if ($build->notes('db_user')) {
   $url->userinfo($build->notes('db_user').':'.$build->notes('db_pass'));
 }
 
-ok my $badcxn = Neo4j::Bolt->connect_("bolt://localhost:16444");
+ok my $badcxn = Neo4j::Bolt->connect("bolt://localhost:16444");
 ok !$badcxn->connected;
-$badcxn->run_query_("match (a) return count(a)",{},0);
-like $badcxn->errmsg_, qr/Not connected/, "client error msg correct";
+$badcxn->run_query("match (a) return count(a)");
+like $badcxn->errmsg, qr/Not connected/, "client error msg correct";
 
-ok my $cxn = Neo4j::Bolt->connect_($url->as_string);
+ok my $cxn = Neo4j::Bolt->connect($url->as_string);
 unless ($cxn->connected) {
-  diag $cxn->errmsg_;
+  diag $cxn->errmsg;
 }
 
 SKIP: {
@@ -45,9 +45,9 @@ SKIP: {
   ok my $stream = $cxn->run_query(
     "MATCH (a) RETURN labels(a) piece of crap doesn't work",
    ), 'label count query';
-  ok !$stream->success_, "Not Succeeded";
-  ok $stream->failure_, "Failure";
-  like $stream->server_errcode_, qr/SyntaxError/, "got syntax error code";
+  ok !$stream->success, "Not Succeeded";
+  ok $stream->failure, "Failure";
+  like $stream->server_errcode, qr/SyntaxError/, "got syntax error code";
 
 }
 

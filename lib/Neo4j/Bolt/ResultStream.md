@@ -7,16 +7,15 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
     use Neo4j::Bolt;
     $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
 
-    $stream = $cxn->run_query_(
-      "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
-      {} # parameter hash required
+    $stream = $cxn->run_query(
+      "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
     );
-    while ( my @row = $stream->fetch_next_ ) {
+    while ( my @row = $stream->fetch_next ) {
       print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
     }
     # check that the stream emptied cleanly...
-    if ( $stream->failure_ ) {
-      print STDERR "Uh oh: ".($stream->client_errmsg_ || $stream->server_errmsg_);
+    if ( $stream->failure ) {
+      print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
     }
 
 # DESCRIPTION
@@ -27,9 +26,7 @@ of the response as Perl arrays (not arrayrefs).
 
 # METHODS
 
-Methods ending with an underscore are XS functions.
-
-- fetch\_next\_()
+- fetch\_next()
 
     Obtain the next row of results as an array. Returns false when done.
 
@@ -52,45 +49,49 @@ Methods ending with an underscore are XS functions.
         constraints_removed
 
     If query is unsuccessful, or the stream is not completely fetched yet,
-    returns undef (check [server\_errmsg\_()](https://metacpan.org/pod/server_errmsg_\(\))).
+    returns undef (check [server\_errmsg()](https://metacpan.org/pod/server_errmsg\(\))).
 
-- fieldnames\_()
+- field\_names()
 
     Obtain the column names of the response as an array (not arrayref).
 
-- nfields\_()
+- nfields()
 
     Obtain the number of fields in the response row as an integer.
 
-- success\_(), failure\_()
+- success(), failure()
 
     Use these to check whether fetch\_next() succeeded. They indicate the 
     current error state of the result stream. If 
 
-        $stream->success_ == $stream->failure_ == -1
+        $stream->success == $stream->failure == -1
 
     then the stream has not yet been accessed.
 
-- client\_errnum\_(), client\_errmsg\_(), server\_errcode\_(),
-server\_errmsg\_()
+- client\_errnum()
+- client\_errmsg()
+- server\_errcode()
+- server\_errmsg()
 
-    If `$stream->failure_` is true, these will indicate what happened.
+    If `$stream->failure` is true, these will indicate what happened.
 
     If the error occurred within the `libneo4j-client` code,
-    `client_errnum_()` will provide the `errno` and `client_errmsg_()`
+    `client_errnum()` will provide the `errno` and `client_errmsg()`
     the associated error message. This is a probably a good time to file a
     bug report.
 
-    If the error occurred at the server, `server_errcode_()` and
-    `server_errmsg_()` will contain information sent by the server. In
+    If the error occurred at the server, `server_errcode()` and
+    `server_errmsg()` will contain information sent by the server. In
     particular, Cypher syntax errors will appear here.
 
-- result\_counts\_(), available\_after\_(), consumed\_after\_()
+- result\_counts\_()
+- available\_after()
+- consumed\_after()
 
     These are performance numbers that the server provides after the 
-    stream has been fetched out. result\_counts\_() is the number of rows
-    returned, available\_after\_() is the time in ms it took the server to 
-    provide the stream, and consumed\_after\_() is the time it took the 
+    stream has been fetched out. result\_counts() is the number of rows
+    returned, available\_after() is the time in ms it took the server to 
+    provide the stream, and consumed\_after() is the time it took the 
     client (you) to pull them all.
 
 # SEE ALSO

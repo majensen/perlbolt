@@ -6,30 +6,27 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
     use Neo4j::Bolt;
     $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
-    unless ($cxn->connected_) {
+    unless ($cxn->connected) {
       print STDERR "Problem connecting: ".$cxn->errmsg_;
     }
     $stream = $cxn->run_query(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
     );
-    unless ($stream->suceeded_) {
+    unless ($stream->suceeded) {
       print STDERR "Problem with query run: ".
-                    ($stream->client_errmsg_ || $stream->server_errmsg_);
+                    ($stream->client_errmsg || $stream->server_errmsg);
     }
 
 # DESCRIPTION
 
 [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md) is a container for a Bolt connection, instantiated by
-a call to `Neo4j::Bolt::connect_()`.
+a call to `Neo4j::Bolt::connect()`.
 
 # METHODS
 
-Methods ending with an underscore are XS functions.
+- connected()
 
-- connected\_()
-
-    True if server connected successfully. If not, see errnum\_() and
-    errmsg\_() below.
+    True if server connected successfully. If not, see [errnum](https://metacpan.org/pod/errnum) and [errmsg](https://metacpan.org/pod/errmsg).
 
 - run\_query($cypher\_query, \[$param\_hash\])
 
@@ -52,7 +49,7 @@ Methods ending with an underscore are XS functions.
     the server, and iterate the stream to retrieve all result
     rows. `do_query` is convenient for running write queries (e.g.,
     `CREATE (a:Bloog {prop1:"blarg"})` ), since it returns the $stream
-    with ["update\_counts"](/lib/Neo4j/Bolt/ResultStream.md#update_counts) ready for reading.
+    with ["update\_counts" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#update_counts.md) ready for reading.
 
 - run\_query\_( $cypher\_query, $param\_hash, $send )
 
@@ -64,11 +61,11 @@ Methods ending with an underscore are XS functions.
 
     If `$send` is 1, run\_query\_ will simply send the query and discard
     any results (including query stats). Set `$send` to 0 and follow up
-    with ["fetch\_next"](/lib/Neo4j/Bolt/ResultStream.md#fetch_next_) to retrieve results.
+    with ["fetch\_next\_()" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#fetch_next_.md) to retrieve results.
 
     Easier to use `run_query`, `send_query`, `do_query`.
 
-- reset\_()
+- reset\_cxn()
 
     Send a RESET message to the Neo4j server. According to the [Bolt
     protocol](https://boltprotocol.org/v1/), this should force any currently
@@ -76,14 +73,14 @@ Methods ending with an underscore are XS functions.
     failure state, dispose of outstanding result records, and roll back 
     the current transaction.
 
-- errnum\_(), errmsg\_()
+- errnum(), errmsg()
 
     Current error state of the connection. If 
 
-        $cxn->connected_ == $cxn->errnum_ == 0
+        $cxn->connected == $cxn->errnum == 0
 
     then you have a virgin Cxn object that came from someplace other than
-    `Neo4j::Bolt::connect_()`, which would be weird.
+    `Neo4j::Bolt::connect()`, which would be weird.
 
 # SEE ALSO
 
