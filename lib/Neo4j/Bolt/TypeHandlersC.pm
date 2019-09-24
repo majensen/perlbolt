@@ -335,9 +335,9 @@ SV* neo4j_int_to_SViv( neo4j_value_t value ) {
 }
 
 SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
-  // TODO - deal with UTF-8
   SV* pv;
   pv = newSVpv(neo4j_string_to_alloc_str(value), 0);
+  SvUTF8_on(pv);  // depends on libneo4j-client output being valid UTF-8, always
   return pv;
 }
 
@@ -366,7 +366,6 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
     return newRV_noinc( (SV*)neo4j_path_to_AV( value ));
 
   } else if ( the_type ==  NEO4J_STRING) {
-    // TODO : Deal with UTF-8
     return neo4j_string_to_SVpv(value);
   } else {
     warn("Unknown neo4j_value type encountered");
