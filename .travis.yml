@@ -9,8 +9,12 @@ env:
   global:
   - LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include -fPIC" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   matrix:
-  # - NEO4J_VER=3.5.9
-  - NEO4J_VER=3.0.12
+  - NEO4J_VER=3.5.9
+  - NEO4J_VER=3.2.13
+  # - NEO4J_VER=3.0.12
+matrix:
+  allow_failures:
+    - env: NEO4J_VER=3.2.13
 
 before_install:
   # neo4j pkgs
