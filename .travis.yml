@@ -39,7 +39,7 @@ install:
 
   # need to change pass on first access
   - curl -u neo4j:neo4j -d '{"password":"j4oen"}' -X POST -H 'Accept:application/json' -H'Content-Type:application/json' http://localhost:7474/user/neo4j/password
-  - cat .sample.cypher | cypher-shell -u neo4j -p j4oen 
+  - cat .sample.cypher | ./cypher-shell -u neo4j -p j4oen 
   
 #before_script:
 #  - sudo neo4j start
