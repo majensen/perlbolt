@@ -17,10 +17,10 @@ matrix:
     - env: NEO4J_VER=3.2.14
 
 before_install:
-  - curl -O https://dist.neo4j.org/neo4j-community-$NEO4J-unix.tar.gz
-  - tar -xzf neo4j-community-$NEO4J-unix.tar.gz
-  - neo4j-community-$NEO4J/bin/neo4j start
-  - ln -s neo4j-community-$NEO4J/bin/cypher-shell
+  - curl -O https://dist.neo4j.org/neo4j-community-$NEO4J_VER-unix.tar.gz
+  - tar -xzf neo4j-community-$NEO4J_VER-unix.tar.gz
+  - neo4j-community-$NEO4J_VER/bin/neo4j start
+  - ln -s neo4j-community-$NEO4J_VER/bin/cypher-shell
   # fetch a constant tag
   - git clone https://github.com/cleishm/libneo4j-client.git
   - pushd libneo4j-client
