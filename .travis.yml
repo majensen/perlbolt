@@ -20,11 +20,10 @@ before_install:
   # neo4j pkgs
   - curl https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
   - echo 'deb http://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list
-  - sudo apt-key update
+  - apt-key list  # just to make sure the key is in fact imported...
   - sudo apt-get clean
-  - sudo rm -Rf /var/lib/apt/lists/partial/*
-  - sudo apt-get update -o Acquire::CompressionTypes::Order::=gz
-  - sudo apt-get update -qq
+  - sudo rm -Rf /var/lib/apt/lists/*
+  - sudo apt-get update -q -o Acquire::CompressionTypes::Order::=gz -o Acquire::http::Pipeline-Depth=0 -o Acquire::http::No-Cache=true -o Acquire::BrokenProxy=true
   # fetch a constant tag
   - git clone https://github.com/cleishm/libneo4j-client.git
   - pushd libneo4j-client
