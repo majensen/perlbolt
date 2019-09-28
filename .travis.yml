@@ -6,12 +6,11 @@ perl:
   # - "5.20"
   # - "5.18"
 env:
-  - NEO4J_VER=3.0.3 LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include -fPIC" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-  # - NEO4J_VER=2.3.3
-  # - NEO4J_VER=2.2.8  
-  # - NEO4J_VER=2.1.8
-  # - NEO4J_VER=2.0.4
-  # - NEO4J_VER=1.9.5
+  global:
+  - LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include -fPIC" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  matrix:
+  # - NEO4J_VER=3.5.9
+  - NEO4J_VER=3.0.12
 
 before_install:
   # neo4j pkgs
@@ -33,6 +32,7 @@ before_install:
 
 install:
   - java -version
+  - sudo apt-get -y install cypher-shell || true  # this package may not be reliably available, depending on the OS distro
   - echo N | sudo apt-get -y install neo4j=$NEO4J_VER
   - sleep 20
 
