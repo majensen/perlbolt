@@ -1,5 +1,4 @@
 use Test::More;
-use JSON::PP;
 use Neo4j::Bolt::NeoValue;
 
 diag "create neo4j_values from SVs";
@@ -15,10 +14,9 @@ $i = "Hey dude";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "String", "String";
 is $v->_as_perl, $i, "roundtrip";
-$i = $JSON::PP::false;
+$i = \0;
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Boolean", "Boolean";
-is $v->_as_perl, $i, "Boolean roundtrip";
 ok ! $v->_as_perl, "Boolean false is not truthy";
 is ref($v->_as_perl), "JSON::PP::Boolean", "Boolean false defined and blessed";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl(["this", "is",1,"array"]);
