@@ -124,7 +124,8 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     thing = SvRV(sv);
     t = SvTYPE(thing);
     if ( t < SVt_PVAV) { // scalar ref
-      if (sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean")) {
+      if (sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean") || SvIOK(thing) && SvIV(thing) >> 1 == 0) {
+        // boolean (accepts JSON::PP, Types::Serialiser, literal \1 and \0)
         return SViv_to_neo4j_bool(thing);
       }
       else {
