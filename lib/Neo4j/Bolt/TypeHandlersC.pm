@@ -3,6 +3,7 @@ BEGIN {
   our $VERSION = "0.01";
   eval 'require Neo4j::Bolt::Config; 1';
 }
+use JSON::PP; # operator overloading for boolean values
 use Inline 'global';
 use Inline C => Config =>
   LIBS => $Neo4j::Bolt::Config::extl,
@@ -124,7 +125,13 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     thing = SvRV(sv);
     t = SvTYPE(thing);
     if ( t < SVt_PVAV) { // scalar ref
-      return SV_to_neo4j_value(thing);
+      if (sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean") || SvIOK(thing) && SvIV(thing) >> 1 == 0) {
+        // boolean (accepts JSON::PP, Types::Serialiser, literal \1 and \0)
+        return SViv_to_neo4j_bool(thing);
+      }
+      else {
+        return SV_to_neo4j_value(thing);
+      }
     }
     else if (t == SVt_PVAV) { //array
       return AV_to_neo4j_list( (AV*) thing );
@@ -318,7 +325,9 @@ long long neo4j_identity_value(neo4j_value_t value)
 
 
 SV* neo4j_bool_to_SViv( neo4j_value_t value) {
-  return newSViv( (IV) neo4j_bool_value(value));
+  HV* boolean_stash = gv_stashpv("JSON::PP::Boolean", GV_ADD);
+  SV* scalar = newSViv( (IV) neo4j_bool_value(value) );
+  return sv_bless(newRV_noinc(scalar), boolean_stash);
 }
 
 SV* neo4j_bytes_to_SVpv( neo4j_value_t value ) {

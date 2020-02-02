@@ -23,6 +23,7 @@ my $build = Builder->new(
   },
   requires => {
     'Inline::C' => 0,
+    'JSON::PP' => 0,
     'URI' => 0,
   },
   build_requires => {
