@@ -3,6 +3,7 @@ BEGIN {
   our $VERSION = "0.01";
   eval 'require Neo4j::Bolt::Config; 1';
 }
+use JSON::PP; # operator overloading for boolean values
 use Inline 'global';
 use Inline C => Config =>
   LIBS => $Neo4j::Bolt::Config::extl,
