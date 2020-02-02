@@ -3,7 +3,7 @@ package Neo4j::Bolt;
 BEGIN {
   our $VERSION = "0.01";
   eval 'require Neo4j::Bolt::Config; 1';
-  print $Neo4j::Bolt::Config::extl,"<\n";
+#  print $Neo4j::Bolt::Config::extl,"<\n";
 }
 use Inline 
   C => Config =>
