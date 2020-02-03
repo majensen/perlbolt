@@ -212,6 +212,10 @@ void reset_ (SV *cxn_ref)
   return;
 }
 
+const char *server_id_(SV *cxn_ref) {
+  return neo4j_server_id( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
+}
+
 void DESTROY (SV *cxn_ref)
 {
   neo4j_close( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
@@ -223,6 +227,8 @@ END_BOLT_CXN_C
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
 sub reset_cxn { shift->reset_ }
+
+sub server_id { shift->server_id_ }
 
 sub run_query {
   my $self = shift;
@@ -346,6 +352,13 @@ Current error state of the connection. If
 
 then you have a virgin Cxn object that came from someplace other than
 C<Neo4j::Bolt::connect()>, which would be weird.
+
+=item server_id()
+
+ print $cxn->server_id;  # "Neo4j/3.3.9"
+
+Get the server ID string, including the version number. C<undef> if
+connecting wasn't successful or the server didn't identify itself.
 
 =back
 

@@ -110,6 +110,8 @@ SKIP: {
 
   }
   
+  like $cxn->server_id, qr(^Neo4j/\d+\.\d+\.\d), 'server ID';
+  
 }
   
   
