@@ -1,7 +1,7 @@
 package Neo4j::Bolt;
 
 BEGIN {
-  our $VERSION = "0.01";
+  our $VERSION = "0.02";
   eval 'require Neo4j::Bolt::Config; 1';
 #  print $Neo4j::Bolt::Config::extl,"<\n";
 }
@@ -117,24 +117,30 @@ references. These represent Neo4j types according to the following:
  Bytes            scalar
  List             arrayref
  Map              hashref
- Node             hashref
- Relationship     hashref
- Path             arrayref of hashrefs
+ Node             hashref  (Neo4j::Bolt::Node)
+ Relationship     hashref  (Neo4j::Bolt::Relationship)
+ Path             arrayref (Neo4j::Bolt::Path)
 
-Nodes, Relationships and Paths are represented in L<REST::Neo4p> "as_simple()"
+Nodes, Relationships and Paths are represented in the following
 formats:
 
- Node:
- { _node => $node_id, _labels => [ $label1, $label2, ...],
-   prop1 => $value1, prop2 => $value2, ...}
+ # Node:
+ bless {
+   id => $node_id,  labels => [$label1, $label2, ...],
+   properties => {prop1 => $value1, prop2 => $value2, ...}
+ }, 'Neo4j::Bolt::Node'
 
- Relationship:
- { _relationship => $reln_id, 
-   _start => $start_node_id, _end => $end_node_id,
-   prop1 => $value1, prop2 => $value2, ...}
+ # Relationship:
+ bless {
+   id => $reln_id,  type => $reln_type,
+   start => $start_node_id,  end => $end_node_id,
+   properties => {prop1 => $value1, prop2 => $value2, ...}
+ }, 'Neo4j::Bolt::Relationship'
 
- Path:
- [ $node1, $reln12, $node2, $reln23, $node3,...]
+ # Path:
+ bless [
+   $node1, $reln12, $node2, $reln23, $node3, ...
+ ], 'Neo4j::Bolt::Path'
 
 =head1 METHODS
 
