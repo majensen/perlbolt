@@ -43,8 +43,8 @@ SV* connect_ ( const char* classname, const char* neo4j_url )
   char *climsg;
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
-  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,
-						 NEO4J_INSECURE);
+  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,0);
+
   if (cxn_obj->connection == NULL) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
