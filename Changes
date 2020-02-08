@@ -1,3 +1,9 @@
 Revision history for Perl module Neo4j::Bolt
 0.1 2019-01-09
     - First release to CPAN
+
+0.02 2020-02-06
+    - Represent Cypher structural types as blessed objects in Perl
+
+0.01 2019-02-26
+    - Initial version: regular API done, error handling, result stats
