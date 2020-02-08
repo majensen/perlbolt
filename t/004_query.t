@@ -60,7 +60,7 @@ SKIP: {
   ok $stream = $cxn->run_query("MATCH p = (a)-->(b) RETURN p LIMIT 1"), 'path query';
   
   my ($pth) = $stream->fetch_next;
-  is ref $pth, 'ARRAY', 'got path as ARRAY';
+  is ref $pth, 'Neo4j::Bolt::Path', 'got path as Neo4j::Bolt::Path';
   is scalar @$pth, 3, 'path array length';
   ok defined $pth->[0]->{_node}, 'start node';
   ok defined $pth->[2]->{_node}, 'end node';
@@ -71,7 +71,7 @@ SKIP: {
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   
   ($pth) = $stream->fetch_next;
-  is ref $pth, 'ARRAY', 'got path as ARRAY';
+  is ref $pth, 'Neo4j::Bolt::Path', 'got path 2 as Neo4j::Bolt::Path';
   is scalar @$pth, 3, 'path array length';
   ok defined $pth->[0]->{_node}, 'start node';
   ok defined $pth->[2]->{_node}, 'end node';

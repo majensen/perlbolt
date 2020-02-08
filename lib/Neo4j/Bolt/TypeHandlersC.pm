@@ -20,6 +20,8 @@ use Inline C => <<'END_TYPE_HANDLERS_C';
 
 #include <string.h>
 
+#define PATH_CLASS "Neo4j::Bolt::Path"
+
 extern neo4j_value_t neo4j_identity(long long);               
 extern neo4j_value_t neo4j_node(const neo4j_value_t*);	      
 extern neo4j_value_t neo4j_relationship(const neo4j_value_t*);
@@ -134,6 +136,12 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
       }
     }
     else if (t == SVt_PVAV) { //array
+      if (sv_isobject(sv)) {
+        if (sv_isa(sv, PATH_CLASS)) { // path
+          return AV_to_neo4j_path( (AV*) thing );
+        }
+        warn("Unknown blessed array reference type encountered");
+      }
       return AV_to_neo4j_list( (AV*) thing );
     }
     else if (t == SVt_PVHV) { //hash
@@ -144,9 +152,6 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
       }
       else if (hv_exists(hv, "_relationship", 13)) { // reln
         return HV_to_neo4j_relationship(hv);
-      }
-      else if (hv_exists(hv, "_nodes", 6)) { // path
-        return AV_to_neo4j_path(hv);
       }
       else { // map
         return HV_to_neo4j_map(hv);
@@ -372,7 +377,8 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
   } else if ( the_type ==  NEO4J_MAP) {
     return newRV_noinc( (SV*)neo4j_map_to_HV( value ));
   } else if ( the_type == NEO4J_PATH ){
-    return newRV_noinc( (SV*)neo4j_path_to_AV( value ));
+    return sv_bless( newRV_noinc((SV*)neo4j_path_to_AV( value )),
+                     gv_stashpv(PATH_CLASS, GV_ADD) );
 
   } else if ( the_type ==  NEO4J_STRING) {
     return neo4j_string_to_SVpv(value);

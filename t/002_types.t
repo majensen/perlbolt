@@ -46,7 +46,12 @@ is_deeply $v->_as_perl,{ _relationship => 154732534, _start => 53243, _end => 23
 
 TODO: {
   local $TODO = "Implement paths";
-  $v = Neo4j::Bolt::NeoValue->_new_from_perl( [ {_node => 1234}, {_relationship=>523, _start => 1234, _end => 5678, _type => "try"}, {_node => 5678} ] );
+  $i = bless [
+  	{_node},
+  	{_relationship=>523, _start => 1234, _end => 5678, _type => "try"},
+  	{_node => 5678},
+  ], "Neo4j::Bolt::Path";
+  $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
   is $v->_neotype, "Path", "Path";
 }
 
