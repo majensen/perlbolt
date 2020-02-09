@@ -20,6 +20,7 @@ use Inline C => <<'END_TYPE_HANDLERS_C';
 
 #include <string.h>
 
+#define NODE_CLASS "Neo4j::Bolt::Node"
 #define PATH_CLASS "Neo4j::Bolt::Path"
 
 extern neo4j_value_t neo4j_identity(long long);               
@@ -147,15 +148,16 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     else if (t == SVt_PVHV) { //hash
       // determine if is a map, node, or reln
       hv = (HV *)thing;
-      if (hv_exists(hv, "_node", 5)) { // node
-        return HV_to_neo4j_node(hv);
+      if (sv_isobject(sv)) {
+        if (sv_isa(sv, NODE_CLASS)) { // node
+          return HV_to_neo4j_node(hv);
+        }
+        warn("Unknown blessed hash reference type encountered");
       }
       else if (hv_exists(hv, "_relationship", 13)) { // reln
         return HV_to_neo4j_relationship(hv);
       }
-      else { // map
-        return HV_to_neo4j_map(hv);
-      }
+      return HV_to_neo4j_map(hv); // map
     }
   }
   else {
@@ -220,42 +222,36 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
 //   simple rendering! Fix!)
 // fields[2] is a NEO4J_MAP of properties
 neo4j_value_t HV_to_neo4j_node(HV *hv) {
-  HV *hv_cpy;
-  SV *node_id, *lbls_ref;
+  SV **node_id_p, **lbls_ref_p, **props_ref_p;
   AV *lbls;
+  HV *props;
   neo4j_value_t *fields;
   neo4j_map_entry_t null_ent;
-  char *k;
-  int len;
-  SV *v;
   
   Newx(fields, 3, neo4j_value_t);
-  hv_cpy = newHV();
-  hv_iterinit(hv);
-  while( (v=hv_iternextsv(hv,&k,&len)) ) {
-    SvREFCNT_inc(v);
-    if (!hv_store(hv_cpy, k, len, v, 0)) {
-      SvREFCNT_dec(v);
-    }
-  }
-  sv_2mortal((SV*)hv_cpy);
 
-  node_id = hv_delete( hv_cpy, "_node", 5, 0);
-  lbls_ref = hv_delete( hv_cpy, "_labels", 7, 0);
-  if (lbls_ref) {
-    lbls = (AV*) SvRV(lbls_ref);
+  node_id_p = hv_fetch(hv, "id", 2, 0);
+  lbls_ref_p = hv_fetch(hv, "labels", 6, 0);
+  if (lbls_ref_p && SvROK(*lbls_ref_p)) {
+    lbls = (AV*) SvRV(*lbls_ref_p);
   } else {
     lbls = NULL;
   }
-  if (lbls) {
+  if (lbls && SvTYPE((SV*)lbls) == SVt_PVAV && av_top_index(lbls) >= 0) {
     fields[1] = AV_to_neo4j_list(lbls);
   } else {
     fields[1] = neo4j_list( &neo4j_null, 0 );
   }
-  fields[0] = neo4j_identity( SvIV(node_id) );
+  fields[0] = neo4j_identity( node_id_p ? SvIV( *node_id_p ) : -1 );
 
-  if (HvTOTALKEYS(hv_cpy)) {
-    fields[2] = HV_to_neo4j_map(hv_cpy);
+  props_ref_p = hv_fetch(hv, "properties", 10, 0);
+  if (props_ref_p && SvROK(*props_ref_p)) {
+    props = (HV*) SvRV(*props_ref_p);
+  } else {
+    props = NULL;
+  }
+  if (props && SvTYPE((SV*)props) == SVt_PVHV && HvTOTALKEYS(props)) {
+    fields[2] = HV_to_neo4j_map(props);
   } else {
     null_ent = neo4j_map_entry( "", neo4j_null );
     fields[2] = neo4j_map( &null_ent, 0 );
@@ -367,7 +363,8 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
   } else if ( the_type ==  NEO4J_INT) {
     return neo4j_int_to_SViv(value);
   } else if ( the_type ==  NEO4J_NODE) {
-    return newRV_noinc((SV*)neo4j_node_to_HV( value ));;
+    return sv_bless( newRV_noinc((SV*)neo4j_node_to_HV( value )),
+                     gv_stashpv(NODE_CLASS, GV_ADD) );
   } else if ( the_type ==  NEO4J_RELATIONSHIP) {
     return newRV_noinc((SV*)neo4j_relationship_to_HV( value ));;
   } else if ( the_type ==  NEO4J_NULL) {
@@ -438,15 +435,13 @@ HV* neo4j_node_to_HV( neo4j_value_t value ) {
   id = neo4j_identity_value(neo4j_node_identity(value));
   labels = neo4j_node_labels(value);
   props_hv = neo4j_map_to_HV(neo4j_node_properties(value));
-  hv_stores(hv, "_node", newSViv( (IV) id ));
+  hv_stores(hv, "id", newSViv( (IV) id ));
   if (neo4j_list_length(labels)) {
-    hv_stores(hv, "_labels", neo4j_value_to_SV(labels));
+    hv_stores(hv, "labels", neo4j_value_to_SV(labels));
   }
-  hv_iterinit(props_hv);
-  while ((v = hv_iternextsv(props_hv, &k, &retlen))) {
-    hv_store(hv, k, retlen, v, 0);
+  if (HvTOTALKEYS(props_hv)) {
+    hv_stores(hv, "properties", newRV_noinc( (SV*) props_hv ));
   }
-  hv_undef(props_hv);
   return hv;
 }
 

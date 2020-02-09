@@ -25,15 +25,18 @@ is_deeply $v->_as_perl,["this", "is",1,"array"],"roundtrip";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl({ this => "is", a => 5, hash => "map"});
 is $v->_neotype, "Map", "Map";
 is_deeply $v->_as_perl,{ this => "is", a => 5, hash => "map"}, "roundtrip";
-$v = Neo4j::Bolt::NeoValue->_new_from_perl({ _node => 154732534 });
+$i = bless { id => 154732534 }, "Neo4j::Bolt::Node";
+$v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Empty node";
-is_deeply $v->_as_perl,{ _node => 154732534 },"roundtrip";
-$v = Neo4j::Bolt::NeoValue->_new_from_perl({ _node => 154732534, these => "are", some => "props" });
+is_deeply $v->_as_perl,$i,"Empty node roundtrip";
+$i = bless { id => 154732534, properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
+$v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Node with Props";
-is_deeply $v->_as_perl,{ _node => 154732534, these => "are", some => "props" },"roundtrip";
-$v = Neo4j::Bolt::NeoValue->_new_from_perl({ _node => 154732534, _labels=>['lab','el'], these => "are", some => "props" });
+is_deeply $v->_as_perl,$i,"Node with Props roundtrip";
+$i = bless { id => 154732534, labels=>['lab','el'], properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
+$v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Node with Props & Labels";
-is_deeply $v->_as_perl,{ _node => 154732534, _labels=>['lab','el'], these => "are", some => "props" },"roundtrip";
+is_deeply $v->_as_perl,$i,"Node with Props & Labels roundtrip";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl({ _relationship => 154732534, _start => 53243, _end => 235367, _type => "IS_THING", these => "are", some => "props" });
 is $v->_neotype, "Relationship", "Relationship with Type and Props";
 is_deeply $v->_as_perl,{ _relationship => 154732534, _start => 53243, _end => 235367, _type => "IS_THING", these => "are", some => "props" },"roundtrip";
@@ -47,9 +50,9 @@ is_deeply $v->_as_perl,{ _relationship => 154732534, _start => 53243, _end => 23
 TODO: {
   local $TODO = "Implement paths";
   $i = bless [
-  	{_node},
+  	bless({ id => 1234 }, "Neo4j::Bolt::Node"),
   	{_relationship=>523, _start => 1234, _end => 5678, _type => "try"},
-  	{_node => 5678},
+  	bless({ id => 5678 }, "Neo4j::Bolt::Node"),
   ], "Neo4j::Bolt::Path";
   $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
   is $v->_neotype, "Path", "Path";
