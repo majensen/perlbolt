@@ -9,6 +9,9 @@ lib/Neo4j/Bolt/NeoValue.pm
 lib/Neo4j/Bolt/Cxn.pm
 lib/Neo4j/Bolt/ResultStream.pm
 lib/Neo4j/Bolt/TypeHandlersC.pm
+lib/Neo4j/Bolt/Node.pm
+lib/Neo4j/Bolt/Relationship.pm
+lib/Neo4j/Bolt/Path.pm
 lib/URI/bolt.pm
 t/001_useok.t
 t/002_types.t
