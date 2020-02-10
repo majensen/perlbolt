@@ -3,6 +3,18 @@ package Neo4j::Bolt::Node;
 
 $Neo4j::Bolt::Node::VERSION = '0.02';
 
+use strict;
+use warnings;
+
+sub as_simple {
+  my ($self) = @_;
+  
+  my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
+  $simple{_node} = $self->{id};
+  $simple{_labels} = defined $self->{labels} ? $self->{labels} : [];
+  return \%simple;
+}
+
 1;
 
 __END__
@@ -24,6 +36,8 @@ Neo4j::Bolt::Node - Representation of a Neo4j Node
  
  $value1 = $node->{properties}->{property1};
  $value2 = $node->{properties}->{property2};
+ 
+ $hashref = $node->as_simple;
 
 =head1 DESCRIPTION
 
@@ -34,6 +48,26 @@ synopsis above.
 
 If a query returns the same node twice, two separate
 L<Neo4j::Bolt::Node> instances will be created.
+
+=head1 METHODS
+
+=over
+
+=item as_simple()
+
+ $simple  = $node->as_simple;
+ 
+ $node_id = $simple->{_node};
+ @labels  = @{ $simple->{_labels} };
+ $value1  = $simple->{property1};
+ $value2  = $simple->{property2};
+
+Get node as a simple hashref in the style of L<REST::Neo4p>.
+
+The value of properties named C<_node> or C<_labels> will be
+replaced with the node's metadata.
+
+=back
 
 =head1 SEE ALSO
 

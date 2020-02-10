@@ -3,6 +3,15 @@ package Neo4j::Bolt::Path;
 
 $Neo4j::Bolt::Relationship::VERSION = '0.02';
 
+use strict;
+use warnings;
+
+sub as_simple {
+  my ($self) = @_;
+  
+  return [ @$self ];
+}
+
 1;
 
 __END__
@@ -24,6 +33,8 @@ Neo4j::Bolt::Path - Representation of a Neo4j Path
  $start_node = $path[0];
  $end_node   = $path[@$path - 1];
  $length     = @$path >> 1;  # number of relationships
+ 
+ $arrayref = $path->as_simple;
 
 =head1 DESCRIPTION
 
@@ -34,6 +45,21 @@ as shown in the synopsis above.
 
 If a query returns the same path twice, two separate
 L<Neo4j::Bolt::Path> instances will be created.
+
+=head1 METHODS
+
+=over
+
+=item as_simple()
+
+ $simple  = $path->as_simple;
+
+Get path as a simple arrayref in the style of L<REST::Neo4p>.
+
+The simple arrayref is unblessed, but is otherwise an exact duplicate
+of the L<Neo4j::Bolt::Path> instance.
+
+=back
 
 =head1 SEE ALSO
 
