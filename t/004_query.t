@@ -64,9 +64,9 @@ SKIP: {
   is scalar @$pth, 3, 'path array length';
   is ref $pth->[0], 'Neo4j::Bolt::Node', 'got start node as Neo4j::Bolt::Node';
   is ref $pth->[2], 'Neo4j::Bolt::Node', 'got end node as Neo4j::Bolt::Node';
-  ok defined $pth->[1]->{_relationship}, 'relationship';
-  is $pth->[1]->{_start}, $pth->[0]->{id}, 'relationship start correct';
-  is $pth->[1]->{_end}, $pth->[2]->{id}, 'relationship end correct';
+  is ref $pth->[1], 'Neo4j::Bolt::Relationship', 'relationship is a Neo4j::Bolt::Relationship';
+  is $pth->[1]->{start}, $pth->[0]->{id}, 'relationship start correct';
+  is $pth->[1]->{end}, $pth->[2]->{id}, 'relationship end correct';
   
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   
@@ -75,9 +75,9 @@ SKIP: {
   is scalar @$pth, 3, 'path array length';
   is ref $pth->[0], 'Neo4j::Bolt::Node', 'got start node 2 as Neo4j::Bolt::Node';
   is ref $pth->[2], 'Neo4j::Bolt::Node', 'got end node 2 as Neo4j::Bolt::Node';
-  ok defined $pth->[1]->{_relationship}, 'relationship';
-  is $pth->[1]->{_end}, $pth->[0]->{id}, 'relationship 2 start correct';
-  is $pth->[1]->{_start}, $pth->[2]->{id}, 'relationship 2 end correct';
+  is ref $pth->[1], 'Neo4j::Bolt::Relationship', 'relationship 2 is a Neo4j::Bolt::Relationship';
+  is $pth->[1]->{end}, $pth->[0]->{id}, 'relationship 2 end correct';
+  is $pth->[1]->{start}, $pth->[2]->{id}, 'relationship 2 start correct';
   
   ok $stream = $cxn->run_query("CALL db.labels()"), 'call db.labels()';
   my @lbl;
