@@ -43,7 +43,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url )
   char *climsg;
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
-  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,0);
+  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,NEO4J_INSECURE);
 
   if (cxn_obj->connection == NULL) {
     cxn_obj->errnum = errno;
@@ -101,6 +101,8 @@ L<libneo4j-client|https://github.com/cleishm/libneo4j-client> library
 implementing the Neo4j L<Bolt|https://boltprotocol.org/> network
 protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
 
+TLS encryption is not yet supported by L<Neo4j::Bolt>.
+
 =head2 Return Types
 
 L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made 
@@ -154,6 +156,9 @@ Class method, connect to Neo4j server. The URL scheme must be C<'bolt'>, as in
 
 Returns object of type L<Neo4j::Bolt::Cxn>, which accepts Cypher queries and
 returns a L<Neo4j::Bolt::ResultStream>.
+
+B<The connection to the server is insecure.> See GitHub issue
+L<#13|https://github.com/majensen/perlbolt/issues/13> for more info.
 
 =back
 
