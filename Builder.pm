@@ -75,6 +75,7 @@ sub ACTION_build {
 	 $p2m->local_module_re(qr/^Neo4j::/);
 	 $p2m->output_string(\$mdstr);
 	 $p2m->parse_file($_);
+ 	 $mdstr =~ s/%3A%3A/::/g;
 	 $mdstr =~ s{(\][(]github::[^)]*[)])}
 		    {
 		      $_ = $1;

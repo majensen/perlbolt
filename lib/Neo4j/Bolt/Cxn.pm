@@ -273,14 +273,14 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 =head1 SYNOPSIS
 
  use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect_("bolt://localhost:7687");
+ $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
  unless ($cxn->connected) {
-   print STDERR "Problem connecting: ".$cxn->errmsg_;
+   print STDERR "Problem connecting: ".$cxn->errmsg;
  }
  $stream = $cxn->run_query(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
  );
- unless ($stream->suceeded) {
+ if ($stream->failure) {
    print STDERR "Problem with query run: ".
                  ($stream->client_errmsg || $stream->server_errmsg);
  }
@@ -288,7 +288,7 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 =head1 DESCRIPTION
 
 L<Neo4j::Bolt::Cxn> is a container for a Bolt connection, instantiated by
-a call to C<Neo4j::Bolt::connect()>.
+a call to C<< Neo4j::Bolt->connect() >>.
 
 =head1 METHODS
 
@@ -302,8 +302,8 @@ True if server connected successfully. If not, see L<errnum> and L<errmsg>.
 
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
-to retrieve query results as Perl types and structures. C<$param_hash> is
-a hashref of the form C<{ param =E<gt> $value, ... }>.
+to retrieve query results as Perl types and structures. [$param_hash]
+is an optional hashref of the form C<{ param =E<gt> $value, ... }>.
 
 =item send_query($cypher_query, [$param_hash])
 
@@ -312,8 +312,8 @@ the server. All results (except error info) are discarded.
 
 =item do_query($cypher_query, [$param_hash])
 
-  ($stream, @rows) = do_query($cypher_query, [$param_hash]);
-  $stream = do_query($cypher_query, [$param_hash]);
+  ($stream, @rows) = do_query($cypher_query);
+  $stream = do_query($cypher_query, $param_hash);
 
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server, and iterate the stream to retrieve all result
@@ -327,7 +327,7 @@ with L<Neo4j::Bolt::ResultStream/update_counts> ready for reading.
 Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
 the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
 to retrieve query results as Perl types and structures. C<$param_hash> is
-a hashref of the form C<{ param => $value, ... }>. If there are no params
+a hashref of the form C<< { param => $value, ... } >>. If there are no params
 to be set, use C<{}>. 
 
 If C<$send> is 1, run_query_ will simply send the query and discard
@@ -351,7 +351,7 @@ Current error state of the connection. If
  $cxn->connected == $cxn->errnum == 0
 
 then you have a virgin Cxn object that came from someplace other than
-C<Neo4j::Bolt::connect()>, which would be weird.
+C<< Neo4j::Bolt->connect() >>, which would be weird.
 
 =item server_id()
 
@@ -374,7 +374,7 @@ L<Neo4j::Bolt>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 

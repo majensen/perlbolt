@@ -30,8 +30,8 @@ Neo4j::Bolt::Path - Representation of a Neo4j Path
  @nodes         = grep { ref eq 'Neo4j::Bolt::Node' } @$path;
  @relationships = grep { ref eq 'Neo4j::Bolt::Relationship' } @$path;
  
- $start_node = $path[0];
- $end_node   = $path[@$path - 1];
+ $start_node = $path->[0];
+ $end_node   = $path->[@$path - 1];
  $length     = @$path >> 1;  # number of relationships
  
  $arrayref = $path->as_simple;
@@ -73,7 +73,7 @@ L<Neo4j::Bolt>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2020 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 

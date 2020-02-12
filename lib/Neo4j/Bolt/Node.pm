@@ -81,7 +81,7 @@ L<Neo4j::Bolt>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2020 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 

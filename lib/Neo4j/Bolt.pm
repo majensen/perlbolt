@@ -72,25 +72,25 @@ sub connect { shift->connect_(@_) }
 
 Neo4j::Bolt - query Neo4j using Bolt protocol
 
-[![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
+=for markdown [![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
 
 =head1 SYNOPSIS
 
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
- $stream = $cxn->run_query_(
+ $stream = $cxn->run_query(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
    {} # parameter hash required
  );
- @names = $stream->fieldnames_;
- while ( my @row = $stream->fetch_next_ ) {
+ @names = $stream->fieldnames;
+ while ( my @row = $stream->fetch_next ) {
    print "For label '$row[0]' there are $row[1] nodes.\n";
  }
- $stream = $cxn->run_query_(
+ $stream = $cxn->run_query(
    "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
    {} # parameter hash required
  );
- while ( my @row = $stream->fetch_next_ ) {
+ while ( my @row = $stream->fetch_next ) {
    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
  }
 
@@ -100,8 +100,6 @@ L<Neo4j::Bolt> is a Perl wrapper around Chris Leishmann's excellent
 L<libneo4j-client|https://github.com/cleishm/libneo4j-client> library
 implementing the Neo4j L<Bolt|https://boltprotocol.org/> network
 protocol. It uses Ingy's L<Inline::C> to do all the hard XS work.
-
-TLS encryption is not yet supported by L<Neo4j::Bolt>.
 
 =head2 Return Types
 
@@ -123,8 +121,8 @@ references. These represent Neo4j types according to the following:
  Relationship     hashref  (Neo4j::Bolt::Relationship)
  Path             arrayref (Neo4j::Bolt::Path)
 
-Nodes, Relationships and Paths are represented in the following
-formats:
+L<Nodes|Neo4j::Bolt::Node>, L<Relationships|Neo4j::Bolt::Relationship> and
+L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
 
  # Node:
  bless {
@@ -148,11 +146,11 @@ formats:
 
 =over 
 
-=item connect_($url)
+=item connect($url)
 
 Class method, connect to Neo4j server. The URL scheme must be C<'bolt'>, as in
 
-  $cxn = bolt://localhost:7687
+  $url = 'bolt://localhost:7687';
 
 Returns object of type L<Neo4j::Bolt::Cxn>, which accepts Cypher queries and
 returns a L<Neo4j::Bolt::ResultStream>.
@@ -161,6 +159,10 @@ B<The connection to the server is insecure.> See GitHub issue
 L<#13|https://github.com/majensen/perlbolt/issues/13> for more info.
 
 =back
+
+=head1 BUGS
+
+TLS encryption is not yet supported by L<Neo4j::Bolt>.
 
 =head1 SEE ALSO
 
@@ -182,7 +184,7 @@ L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 
