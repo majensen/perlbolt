@@ -540,7 +540,7 @@ neo4j_value_t argument.
 
 =head1 SEE ALSO
 
-L<Neo4j::Bolt>, L<Neo4j::Bolt::Value>, L<Inline::C>, 
+L<Neo4j::Bolt>, L<Neo4j::Bolt::NeoValue>, L<Inline::C>, 
 L<libneo4j-client API|http://neo4j-client.net/doc/latest/neo4j-client_8h.html>.
 
 =head1 AUTHOR

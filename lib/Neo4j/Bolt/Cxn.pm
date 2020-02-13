@@ -296,7 +296,8 @@ a call to C<< Neo4j::Bolt->connect() >>.
 
 =item connected()
 
-True if server connected successfully. If not, see L<errnum> and L<errmsg>.
+True if server connected successfully. If not, see L</"errnum()"> and
+L</"errmsg()">.
 
 =item run_query($cypher_query, [$param_hash])
 
