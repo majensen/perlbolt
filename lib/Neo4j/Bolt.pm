@@ -34,36 +34,33 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   return;
 }
 
-SV* connect_ ( const char* classname, const char* neo4j_url, const char* tls_ca_dir,
-               const char* tls_ca_file, const char* tls_pk_file, const char* tls_pk_pass)
+SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
+               const char* tls_ca_dir, const char* tls_ca_file,
+               const char* tls_pk_file, const char* tls_pk_pass )
 {
   SV *cxn;
   SV *cxn_ref;
   cxn_obj_t *cxn_obj;
   char *climsg;
   neo4j_config_t *config;
-  int secflag = NEO4J_INSECURE;
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
   config = neo4j_new_config();
   if (strlen(tls_ca_dir)) {
     neo4j_config_set_TLS_ca_dir(config, tls_ca_dir);
-    secflag=0;
   }
   if (strlen(tls_ca_file)) {
     neo4j_config_set_TLS_ca_file(config, tls_ca_file);
-    secflag=0;
   }
   if (strlen(tls_pk_file)) {
     neo4j_config_set_TLS_private_key(config, tls_pk_file);
-    secflag=0;
   }
   if (strlen(tls_pk_pass)) {
     neo4j_config_set_TLS_private_key_password(config, tls_pk_pass);
-    secflag=0;
   }
   
-  cxn_obj->connection = neo4j_connect(neo4j_url,config,secflag);
+  cxn_obj->connection = neo4j_connect( neo4j_url, config,
+                                       encrypt ? 0 : NEO4J_INSECURE );
 
   if ((cxn_obj->connection == NULL) || (cxn_obj->errnum != 0)) {
     cxn_obj->errnum = errno;
@@ -71,6 +68,9 @@ SV* connect_ ( const char* classname, const char* neo4j_url, const char* tls_ca_
     neo4j_strerror(errno, climsg, BUFLEN);
     cxn_obj->strerror = climsg;
   } else {
+    if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
+      warn("Bolt connection not secure!");
+    }
     cxn_obj->connected = 1;
   }
   cxn = newSViv((IV) cxn_obj);
@@ -86,7 +86,7 @@ require Neo4j::Bolt::Cxn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
-sub connect { $_[0]->connect_($_[1],"","","",""); }
+sub connect { $_[0]->connect_($_[1],0,"","","",""); }
 
 sub connect_tls {
   my $self = shift;
@@ -96,6 +96,7 @@ sub connect_tls {
   }
   return $self->connect_(
     $url,
+    1,  # encrypt
     $tls->{ca_dir} || "",
     $tls->{ca_file} || "",
     $tls->{pk_file} || "",
