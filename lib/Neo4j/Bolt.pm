@@ -3,7 +3,6 @@ package Neo4j::Bolt;
 BEGIN {
   our $VERSION = "0.02";
   eval 'require Neo4j::Bolt::Config; 1';
-#  print $Neo4j::Bolt::Config::extl,"<\n";
 }
 use Inline 
   C => Config =>
@@ -35,17 +34,38 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   return;
 }
 
-SV* connect_ ( const char* classname, const char* neo4j_url )
+SV* connect_ ( const char* classname, const char* neo4j_url, const char* tls_ca_dir,
+               const char* tls_ca_file, const char* tls_pk_file, const char* tls_pk_pass)
 {
   SV *cxn;
   SV *cxn_ref;
   cxn_obj_t *cxn_obj;
   char *climsg;
+  neo4j_config_t *config;
+  int secflag = NEO4J_INSECURE;
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
-  cxn_obj->connection = neo4j_connect(neo4j_url,NULL,NEO4J_INSECURE);
+  config = neo4j_new_config();
+  if (strlen(tls_ca_dir)) {
+    neo4j_config_set_TLS_ca_dir(config, tls_ca_dir);
+    secflag=0;
+  }
+  if (strlen(tls_ca_file)) {
+    neo4j_config_set_TLS_ca_file(config, tls_ca_file);
+    secflag=0;
+  }
+  if (strlen(tls_pk_file)) {
+    neo4j_config_set_TLS_private_key(config, tls_pk_file);
+    secflag=0;
+  }
+  if (strlen(tls_pk_pass)) {
+    neo4j_config_set_TLS_private_key_password(config, tls_pk_pass);
+    secflag=0;
+  }
+  
+  cxn_obj->connection = neo4j_connect(neo4j_url,config,secflag);
 
-  if (cxn_obj->connection == NULL) {
+  if ((cxn_obj->connection == NULL) || (cxn_obj->errnum != 0)) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
     neo4j_strerror(errno, climsg, BUFLEN);
@@ -66,7 +86,24 @@ require Neo4j::Bolt::Cxn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
-sub connect { shift->connect_(@_) }
+sub connect { $_[0]->connect_($_[1],"","","",""); }
+
+sub connect_tls {
+  my $self = shift;
+  my ($url, $tls) = @_;
+  unless ($tls && (ref($tls) == 'HASH')) {
+    die "Arg 1 should URL and Arg 2 a hashref with keys 'ca_dir','ca_file','pk_file','pk_pass'"
+  }
+  return $self->connect_(
+    $url,
+    $tls->{ca_dir} || "",
+    $tls->{ca_file} || "",
+    $tls->{pk_file} || "",
+    $tls->{pk_pass} || ""
+   );
+}
+		 
+
 
 =head1 NAME
 
@@ -146,7 +183,7 @@ L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
 
 =over 
 
-=item connect($url)
+=item connect($url), connect_tls($url,$tls_hash)
 
 Class method, connect to Neo4j server. The URL scheme must be C<'bolt'>, as in
 
@@ -155,14 +192,19 @@ Class method, connect to Neo4j server. The URL scheme must be C<'bolt'>, as in
 Returns object of type L<Neo4j::Bolt::Cxn>, which accepts Cypher queries and
 returns a L<Neo4j::Bolt::ResultStream>.
 
-B<The connection to the server is insecure.> See GitHub issue
-L<#13|https://github.com/majensen/perlbolt/issues/13> for more info.
+To connect by SSL/TLS, use connect_tls, with a hashref with keys as follows
+
+  ca_dir => <path/to/dir/of/CAs
+  ca_file => <path/to/file/of/CAs
+  pk_file => <path/to/private/key.pm
+  pk_pass => <private/key.pm passphrase>
+
+Example:
+
+  $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
+
 
 =back
-
-=head1 BUGS
-
-TLS encryption is not yet supported by L<Neo4j::Bolt>.
 
 =head1 SEE ALSO
 
