@@ -101,7 +101,7 @@ sub connect_tls {
   eval {
     require Mozilla::CA;
     $default_ca{SSL_ca_file} = Mozilla::CA::SSL_ca_file();
-  } if $@;
+  } unless %default_ca;
   return $self->connect_(
     $url,
     1,  # encrypt
