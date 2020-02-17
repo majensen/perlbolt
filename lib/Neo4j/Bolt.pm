@@ -62,11 +62,10 @@ SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
 
-  if ((cxn_obj->connection == NULL) || (cxn_obj->errnum != 0)) {
+  if ((cxn_obj->connection == NULL)) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, climsg, BUFLEN);
-    cxn_obj->strerror = climsg;
+    cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
   } else {
     if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
       warn("Bolt connection not secure!");

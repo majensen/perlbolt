@@ -49,6 +49,9 @@ SKIP: {
   ok $stream->failure, "Failure";
   like $stream->server_errcode, qr/SyntaxError/, "got syntax error code";
 
+  $cxn = Neo4j::Bolt->connect('snarf://localhost:7687');
+  is $cxn->errnum, -12, "got error";
+  like $cxn->errmsg, qr/scheme/, "got errmsg";
 }
 
 done_testing;
