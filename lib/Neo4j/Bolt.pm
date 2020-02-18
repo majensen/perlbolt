@@ -16,6 +16,43 @@ use Inline C => <<'END_BOLT_C';
 #define CXNCLASS "Neo4j::Bolt::Cxn"
 #define BUFLEN 100
 
+struct neo4j_config
+{
+  struct neo4j_logger_provider *logger_provider;
+  struct neo4j_connection_factory *connection_factory;
+  struct neo4j_memory_allocator *allocator;
+  unsigned int mpool_block_size;
+  char *username;
+  char *password;
+  neo4j_basic_auth_callback_t basic_auth_callback;
+  void *basic_auth_callback_userdata;
+  const char *client_id;
+  unsigned int so_rcvbuf_size;
+  unsigned int so_sndbuf_size;
+  time_t connect_timeout;
+  size_t io_rcvbuf_size;
+  size_t io_sndbuf_size;
+  uint16_t snd_min_chunk_size;
+  uint16_t snd_max_chunk_size;
+  unsigned int session_request_queue_size;
+  unsigned int max_pipelined_requests;
+#ifdef HAVE_TLS
+  char *tls_private_key_file;
+  neo4j_password_callback_t tls_pem_pw_callback;
+  void *tls_pem_pw_callback_userdata;
+  char *tls_ca_file;
+  char *tls_ca_dir;
+#endif
+  bool trust_known;
+  char *known_hosts_file;
+  neo4j_unverified_host_callback_t unverified_host_callback;
+  void *unverified_host_callback_userdata;
+  uint_fast32_t render_flags;
+  unsigned int render_inspect_rows;
+  const struct neo4j_results_table_colors *results_table_colors;
+  const struct neo4j_plan_table_colors *plan_table_colors;
+};
+
 struct cxn_obj {
   neo4j_connection_t *connection;
   int connected;
@@ -34,7 +71,8 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   return;
 }
 
-SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
+SV* connect_ ( const char* classname, const char* neo4j_url,
+               int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
                const char* tls_pk_file, const char* tls_pk_pass )
 {
@@ -46,6 +84,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
   config = neo4j_new_config();
+  config->connect_timeout = (time_t) timeout;
   if (strlen(tls_ca_dir)) {
     neo4j_config_set_TLS_ca_dir(config, tls_ca_dir);
   }
@@ -85,7 +124,9 @@ require Neo4j::Bolt::Cxn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
-sub connect { $_[0]->connect_($_[1],0,"","","",""); }
+sub connect {
+  $_[0]->connect_( $_[1], $_[2]->{timeout}, 0, "", "", "", "" );
+}
 
 sub connect_tls {
   my $self = shift;
@@ -95,6 +136,7 @@ sub connect_tls {
   }
   return $self->connect_(
     $url,
+    $tls->{timeout},
     1,  # encrypt
     $tls->{ca_dir} || "",
     $tls->{ca_file} || "",
