@@ -93,11 +93,20 @@ sub connect_tls {
   unless ($tls && (ref($tls) == 'HASH')) {
     die "Arg 1 should URL and Arg 2 a hashref with keys 'ca_dir','ca_file','pk_file','pk_pass'"
   }
+  my %default_ca = ();
+  eval {
+    require IO::Socket::SSL;
+    %default_ca = IO::Socket::SSL::default_ca();
+  };
+  eval {
+    require Mozilla::CA;
+    $default_ca{SSL_ca_file} = Mozilla::CA::SSL_ca_file();
+  } unless %default_ca;
   return $self->connect_(
     $url,
     1,  # encrypt
-    $tls->{ca_dir} || "",
-    $tls->{ca_file} || "",
+    $tls->{ca_dir}  // $default_ca{SSL_ca_path} // "",
+    $tls->{ca_file} // $default_ca{SSL_ca_file} // "",
     $tls->{pk_file} || "",
     $tls->{pk_pass} || ""
    );
@@ -203,6 +212,9 @@ Example:
 
   $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
 
+When neither C<ca_dir> nor C<ca_file> are specified, an attempt will
+be made to use the default trust store instead.
+This requires L<IO::Socket::SSL> or L<Mozilla::CA> to be installed.
 
 =back
 

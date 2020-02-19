@@ -31,6 +31,7 @@ my $build = Builder->new(
     'Try::Tiny' => 0,
   },
   recommends => {
+    'Mozilla::CA' => 0,
     Pod::Markdown => 0,
    },
   license => 'Apache_2_0',
