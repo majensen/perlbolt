@@ -16,6 +16,7 @@ my $build = Builder->new(
   dist_name => "Neo4j-Bolt",
   dist_version_from => "lib/Neo4j/Bolt.pm",
   dist_abstract => "Neo4j server agent using Bolt protocol",
+  dist_author => 'Mark A. Jensen',
   configure_requires => {
     'Module::Build' => '0.36_14',
     'ExtUtils::CChecker' => 0,
@@ -32,9 +33,21 @@ my $build = Builder->new(
   },
   recommends => {
     'Mozilla::CA' => 0,
-    Pod::Markdown => 0,
-   },
+    'Pod::Markdown' => 0,
+  },
   license => 'Apache_2_0',
+  no_index => {
+    package => [
+      'Builder',
+      't::BoltFile',
+    ],
+  },
+  meta_merge => {
+    resources => {
+      bugtracker => 'https://github.com/majensen/perlbolt/issues',
+      repository => 'https://github.com/majensen/perlbolt.git',
+    },
+  },
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [
     # note: the commented modules get built automatically as require'd deps

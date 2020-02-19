@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Node;
 # ABSTRACT: Representation of Neo4j Node
 
-$Neo4j::Bolt::Node::VERSION = '0.02';
+$Neo4j::Bolt::Node::VERSION = '0.10';
 
 use strict;
 use warnings;

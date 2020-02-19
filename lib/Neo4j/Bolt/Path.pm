@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Path;
 # ABSTRACT: Representation of Neo4j Path
 
-$Neo4j::Bolt::Relationship::VERSION = '0.02';
+$Neo4j::Bolt::Relationship::VERSION = '0.10';
 
 use strict;
 use warnings;

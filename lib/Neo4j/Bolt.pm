@@ -1,7 +1,7 @@
 package Neo4j::Bolt;
 
 BEGIN {
-  our $VERSION = "0.02";
+  our $VERSION = "0.10";
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline 
