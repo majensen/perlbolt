@@ -4,6 +4,7 @@ MANIFEST
 Changes
 LICENSE
 README
+lib/Neo4j/neo4j_config_struct.h
 lib/Neo4j/Bolt.pm
 lib/Neo4j/Bolt/NeoValue.pm
 lib/Neo4j/Bolt/Cxn.pm

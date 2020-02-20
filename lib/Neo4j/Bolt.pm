@@ -12,6 +12,7 @@ use Inline
   name => __PACKAGE__;
 
 use Inline C => <<'END_BOLT_C';
+#include <neo4j_config_struct.h>
 #include <neo4j-client.h>
 #define CXNCLASS "Neo4j::Bolt::Cxn"
 #define BUFLEN 100
@@ -34,7 +35,8 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   return;
 }
 
-SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
+SV* connect_ ( const char* classname, const char* neo4j_url,
+               int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
                const char* tls_pk_file, const char* tls_pk_pass )
 {
@@ -46,6 +48,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
   config = neo4j_new_config();
+  config->connect_timeout = (time_t) timeout;
   if (strlen(tls_ca_dir)) {
     neo4j_config_set_TLS_ca_dir(config, tls_ca_dir);
   }
@@ -85,7 +88,9 @@ require Neo4j::Bolt::Cxn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
-sub connect { $_[0]->connect_($_[1],0,"","","",""); }
+sub connect {
+  $_[0]->connect_( $_[1], $_[2]->{timeout}, 0, "", "", "", "" );
+}
 
 sub connect_tls {
   my $self = shift;
@@ -104,6 +109,7 @@ sub connect_tls {
   } unless %default_ca;
   return $self->connect_(
     $url,
+    $tls->{timeout},
     1,  # encrypt
     $tls->{ca_dir}  // $default_ca{SSL_ca_path} // "",
     $tls->{ca_file} // $default_ca{SSL_ca_file} // "",
