@@ -89,7 +89,7 @@ require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
 sub connect {
-  $_[0]->connect_( $_[1], $_[2]->{timeout}, 0, "", "", "", "" );
+  $_[0]->connect_( $_[1], $_[2], 0, "", "", "", "" );
 }
 
 sub connect_tls {
