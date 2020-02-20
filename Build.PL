@@ -1,4 +1,5 @@
 use lib '.';
+use File::Spec;
 use Builder;
 use ExtUtils::CChecker;
 use Try::Tiny;
@@ -36,6 +37,7 @@ my $build = Builder->new(
   license => 'Apache_2_0',
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [
+
     # note: the commented modules get built automatically as require'd deps
     # all can be uncommented, but Inline will redundantly compile, build, and
     # erase them from blib/lib/auto...
@@ -53,6 +55,7 @@ $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 # look for libneo4j-client
 $cc->push_extra_linker_flags(split(/\s+/, $ENV{LDFLAGS}),'-lneo4j-client');
 $cc->push_extra_compiler_flags(split(/\s+/, $ENV{CFLAGS}));
+$cc->push_extra_compiler_flags('-I'.File::Spec->rel2abs('./lib/Neo4j'));
 #open my $errh, '>&STDERR';
 #open STDERR, '>/tmp/xxx_try_bolt_compile_run';
 unless (
