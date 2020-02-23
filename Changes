@@ -1,5 +1,5 @@
 Revision history for Perl module Neo4j::Bolt
-0.10 2020-02-20
+0.10 2020-02-22
     - Support TLS encryption
     - First release to CPAN
 
