@@ -1,4 +1,7 @@
 Revision history for Perl module Neo4j::Bolt
+0.11 2020-02-23
+    - Don't error, just exit, Build.PL when missing libneo4j-client
+    
 0.10 2020-02-22
     - Support TLS encryption
     - First release to CPAN
