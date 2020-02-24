@@ -1,6 +1,6 @@
 package Neo4j::Bolt::TypeHandlersC;
 BEGIN {
-  our $VERSION = "0.10";
+  our $VERSION = "0.11";
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use JSON::PP; # operator overloading for boolean values

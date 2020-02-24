@@ -2,7 +2,7 @@ package Neo4j::Bolt::NeoValue;
 #use lib '../lib';
 #use lib '../../lib';
 BEGIN {
-  our $VERSION = "0.10";
+  our $VERSION = "0.11";
   require Neo4j::Bolt::TypeHandlersC;
   eval 'require Neo4j::Bolt::Config; 1';
 }
