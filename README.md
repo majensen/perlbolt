@@ -74,7 +74,7 @@ references. These represent Neo4j types according to the following:
 
 # METHODS
 
-- connect($url)
+- connect($url), connect\_tls($url,$tls\_hash)
 
     Class method, connect to Neo4j server. The URL scheme must be `'bolt'`, as in
 
@@ -83,12 +83,20 @@ references. These represent Neo4j types according to the following:
     Returns object of type [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), which accepts Cypher queries and
     returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).
 
-    **The connection to the server is insecure.** See GitHub issue
-    [#13](https://github.com/majensen/perlbolt/issues/13) for more info.
+    To connect by SSL/TLS, use connect\_tls, with a hashref with keys as follows
 
-# BUGS
+        ca_dir => <path/to/dir/of/CAs
+        ca_file => <path/to/file/of/CAs
+        pk_file => <path/to/private/key.pm
+        pk_pass => <private/key.pm passphrase>
 
-TLS encryption is not yet supported by [Neo4j::Bolt](/lib/Neo4j/Bolt.md).
+    Example:
+
+        $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
+
+    When neither `ca_dir` nor `ca_file` are specified, an attempt will
+    be made to use the default trust store instead.
+    This requires [IO::Socket::SSL](https://metacpan.org/pod/IO::Socket::SSL) or [Mozilla::CA](https://metacpan.org/pod/Mozilla::CA) to be installed.
 
 # SEE ALSO
 

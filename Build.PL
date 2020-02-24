@@ -87,7 +87,7 @@ unless (
   } catch {
     print "libneo4j-client cannot be found.\n";
     print "To obtain libneo4j-client, follow the steps at https://github.com/cleishm/libneo4j-client#neo4j-client, and try the Neo4j::Bolt installation again.\n";
-    exit(1);
+    exit(0);
   };
 }
 

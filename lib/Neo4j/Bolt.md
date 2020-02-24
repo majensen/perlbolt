@@ -2,25 +2,25 @@
 
 Neo4j::Bolt - query Neo4j using Bolt protocol
 
-\[!\[Build Status\](https://travis-ci.org/majensen/perlbolt.svg?branch=master)\](https://travis-ci.org/majensen/perlbolt)
+[![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
 
 # SYNOPSIS
 
     use Neo4j::Bolt;
     $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
-    $stream = $cxn->run_query_(
+    $stream = $cxn->run_query(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
       {} # parameter hash required
     );
-    @names = $stream->fieldnames_;
-    while ( my @row = $stream->fetch_next_ ) {
+    @names = $stream->fieldnames;
+    while ( my @row = $stream->fetch_next ) {
       print "For label '$row[0]' there are $row[1] nodes.\n";
     }
-    $stream = $cxn->run_query_(
+    $stream = $cxn->run_query(
       "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
       {} # parameter hash required
     );
-    while ( my @row = $stream->fetch_next_ ) {
+    while ( my @row = $stream->fetch_next ) {
       print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
     }
 
@@ -47,35 +47,56 @@ references. These represent Neo4j types according to the following:
     Bytes            scalar
     List             arrayref
     Map              hashref
-    Node             hashref
-    Relationship     hashref
-    Path             arrayref of hashrefs
+    Node             hashref  (Neo4j::Bolt::Node)
+    Relationship     hashref  (Neo4j::Bolt::Relationship)
+    Path             arrayref (Neo4j::Bolt::Path)
 
-Nodes, Relationships and Paths are represented in [REST::Neo4p](https://metacpan.org/pod/REST::Neo4p) "as\_simple()"
-formats:
+[Nodes](/lib/Neo4j/Bolt/Node.md), [Relationships](/lib/Neo4j/Bolt/Relationship.md) and
+[Paths](/lib/Neo4j/Bolt/Path.md) are represented in the following formats:
 
-    Node:
-    { _node => $node_id, _labels => [ $label1, $label2, ...],
-      prop1 => $value1, prop2 => $value2, ...}
+    # Node:
+    bless {
+      id => $node_id,  labels => [$label1, $label2, ...],
+      properties => {prop1 => $value1, prop2 => $value2, ...}
+    }, 'Neo4j::Bolt::Node'
 
-    Relationship:
-    { _relationship => $reln_id, 
-      _start => $start_node_id, _end => $end_node_id,
-      prop1 => $value1, prop2 => $value2, ...}
+    # Relationship:
+    bless {
+      id => $reln_id,  type => $reln_type,
+      start => $start_node_id,  end => $end_node_id,
+      properties => {prop1 => $value1, prop2 => $value2, ...}
+    }, 'Neo4j::Bolt::Relationship'
 
-    Path:
-    [ $node1, $reln12, $node2, $reln23, $node3,...]
+    # Path:
+    bless [
+      $node1, $reln12, $node2, $reln23, $node3, ...
+    ], 'Neo4j::Bolt::Path'
 
 # METHODS
 
-- connect\_($url)
+- connect($url), connect\_tls($url,$tls\_hash)
 
     Class method, connect to Neo4j server. The URL scheme must be `'bolt'`, as in
 
-        $cxn = bolt://localhost:7687
+        $url = 'bolt://localhost:7687';
 
     Returns object of type [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), which accepts Cypher queries and
     returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).
+
+    To connect by SSL/TLS, use connect\_tls, with a hashref with keys as follows
+
+        ca_dir => <path/to/dir/of/CAs
+        ca_file => <path/to/file/of/CAs
+        pk_file => <path/to/private/key.pm
+        pk_pass => <private/key.pm passphrase>
+
+    Example:
+
+        $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
+
+    When neither `ca_dir` nor `ca_file` are specified, an attempt will
+    be made to use the default trust store instead.
+    This requires [IO::Socket::SSL](https://metacpan.org/pod/IO::Socket::SSL) or [Mozilla::CA](https://metacpan.org/pod/Mozilla::CA) to be installed.
 
 # SEE ALSO
 
@@ -93,7 +114,7 @@ formats:
 
 # LICENSE
 
-This software is Copyright (c) 2019 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 
