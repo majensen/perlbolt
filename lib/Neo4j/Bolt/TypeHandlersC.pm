@@ -72,7 +72,7 @@ neo4j_value_t AV_to_neo4j_list(AV *av);
 neo4j_value_t HV_to_neo4j_map(HV *hv);
 neo4j_value_t HV_to_neo4j_node(HV *hv);
 neo4j_value_t HV_to_neo4j_relationship(HV *hv);
-neo4j_value_t AV_to_neo4j_path(HV *hv);
+neo4j_value_t AV_to_neo4j_path(AV *av);
 neo4j_value_t SV_to_neo4j_value(SV *sv);
 
 SV* neo4j_bool_to_SViv( neo4j_value_t value );
@@ -309,7 +309,7 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv) {
   return neo4j_relationship(fields);
 }
 
-neo4j_value_t AV_to_neo4j_path(HV *hv) {
+neo4j_value_t AV_to_neo4j_path(AV *av) {
   fprintf(stderr, "Not yet implemented");
   return neo4j_null;
 }
