@@ -7,9 +7,17 @@ use Try::Tiny;
 my $DEFAULT_URL = "bolt://localhost:7687";
 
 my $cc = ExtUtils::CChecker->new( quiet => 1);
-my $code_cc = <<CC;
+my $code_cc = <<'CC';
+#include <stdio.h>
+#include <string.h>
 #include <neo4j-client.h>
 int main(int argc, char *argv[]) {
+  const char *version = libneo4j_client_version();
+  printf("libneo4j-client version %s is installed.\n", version);
+  if (strcmp(version, "2.") < 0) {
+    printf("ERROR: libneo4j-client version 1.x is not supported by Neo4j::Bolt.\n");
+    return 1;
+  }
   return neo4j_type(neo4j_null);
 }
 CC
