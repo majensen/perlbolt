@@ -1,7 +1,7 @@
 package Neo4j::Bolt;
 
 BEGIN {
-  our $VERSION = "0.02";
+  our $VERSION = "0.12";
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline 
@@ -12,6 +12,7 @@ use Inline
   name => __PACKAGE__;
 
 use Inline C => <<'END_BOLT_C';
+#include <neo4j_config_struct.h>
 #include <neo4j-client.h>
 #define CXNCLASS "Neo4j::Bolt::Cxn"
 #define BUFLEN 100
@@ -34,7 +35,8 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   return;
 }
 
-SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
+SV* connect_ ( const char* classname, const char* neo4j_url,
+               int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
                const char* tls_pk_file, const char* tls_pk_pass )
 {
@@ -46,6 +48,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url, bool encrypt,
   new_cxn_obj(&cxn_obj);
   neo4j_client_init();
   config = neo4j_new_config();
+  config->connect_timeout = (time_t) timeout;
   if (strlen(tls_ca_dir)) {
     neo4j_config_set_TLS_ca_dir(config, tls_ca_dir);
   }
@@ -85,7 +88,9 @@ require Neo4j::Bolt::Cxn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 
-sub connect { $_[0]->connect_($_[1],0,"","","",""); }
+sub connect {
+  $_[0]->connect_( $_[1], $_[2], 0, "", "", "", "" );
+}
 
 sub connect_tls {
   my $self = shift;
@@ -93,11 +98,21 @@ sub connect_tls {
   unless ($tls && (ref($tls) == 'HASH')) {
     die "Arg 1 should URL and Arg 2 a hashref with keys 'ca_dir','ca_file','pk_file','pk_pass'"
   }
+  my %default_ca = ();
+  eval {
+    require IO::Socket::SSL;
+    %default_ca = IO::Socket::SSL::default_ca();
+  };
+  eval {
+    require Mozilla::CA;
+    $default_ca{SSL_ca_file} = Mozilla::CA::SSL_ca_file();
+  } unless %default_ca;
   return $self->connect_(
     $url,
+    $tls->{timeout},
     1,  # encrypt
-    $tls->{ca_dir} || "",
-    $tls->{ca_file} || "",
+    $tls->{ca_dir}  // $default_ca{SSL_ca_path} // "",
+    $tls->{ca_file} // $default_ca{SSL_ca_file} // "",
     $tls->{pk_file} || "",
     $tls->{pk_pass} || ""
    );
@@ -203,6 +218,9 @@ Example:
 
   $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
 
+When neither C<ca_dir> nor C<ca_file> are specified, an attempt will
+be made to use the default trust store instead.
+This requires L<IO::Socket::SSL> or L<Mozilla::CA> to be installed.
 
 =back
 

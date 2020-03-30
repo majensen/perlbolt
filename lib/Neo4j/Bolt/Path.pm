@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Path;
 # ABSTRACT: Representation of Neo4j Path
 
-$Neo4j::Bolt::Relationship::VERSION = '0.02';
+$Neo4j::Bolt::Path::VERSION = '0.12';
 
 use strict;
 use warnings;
@@ -67,13 +67,12 @@ L<Neo4j::Bolt>
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+ Arne Johannessen
+ CPAN: AJNN
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2020 by Mark A. Jensen.
+This software is Copyright (c) 2020 by Arne Johannessen.
 
 This is free software, licensed under:
 

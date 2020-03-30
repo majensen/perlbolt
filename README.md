@@ -93,6 +93,9 @@ references. These represent Neo4j types according to the following:
     Example:
 
         $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
+    When neither `ca_dir` nor `ca_file` are specified, an attempt will
+    be made to use the default trust store instead.
+    This requires [IO::Socket::SSL](https://metacpan.org/pod/IO::Socket::SSL) or [Mozilla::CA](https://metacpan.org/pod/Mozilla::CA) to be installed.
 
 # SEE ALSO
 
