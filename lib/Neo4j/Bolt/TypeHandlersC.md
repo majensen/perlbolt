@@ -34,7 +34,7 @@ data to Perl representations.
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::Value](/lib/Neo4j/Bolt/Value.md), [Inline::C](https://metacpan.org/pod/Inline::C), 
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::NeoValue](/lib/Neo4j/Bolt/NeoValue.md), [Inline::C](https://metacpan.org/pod/Inline::C), 
 [libneo4j-client API](http://neo4j-client.net/doc/latest/neo4j-client_8h.html).
 
 # AUTHOR
@@ -45,7 +45,7 @@ data to Perl representations.
 
 # LICENSE
 
-This software is Copyright (c) 2019 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 

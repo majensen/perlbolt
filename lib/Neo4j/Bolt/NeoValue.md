@@ -9,16 +9,18 @@ Neo4j::Bolt::NeoValue - Container to hold Bolt-encoded values
     $neo_int = Neo4j::Bolt::NeoValue->of( 42 );
     $i = $neo_int->_as_perl;
     $neo_node = Neo4j::Bolt::NeoValue->of( 
-      { _node => 1,
-        _labels => ['thing','chose'],
-        texture => 'crunchy',
-        consistency => 'gooey'}
-      );
+      bless { id => 1,
+        labels => ['thing','chose'],
+        properties => {
+          texture => 'crunchy',
+          consistency => 'gooey',
+        },
+      }, 'Neo4j::Bolt::Node' );
     if ($neo_node->_neotype eq 'Node') {
       print "Yep, that's a node all right."
     }
 
-    %node = %{ Neo4j::Bolt::NeoValue->is($neo_node) };
+    %node = %{ Neo4j::Bolt::NeoValue->is($neo_node)->as_simple };
     
     ($h,$j) = Neo4j::Bolt::NeoValue->are($neo_node, $neo_int);
 
@@ -50,7 +52,7 @@ ways.
 
 - is($neovalue), are(@neovalues)
 
-    Class method. Syntactic sugar; runs [\_as\_perl()](https://metacpan.org/pod/_as_perl\(\)) on the arguments.
+    Class method. Syntactic sugar; runs ["\_as\_perl()"](#_as_perl) on the arguments.
 
 # AUTHOR
 
@@ -60,7 +62,7 @@ ways.
 
 # LICENSE
 
-This software is Copyright (c) 2019 by Mark A. Jensen.
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
 
 This is free software, licensed under:
 

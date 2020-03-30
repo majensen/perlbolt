@@ -119,7 +119,7 @@ Neo4j::Bolt - query Neo4j using Bolt protocol
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
    {} # parameter hash required
  );
- @names = $stream->fieldnames;
+ @names = $stream->field_names;
  while ( my @row = $stream->fetch_next ) {
    print "For label '$row[0]' there are $row[1] nodes.\n";
  }
