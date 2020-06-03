@@ -1,13 +1,15 @@
 package Neo4j::Bolt;
+use Neo4j::Client;
+use Cwd qw/realpath getcwd/;
 
 BEGIN {
-  our $VERSION = "0.12";
+  our $VERSION = "0.20";
   eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline 
   C => Config =>
-  LIBS => $Neo4j::Bolt::Config::extl,
-  INC => $Neo4j::Bolt::Config::extc,  
+  LIBS => $Neo4j::Client::LIBS,
+  INC => join(' ',$Neo4j::Client::CCFLAGS,'-I'.realpath('include')),
   version => $VERSION,
   name => __PACKAGE__;
 

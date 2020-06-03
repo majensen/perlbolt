@@ -1,7 +1,6 @@
 package Neo4j::Bolt::TypeHandlersC;
 BEGIN {
-  our $VERSION = "0.12";
-  eval 'require Neo4j::Bolt::Config; 1';
+  our $VERSION = "0.20";
 }
 use JSON::PP; # operator overloading for boolean values
 use Neo4j::Bolt::Node;
@@ -10,10 +9,8 @@ use Neo4j::Bolt::Path;
 
 use Inline 'global';
 use Inline C => Config =>
-  LIBS => $Neo4j::Bolt::Config::extl,
-  INC => $Neo4j::Bolt::Config::extc,
-  optimize => '-g',
-  myextlib => $Neo4j::Bolt::Config::liba,
+  LIBS => $Neo4j::Client::LIBS,
+  INC => $Neo4j::Client::CCFLAGS,
   ccflagsex => '-Wno-comment',
   version => $VERSION,
   name => __PACKAGE__;
@@ -133,7 +130,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     thing = SvRV(sv);
     t = SvTYPE(thing);
     if ( t < SVt_PVAV) { // scalar ref
-      if (sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean") || SvIOK(thing) && SvIV(thing) >> 1 == 0) {
+      if ((sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean")) || (SvIOK(thing) && SvIV(thing) >> 1 == 0)) {
         // boolean (accepts JSON::PP, Types::Serialiser, literal \1 and \0)
         return SViv_to_neo4j_bool(thing);
       }

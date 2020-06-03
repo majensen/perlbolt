@@ -2,25 +2,11 @@ use lib '.';
 use File::Spec;
 use Builder;
 use ExtUtils::CChecker;
+use Neo4j::Client;
 use Try::Tiny;
 
 my $DEFAULT_URL = "bolt://localhost:7687";
 
-my $cc = ExtUtils::CChecker->new( quiet => 1);
-my $code_cc = <<'CC';
-#include <stdio.h>
-#include <string.h>
-#include <neo4j-client.h>
-int main(int argc, char *argv[]) {
-  const char *version = libneo4j_client_version();
-  printf("libneo4j-client version %s is installed.\n", version);
-  if (strcmp(version, "2.") < 0) {
-    printf("ERROR: libneo4j-client version 1.x is not supported by Neo4j::Bolt.\n");
-    return 1;
-  }
-  return neo4j_type(neo4j_null);
-}
-CC
 my $build = Builder->new(
   dist_name => "Neo4j-Bolt",
   dist_version_from => "lib/Neo4j/Bolt.pm",
@@ -28,6 +14,7 @@ my $build = Builder->new(
   dist_author => 'Mark A. Jensen',
   configure_requires => {
     'Module::Build' => '0.36_14',
+    'Neo4j::Client' => '>=0.12',
     'ExtUtils::CChecker' => 0,
     'Try::Tiny' => 0,
   },
@@ -35,6 +22,7 @@ my $build = Builder->new(
     'Inline::C' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
+    'Neo4j::Client' => '>=0.12',
   },
   build_requires => {
     'Inline' => 0,
@@ -56,6 +44,10 @@ my $build = Builder->new(
       bugtracker => 'https://github.com/majensen/perlbolt/issues',
       repository => 'https://github.com/majensen/perlbolt.git',
     },
+    x_contributors => [
+      'Mark A. Jensen <majensen@cpan.org>',
+      'Arne Johannessen <ajnn@cpan.org>'
+      ],
   },
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [
@@ -70,14 +62,29 @@ my $build = Builder->new(
     'Neo4j::Bolt',
   ],
  );
-
+$build->add_build_element("h");
 $build->add_to_cleanup("_Inline");
 $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 
 # look for libneo4j-client
-$cc->push_extra_linker_flags(split(/\s+/, $ENV{LDFLAGS}),'-lneo4j-client');
-$cc->push_extra_compiler_flags(split(/\s+/, $ENV{CFLAGS}));
+my $cc = ExtUtils::CChecker->new( quiet => 1);
+$cc->push_extra_linker_flags( Neo4j::Client::LIBS_ARY() );
+$cc->push_extra_compiler_flags( Neo4j::Client::CCFLAGS_ARY() );
 $cc->push_extra_compiler_flags('-I'.File::Spec->rel2abs('./lib/Neo4j'));
+my $code_cc = <<'CC';
+#include <stdio.h>
+#include <string.h>
+#include <neo4j-client.h>
+int main(int argc, char *argv[]) {
+  const char *version = libneo4j_client_version();
+  printf("libneo4j-client version %s is installed.\n", version);
+  if (strcmp(version, "2.") < 0) {
+    printf("ERROR: libneo4j-client version 1.x is not supported by Neo4j::Bolt.\n");
+    return 1;
+  }
+  return neo4j_type(neo4j_null);
+}
+CC
 
 unless (
   $cc->try_compile_run(source => $code_cc,
@@ -100,9 +107,9 @@ unless (
 }
 
 #add libraries if needed
-unless (grep /^-lneo4j-client$/,@{$cc->extra_linker_flags}) {
-  $cc->push_extra_linker_flags('-lneo4j-client');
-}
+# unless (grep /^-lneo4j-client$/,@{$cc->extra_linker_flags}) {
+#   $cc->push_extra_linker_flags('-lneo4j-client');
+# }
 $build->notes(lf => $cc->extra_linker_flags);
 $build->notes(cf => $cc->extra_compiler_flags);
 $build->notes(libneo_loc => $build->prompt("Enter local libneo4j-client build directory (req'd for some tests, RET to skip): ",undef));

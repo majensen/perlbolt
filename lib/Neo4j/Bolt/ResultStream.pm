@@ -1,12 +1,12 @@
 package Neo4j::Bolt::ResultStream;
+use Neo4j::Client;
 BEGIN {
-  our $VERSION = "0.12";
+  our $VERSION = "0.20";
   require Neo4j::Bolt::Cxn;
-  eval 'require Neo4j::Bolt::Config; 1';
 }
 use Inline C => Config =>
-  LIBS => $Neo4j::Bolt::Config::extl,
-  INC => $Neo4j::Bolt::Config::extc,  
+  LIBS => $Neo4j::Client::LIBS,
+  INC => $Neo4j::Client::CCFLAGS,
   version => $VERSION,
   name => __PACKAGE__;
 

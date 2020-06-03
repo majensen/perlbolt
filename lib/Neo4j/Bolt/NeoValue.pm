@@ -1,15 +1,15 @@
 package Neo4j::Bolt::NeoValue;
+use Neo4j::Client;
 #use lib '../lib';
 #use lib '../../lib';
 BEGIN {
-  our $VERSION = "0.12";
+  our $VERSION = "0.20";
   require Neo4j::Bolt::TypeHandlersC;
-  eval 'require Neo4j::Bolt::Config; 1';
 }
 
 use Inline C => Config =>
-  LIBS => $Neo4j::Bolt::Config::extl,
-  INC => $Neo4j::Bolt::Config::extc,
+  LIBS => $Neo4j::Client::LIBS,
+  INC => $Neo4j::Client::CCFLAGS,
   version => $VERSION,
   name => __PACKAGE__;
 use Inline C => <<'END_NEOVALUE_C';
