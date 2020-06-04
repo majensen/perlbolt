@@ -42,7 +42,7 @@
          "requires" : {
             "Inline::C" : "0",
             "JSON::PP" : "0",
-            "Neo4j::Client" : "0.12",
+            "Neo4j::Client" : "0.17",
             "URI" : "0"
          }
       }

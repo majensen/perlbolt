@@ -70,7 +70,7 @@ $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 my $cc = ExtUtils::CChecker->new( quiet => 1);
 $cc->push_extra_linker_flags( Neo4j::Client::LIBS_ARY() );
 $cc->push_extra_compiler_flags( Neo4j::Client::CCFLAGS_ARY() );
-$cc->push_extra_compiler_flags('-I'.File::Spec->rel2abs('./lib/Neo4j'));
+
 my $code_cc = <<'CC';
 #include <stdio.h>
 #include <string.h>
@@ -90,20 +90,9 @@ unless (
   $cc->try_compile_run(source => $code_cc,
 		      )
  ) {
-  try {
-    print "Neo4j::Bolt requires the libneo4j-client library and the header file 'neo4j-client.h'.\n";
-    my $lib = $build->prompt("Enter the directory containing the library: ");
-    die unless $lib && -d $lib;
-    my $inc = $build->prompt("Enter the directory containing the header file: ");
-    die unless $inc && -d $inc;
-    $cc->push_extra_linker_flags("-L$lib", "-lneo4j-client");
-    $cc->push_extra_compiler_flags("-I$inc");
-    $cc->try_compile_run($code_cc) or die;
-  } catch {
-    print "libneo4j-client cannot be found.\n";
-    print "To obtain libneo4j-client, follow the steps at https://github.com/cleishm/libneo4j-client#neo4j-client, and try the Neo4j::Bolt installation again.\n";
-    exit(0);
-  };
+  print "libneo4j-client cannot be found.\n";
+  print "Install the module Neo4j::Client.\n";
+  exit(0);
 }
 
 $build->notes(lf => $cc->extra_linker_flags);
