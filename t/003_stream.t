@@ -1,5 +1,6 @@
 use Test::More;
 use Module::Build;
+use Neo4j::Client;
 use lib '..';
 use blib;
 use Cwd;
@@ -22,9 +23,6 @@ BEGIN {
 
   unless (defined $build) {
     plan skip_all => "No build context. Run tests with ./Build test.";
-  }
-  unless ($build->notes('libneo_loc')) {
-    plan skip_all => "libneo4j-client build directory not set; skipping";
   }
 }
 

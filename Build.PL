@@ -14,7 +14,7 @@ my $build = Builder->new(
   dist_author => 'Mark A. Jensen',
   configure_requires => {
     'Module::Build' => '0.36_14',
-    'Neo4j::Client' => '>=0.12',
+    'Neo4j::Client' => '>=0.17',
     'ExtUtils::CChecker' => 0,
     'Try::Tiny' => 0,
   },
@@ -22,7 +22,7 @@ my $build = Builder->new(
     'Inline::C' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
-    'Neo4j::Client' => '>=0.12',
+    'Neo4j::Client' => '>=0.17',
   },
   build_requires => {
     'Inline' => 0,
@@ -106,33 +106,11 @@ unless (
   };
 }
 
-#add libraries if needed
-# unless (grep /^-lneo4j-client$/,@{$cc->extra_linker_flags}) {
-#   $cc->push_extra_linker_flags('-lneo4j-client');
-# }
 $build->notes(lf => $cc->extra_linker_flags);
 $build->notes(cf => $cc->extra_compiler_flags);
-$build->notes(libneo_loc => $build->prompt("Enter local libneo4j-client build directory (req'd for some tests, RET to skip): ",undef));
-if ($build->notes('libneo_loc')) {
-  unless (-e File::Spec->catfile($build->notes('libneo_loc'),'lib','src','iostream.h') or
--e File::Spec->catfile($build->notes('libneo_loc'),'src','lib','iostream.h')  ) {
-    $build->notes(libneo_loc =>
-		    $build->prompt("That doesn't look like the libneo4j-client directory. Try again (or RET to skip): ",undef));
-  }
-}
-
-if ($build->notes('libneo_loc')) {
-  $cc->push_extra_compiler_flags(
-    "-I".File::Spec->catdir($build->notes('libneo_loc'), qw/lib src/),
-    "-I".File::Spec->catdir($build->notes('libneo_loc'), qw/src lib/)    
-     );
-}
 
 $build->extra_linker_flags(@{$cc->extra_linker_flags});
 $build->extra_compiler_flags(@{$cc->extra_compiler_flags});
-#print join("\n",@{$build->extra_linker_flags}),"\n";
-#print join("\n",@{$build->extra_compiler_flags}),"\n";
-
 
 if ($build->y_n("Would you like to perform read-only tests on a local database?","n")) {
   $build->notes( 'db_url' =>
