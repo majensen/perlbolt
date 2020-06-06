@@ -9,9 +9,8 @@ env:
   global:
   - LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include -fPIC" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   matrix:
-  - NEO4J_VER=3.5.11
+  - NEO4J_VER=3.5.18
   - NEO4J_VER=3.2.14
-  # - NEO4J_VER=3.0.12
 matrix:
   allow_failures:
     - env: NEO4J_VER=3.2.14
@@ -21,16 +20,8 @@ before_install:
   - tar -xzf neo4j-community-$NEO4J_VER-unix.tar.gz
   - neo4j-community-$NEO4J_VER/bin/neo4j start
   - ln -s neo4j-community-$NEO4J_VER/bin/cypher-shell
-  # fetch a constant tag
-  - git clone https://github.com/cleishm/libneo4j-client.git
-  - pushd libneo4j-client
-  - git fetch --tags --all
-  - git checkout tags/v2.2.0 -b v2.2.0
-  - ./autogen.sh
-  # --with-pic key for Inline::C compile later
-  - ./configure --disable-tools --with-pic --prefix /usr/local
-  - sudo make install
-  - popd
+  # install libneo4j-client
+  - cpanm Neo4j::Client
   # perl pkgs
   - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
 
