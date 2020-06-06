@@ -1,18 +1,17 @@
 package Neo4j::Bolt::NeoValue;
 use Neo4j::Client;
-#use lib '../lib';
-#use lib '../../lib';
+
 BEGIN {
   our $VERSION = "0.20";
   require Neo4j::Bolt::TypeHandlersC;
 }
 
-use Inline C => Config =>
+use Inline P => Config =>
   LIBS => $Neo4j::Client::LIBS,
   INC => $Neo4j::Client::CCFLAGS,
   version => $VERSION,
   name => __PACKAGE__;
-use Inline C => <<'END_NEOVALUE_C';
+use Inline P => <<'END_NEOVALUE_C';
 
 #include <neo4j-client.h>
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))

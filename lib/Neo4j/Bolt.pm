@@ -2,18 +2,19 @@ package Neo4j::Bolt;
 use Neo4j::Client;
 use Cwd qw/realpath getcwd/;
 
+
 BEGIN {
   our $VERSION = "0.20";
-  eval 'require Neo4j::Bolt::Config; 1';
 }
+use Inline 'global';
 use Inline 
-  C => Config =>
+  P => Config =>
   LIBS => $Neo4j::Client::LIBS,
   INC => join(' ',$Neo4j::Client::CCFLAGS,'-I'.realpath('include')),
   version => $VERSION,
   name => __PACKAGE__;
 
-use Inline C => <<'END_BOLT_C';
+use Inline P => <<'END_BOLT_C';
 #include <neo4j_config_struct.h>
 #include <neo4j-client.h>
 #define CXNCLASS "Neo4j::Bolt::Cxn"

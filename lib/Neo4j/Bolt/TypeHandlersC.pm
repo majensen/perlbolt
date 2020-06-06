@@ -6,16 +6,17 @@ use JSON::PP; # operator overloading for boolean values
 use Neo4j::Bolt::Node;
 use Neo4j::Bolt::Relationship;
 use Neo4j::Bolt::Path;
+use Neo4j::Client;
 
 use Inline 'global';
-use Inline C => Config =>
+use Inline P => Config =>
   LIBS => $Neo4j::Client::LIBS,
   INC => $Neo4j::Client::CCFLAGS,
   ccflagsex => '-Wno-comment',
   version => $VERSION,
   name => __PACKAGE__;
 
-use Inline C => <<'END_TYPE_HANDLERS_C';
+use Inline P => <<'END_TYPE_HANDLERS_C';
 
 #include <neo4j-client.h>
 

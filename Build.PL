@@ -22,11 +22,13 @@ my $build = Builder->new(
     'Inline::C' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
-    'Neo4j::Client' => '>=0.17',
+    'Neo4j::Client' => '0.17',
   },
   build_requires => {
     'Inline' => 0,
     'Try::Tiny' => 0,
+    'Test::More' => 0,
+    'Test::Exception' => 0
   },
   recommends => {
     'Mozilla::CA' => 0,
@@ -51,10 +53,6 @@ my $build = Builder->new(
   },
   # inline_modules is a property added in the subclass 'Builder.pm'
   inline_modules => [
-
-    # note: the commented modules get built automatically as require'd deps
-    # all can be uncommented, but Inline will redundantly compile, build, and
-    # erase them from blib/lib/auto...
 #    'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
 #    'Neo4j::Bolt::Cxn',
@@ -111,6 +109,9 @@ if ($build->y_n("Would you like to perform read-only tests on a local database?"
     $build->notes( 'db_pass' =>
 		     $build->prompt("Enter Neo4j password: ","") );
   }
+  else {
+    $build->notes('db_pass' => undef);
+  }
   if ($build->notes('db_url')) {
     $build->notes('ok_add_delete', $build->y_n("Will you allow add/delete tests on your database (cruft added will be removed)?","y"));
   }
@@ -118,4 +119,3 @@ if ($build->y_n("Would you like to perform read-only tests on a local database?"
 
 
 $build->create_build_script;
-
