@@ -536,6 +536,11 @@ neo4j_value_t argument.
 
 =back
 
+=head1 BUGS
+
+Bolt v1 is limited to 64-bit floats. If Perl is compiled with
+C<-Duserlongdouble>, loss of floating point precision may occur.
+
 =head1 SEE ALSO
 
 L<Neo4j::Bolt>, L<Neo4j::Bolt::NeoValue>, L<Inline::C>, 
