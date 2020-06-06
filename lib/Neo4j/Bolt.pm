@@ -219,7 +219,7 @@ To connect by SSL/TLS, use connect_tls, with a hashref with keys as follows
 
 Example:
 
-  $cxn = Neo4j::Bolt->connect_tls('bolt://boogaloo-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
+  $cxn = Neo4j::Bolt->connect_tls('bolt://all-the-young-dudes.us:7687', { ca_cert => '/etc/ssl/cert.pem' });
 
 When neither C<ca_dir> nor C<ca_file> are specified, an attempt will
 be made to use the default trust store instead.
