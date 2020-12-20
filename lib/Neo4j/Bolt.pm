@@ -4,7 +4,7 @@ use Cwd qw/realpath getcwd/;
 
 
 BEGIN {
-  our $VERSION = "0.20";
+  our $VERSION = "0.40";
 }
 use Inline 'global';
 use Inline
