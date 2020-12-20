@@ -26,8 +26,8 @@ use Inline P => <<'END_TYPE_HANDLERS_C';
 #define RELATIONSHIP_CLASS "Neo4j::Bolt::Relationship"
 #define PATH_CLASS "Neo4j::Bolt::Path"
 
-extern neo4j_value_t neo4j_identity(long long);               
-extern neo4j_value_t neo4j_node(const neo4j_value_t*);	      
+extern neo4j_value_t neo4j_identity(long long);
+extern neo4j_value_t neo4j_node(const neo4j_value_t*);
 extern neo4j_value_t neo4j_relationship(const neo4j_value_t*);
 
 
@@ -45,7 +45,6 @@ struct neo4j_struct
     };
 };
 
- 
 /**
 Types
 NEO4J_BOOL
@@ -59,7 +58,7 @@ NEO4J_NODE
 NEO4J_NULL
 NEO4J_PATH
 NEO4J_RELATIONSHIP
-NEO4J_STRING 
+NEO4J_STRING
 **/
 
 neo4j_value_t SViv_to_neo4j_bool (SV *sv);
@@ -90,7 +89,7 @@ char *neo4j_string_to_alloc_str(neo4j_value_t value);
 
 char *neo4j_string_to_alloc_str(neo4j_value_t value) {
   assert(neo4j_type(value) == NEO4J_STRING);
-  char *s;  
+  char *s;
   int nlength;
   nlength = (int) neo4j_string_length(value);
   Newx(s,nlength+1,char);
@@ -221,7 +220,7 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
 // neo4j_node(neo4j_value_t fields[3]) is not exposed in the API
 // fields[0] is a NEO4J_IDENTITY
 // fields[1] is a NEO4J_LIST of node labels (NEO4J_STRINGs)
-//   (note REST::Neo4p::Node doesn't store a list of labels in the 
+//   (note REST::Neo4p::Node doesn't store a list of labels in the
 //   simple rendering! Fix!)
 // fields[2] is a NEO4J_MAP of properties
 neo4j_value_t HV_to_neo4j_node(HV *hv) {
@@ -230,7 +229,6 @@ neo4j_value_t HV_to_neo4j_node(HV *hv) {
   HV *props;
   neo4j_value_t *fields;
   neo4j_map_entry_t null_ent;
-  
   Newx(fields, 3, neo4j_value_t);
 
   node_id_p = hv_fetch(hv, "id", 2, 0);
@@ -414,7 +412,7 @@ HV* neo4j_map_to_HV( neo4j_value_t value ) {
   }
   return hv;
 }
- 
+
 HV* neo4j_node_to_HV( neo4j_value_t value ) {
   HV *hv, *props_hv;
   char *k;
@@ -513,7 +511,7 @@ Neo4j::Bolt::TypeHandlersC - Low level Perl to Bolt converters
 
 =head1 DESCRIPTION
 
-L<Neo4j::Bolt::TypeHandlersC> is all C code, managed by L<Inline::C>. 
+L<Neo4j::Bolt::TypeHandlersC> is all C code, managed by L<Inline::C>.
 It tediously defines methods to convert Perl structures to Bolt
 representations, and also tediously defines methods convert Bolt
 data to Perl representations.
@@ -530,15 +528,15 @@ representation of the Perl SV argument.
 
 =item SV* neo4j_value_to_SV( neo4j_value_t value )
 
-Attempt to create the appropriate Perl SV representation of the 
-L<libneo4j-client|https://github.com/cleishm/libneo4j-client> 
+Attempt to create the appropriate Perl SV representation of the
+L<libneo4j-client|https://github.com/cleishm/libneo4j-client>
 neo4j_value_t argument.
 
 =back
 
 =head1 SEE ALSO
 
-L<Neo4j::Bolt>, L<Neo4j::Bolt::NeoValue>, L<Inline::C>, 
+L<Neo4j::Bolt>, L<Neo4j::Bolt::NeoValue>, L<Inline::C>,
 L<libneo4j-client API|http://neo4j-client.net/doc/latest/neo4j-client_8h.html>.
 
 =head1 AUTHOR

@@ -7,7 +7,7 @@ BEGIN {
   our $VERSION = "0.20";
 }
 use Inline 'global';
-use Inline 
+use Inline
   P => Config =>
   LIBS => $Neo4j::Client::LIBS,
   INC => join(' ',$Neo4j::Client::CCFLAGS,'-I'.realpath('include')),
@@ -23,6 +23,8 @@ use Inline P => <<'END_BOLT_C';
 struct cxn_obj {
   neo4j_connection_t *connection;
   int connected;
+  int major_version;
+  int minor_version;
   int errnum;
   const char *strerror;
 };
@@ -34,6 +36,8 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   (*cxn_obj)->connection = (neo4j_connection_t *)NULL;
   (*cxn_obj)->connected = 0;
   (*cxn_obj)->errnum = 0;
+  (*cxn_obj)->major_version = 0;
+  (*cxn_obj)->minor_version = 0;
   (*cxn_obj)->strerror = (char *)NULL;
   return;
 }
@@ -64,7 +68,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   if (strlen(tls_pk_pass)) {
     neo4j_config_set_TLS_private_key_password(config, tls_pk_pass);
   }
-  
+
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
 
@@ -76,6 +80,8 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
     if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
       warn("Bolt connection not secure!");
     }
+    cxn_obj->major_version = cxn_obj->connection->version;
+    cxn_obj->minor_version = cxn_obj->connection->minor_version;
     cxn_obj->connected = 1;
   }
   cxn = newSViv((IV) cxn_obj);
@@ -120,7 +126,7 @@ sub connect_tls {
     $tls->{pk_pass} || ""
    );
 }
-		 
+
 
 
 =head1 NAME

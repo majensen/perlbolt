@@ -38,7 +38,7 @@ SV *_new_from_perl (const char* classname, SV *v) {
 const char* _neotype (SV *obj) {
   neo4j_value_t v;
   v = C_PTR_OF(obj,neovalue_t)->value;
-  return neo4j_typestr( neo4j_type( v ) ); 
+  return neo4j_typestr( neo4j_type( v ) );
 }
 
 SV* _as_perl (SV *obj) {
@@ -124,7 +124,7 @@ hashref.
 
 =item _as_perl()
 
-Returns a Perl scalar, arrayref, or hashref representing the underlying 
+Returns a Perl scalar, arrayref, or hashref representing the underlying
 Bolt data stored in the object.
 
 =item _neotype()

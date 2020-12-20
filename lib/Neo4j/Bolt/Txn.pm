@@ -1,4 +1,4 @@
-package Neo4j::Bolt::Cxn;
+package Neo4j::Bolt::Txn;
 use Neo4j::Client;
 
 BEGIN {
@@ -11,14 +11,20 @@ use Inline P => Config => LIBS => $Neo4j::Client::LIBS,
   version => $VERSION,
   name => __PACKAGE__;
 
-use Inline P => <<'END_BOLT_CXN_C';
+use Inline P => <<'END_BOLT_TXN_C';
 #include <neo4j-client.h>
 #include <errno.h>
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
+#define TXNCLASS  "Neo4j::Bolt::Txn"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
-#define BUFLEN 100
 
-neo4j_value_t SV_to_neo4j_value(SV *sv);
+struct txn_obj {
+  neo4j_transaction_t *tx;
+  int errnum;
+  const char* strerror;
+}
+
+typedef struct txn_obj txn_obj_t;
 
 struct cxn_obj {
   neo4j_connection_t *connection;
@@ -26,6 +32,13 @@ struct cxn_obj {
   int errnum;
   const char *strerror;
 };
+
+void new_txn_obj( txn_obj_t **txn_obj) {
+  Newx(*txn_obj,1,txn_obj_t);
+  (*txn_obj)->errnum = 0;
+  (*txn_obj)->strerror = (char *)NULL;
+  return;
+}
 
 typedef struct cxn_obj cxn_obj_t;
 
@@ -86,8 +99,8 @@ void new_rs_obj (rs_obj_t **rs_obj) {
   rs_stats_t *stats;
   Newx(*rs_obj, 1, rs_obj_t);
   new_rs_stats(&stats);
-  (*rs_obj)->succeed = -1;  
-  (*rs_obj)->fail = -1;  
+  (*rs_obj)->succeed = -1;
+  (*rs_obj)->fail = -1;
   (*rs_obj)->fetched = 0;
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
   (*rs_obj)->stats = stats;
@@ -99,8 +112,8 @@ void new_rs_obj (rs_obj_t **rs_obj) {
 }
 
 void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
-  rs_obj->succeed = -1;  
-  rs_obj->fail = -1;  
+  rs_obj->succeed = -1;
+  rs_obj->fail = -1;
   rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
   rs_obj->eval_errcode = "";
   rs_obj->eval_errmsg = "";
@@ -139,10 +152,38 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   return fail;
 }
 
-SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
-{
+// class method
+SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode, const char *dbname) {
+  txn_obj_t *txn_obj;
+  char *climsg;
+  new_txn_obj(&txn_obj);
+  (cxn_obj_t) *cxn_obj = C_PTR_OF(cxn_ref, cxn_obj_t);
+  (neo4j_transaction_t) *tx = neo4j_begin_tx(cxn_obj->connection, tx_timeout,
+                                             mode, dbname);
+  tnx_obj->tx = tx;
+  if (tx == NULL) {
+    txn_obj->errnum = errno;
+    Newx(climsg, BUFLEN, char);
+    tnx_obj->strerror = neo4j_strerror(errno,climsg,BUFLEN);
+  }
+  SV *txn = newSViv((IV) txn_obj);
+  SV *txn_ref = newRV_noinc(txn);
+  sv_bless(txn_ref, gv_stashpv(TXNCLASS, GV_ADD));
+  SvREADONLY_on(txn);
+  return txn_ref;
+}
+
+int commit_(SV *txn_ref) {
+  return neo4j_commit( C_PTR_OF(txn_ref,txn_obj_t)->tx );
+}
+
+int rollback_(SV *txn_ref) {
+  return neo4j_rollback( C_PTR_OF(txn_ref,txn_obj_t)->tx );
+}
+
+SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) {
   neo4j_result_stream_t *res_stream;
-  cxn_obj_t *cxn_obj;
+  txn_obj_t *txn_obj;
   rs_obj_t *rs_obj;
   const char *evalerr, *evalmsg;
   char *climsg;
@@ -150,17 +191,11 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
   int fail;
   SV *rs;
   SV *rs_ref;
-  neo4j_connection_t *cxn;
   neo4j_value_t params_p;
 
   new_rs_obj(&rs_obj);
   // extract connection
-  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
-  if (!cxn_obj->connected) {
-    cxn_obj->errnum = ENOTCONN;
-    cxn_obj->strerror = "Not connected";
-    return &PL_sv_undef;
-  }
+  txn_obj = C_PTR_OF(txn_ref,txn_obj_t);
 
   // extract params
   if (SvROK(params_ref) && (SvTYPE(SvRV(params_ref))==SVt_PVHV)) {
@@ -170,9 +205,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
     perror("Parameter arg must be a hash reference\n");
     return &PL_sv_undef;
   }
-  res_stream = (send >= 1 ?
-                neo4j_send(cxn_obj->connection, cypher_query, params_p) :
-                neo4j_run(cxn_obj->connection, cypher_query, params_p));
+  res_stream = neo4j_run_in_tx(C_PTR_OF(txn_ref,txn_obj_t)->tx, cypher_query, params_p);
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
   if (send >= 1) {
@@ -185,50 +218,36 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
   return rs_ref;
 }
 
-int connected(SV *cxn_ref) {
-  return C_PTR_OF(cxn_ref,cxn_obj_t)->connected;
+int errnum_(SV *txn_ref) {
+  return C_PTR_OF(txn_ref,txn_obj_t)->errnum;
 }
 
-int errnum_(SV *cxn_ref) {
-  return C_PTR_OF(cxn_ref,cxn_obj_t)->errnum;
+const char *errmsg_(SV *txn_ref) {
+  return C_PTR_OF(txn_ref,txn_obj_t)->strerror;
 }
 
-const char *errmsg_(SV *cxn_ref) {
-  return C_PTR_OF(cxn_ref,cxn_obj_t)->strerror;
-}
-
-void reset_ (SV *cxn_ref)
-{
-  int rc;
-  char *climsg;
-  cxn_obj_t *cxn_obj;
-  cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
-  rc = neo4j_reset( cxn_obj->connection );
-  if (rc < 0) {
-    cxn_obj->errnum = errno;
-    Newx(climsg, BUFLEN, char);
-    cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
-  }
-  return;
-}
-
-const char *server_id_(SV *cxn_ref) {
-  return neo4j_server_id( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
-}
-
-void DESTROY (SV *cxn_ref)
-{
-  neo4j_close( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
-  return;
-}
-
-END_BOLT_CXN_C
+END_BOLT_TXN_C
 
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
-sub reset_cxn { shift->reset_ }
 
-sub server_id { shift->server_id_ }
+sub new {
+  my $class = shift;
+  my ($cxn, $params) = @_;
+  $params //= {};
+  unless ($cxn && (ref($cxn) =~ /Cxn$/)) {
+    die "Arg 1 should be a Neo4j::Bolt::Cxn";
+  }
+  unless ($cxn->connected) {
+    warn "Not connected";
+    return;
+  }
+
+  return $class->begin_($cxn, $params->{tx_timeout}, $params->{mode}, $params->{dbname});
+}
+
+sub commit { !shift->commit_ }
+sub rollback { !shift->rollback_ }
 
 sub run_query {
   my $self = shift;
@@ -266,105 +285,56 @@ sub do_query {
   return wantarray ? ($stream, @results) : $stream;
 }
 
-=head1 NAME
+=head NAME
 
-Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
+Neo4j::Bolt::Txn - Container for a Neo4j Bolt explicit transaction
 
-=head1 SYNOPSIS
+=head SYNOPSIS
 
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
  unless ($cxn->connected) {
    print STDERR "Problem connecting: ".$cxn->errmsg;
  }
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
+ $txn = Neo4j::Bolt::Txn->new($cxn);
+ $stream = $txn->run_query(
+   "CREATE (a:booga {this:'that'}) RETURN a;"
  );
  if ($stream->failure) {
    print STDERR "Problem with query run: ".
                  ($stream->client_errmsg || $stream->server_errmsg);
+   $txn->rollback;
+ }
+ else {
+   $txn->commit;
  }
 
-=head1 DESCRIPTION
+=head DESCRIPTION
 
-L<Neo4j::Bolt::Cxn> is a container for a Bolt connection, instantiated by
-a call to C<< Neo4j::Bolt->connect() >>.
+L<Neo4j::Bolt::Txn> is a container for a Bolt explicit transaction, a feature
+available in Bolt versions 3.0 and greater.
 
-=head1 METHODS
+=head METHODS
 
 =over
 
-=item connected()
+=item new()
 
-True if server connected successfully. If not, see L</"errnum()"> and
-L</"errmsg()">.
+Create (begin) a new transaction. Execute within the transaction with run_query(), send_query(), do_query().
 
-=item run_query($cypher_query, [$param_hash])
+=item commit()
 
-Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
-the server. Returns a L<Neo4j::Bolt::ResultStream> which can be iterated
-to retrieve query results as Perl types and structures. [$param_hash]
-is an optional hashref of the form C<{ param =E<gt> $value, ... }>.
+Commit the changes staged by execution in the transaction.
 
-=item send_query($cypher_query, [$param_hash])
+=item rollback()
 
-Send a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query to
-the server. All results (except error info) are discarded.
+Rollback all changes.
 
-=item do_query($cypher_query, [$param_hash])
+=item run_query(), send_query(), do_query()
 
-  ($stream, @rows) = do_query($cypher_query);
-  $stream = do_query($cypher_query, $param_hash);
-
-Run a L<Cypher|https://neo4j.com/docs/cypher-manual/current/> query on
-the server, and iterate the stream to retrieve all result
-rows. C<do_query> is convenient for running write queries (e.g.,
-C<CREATE (a:Bloog {prop1:"blarg"})> ), since it returns the $stream
-with L<Neo4j::Bolt::ResultStream/update_counts> ready for reading.
-
-=item reset_cxn()
-
-Send a RESET message to the Neo4j server. According to the L<Bolt
-protocol|https://boltprotocol.org/v1/>, this should force any currently
-processing query to abort, forget any pending queries, clear any
-failure state, dispose of outstanding result records, and roll back
-the current transaction.
-
-=item errnum(), errmsg()
-
-Current error state of the connection. If
-
- $cxn->connected == $cxn->errnum == 0
-
-then you have a virgin Cxn object that came from someplace other than
-C<< Neo4j::Bolt->connect() >>, which would be weird.
-
-=item server_id()
-
- print $cxn->server_id;  # "Neo4j/3.3.9"
-
-Get the server ID string, including the version number. C<undef> if
-connecting wasn't successful or the server didn't identify itself.
+Completely analogous to same functions in L<Neo4j::Bolt::Cxn>.
 
 =back
-
-=head1 SEE ALSO
-
-L<Neo4j::Bolt>, L<Neo4j::Bolt::ResultStream>.
-
-=head1 AUTHOR
-
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
-
-=head1 LICENSE
-
-This software is Copyright (c) 2019-2020 by Mark A. Jensen.
-
-This is free software, licensed under:
-
-  The Apache License, Version 2.0, January 2004
 
 =cut
 

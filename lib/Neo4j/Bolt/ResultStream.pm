@@ -74,7 +74,7 @@ void fetch_next_ (SV *rs_ref) {
       Inline_Stack_Done;
       return;
     }
-  }  
+  }
   result = neo4j_fetch_next(rs);
   if (result == NULL) {
     if (errno) {
@@ -112,7 +112,7 @@ void fieldnames_ (SV *rs_ref) {
   nfields = neo4j_nfields(rs);
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i = 0; i < nfields; i++) 
+  for (i = 0; i < nfields; i++)
     Inline_Stack_Push(sv_2mortal(newSVpv(neo4j_fieldname(rs,i),0)));
   Inline_Stack_Done;
   return;

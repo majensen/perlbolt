@@ -8,6 +8,7 @@ include/neo4j_config_struct.h
 lib/Neo4j/Bolt.pm
 lib/Neo4j/Bolt/NeoValue.pm
 lib/Neo4j/Bolt/Cxn.pm
+lib/Neo4j/Bolt/Txn.pm
 lib/Neo4j/Bolt/ResultStream.pm
 lib/Neo4j/Bolt/TypeHandlersC.pm
 lib/Neo4j/Bolt/Node.pm
