@@ -15,8 +15,9 @@ use Inline
   name => __PACKAGE__;
 
 use Inline P => <<'END_BOLT_C';
-#include <neo4j_config_struct.h>
+// #include <neo4j_config_struct.h>
 #include <neo4j-client.h>
+#include "connection.h"
 #define CXNCLASS "Neo4j::Bolt::Cxn"
 #define BUFLEN 100
 
@@ -72,7 +73,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
 
-  if ((cxn_obj->connection == NULL)) {
+  if (cxn_obj->connection == NULL) {
     cxn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
     cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN);
@@ -94,6 +95,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
 END_BOLT_C
 
 require Neo4j::Bolt::Cxn;
+require Neo4j::Bolt::Txn;
 require Neo4j::Bolt::ResultStream;
 require Neo4j::Bolt::TypeHandlersC;
 

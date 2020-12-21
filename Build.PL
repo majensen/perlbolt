@@ -1,10 +1,11 @@
 use lib '.';
+use v5.10;
 use File::Spec;
 use Builder;
 use ExtUtils::CChecker;
 use Neo4j::Client;
 use Try::Tiny;
-
+use Data::Dumper;
 my $DEFAULT_URL = "bolt://localhost:7687";
 
 my $build = Builder->new(
@@ -14,7 +15,7 @@ my $build = Builder->new(
   dist_author => 'Mark A. Jensen',
   configure_requires => {
     'Module::Build' => '0.36_14',
-    'Neo4j::Client' => '>=0.17',
+    'Neo4j::Client' => '>=0.20',
     'ExtUtils::CChecker' => 0,
     'Try::Tiny' => 0,
   },
@@ -22,7 +23,7 @@ my $build = Builder->new(
     'Inline::C' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
-    'Neo4j::Client' => '0.17',
+    'Neo4j::Client' => '0.20',
   },
   build_requires => {
     'Inline' => 0,
@@ -55,7 +56,9 @@ my $build = Builder->new(
   inline_modules => [
 #    'Neo4j::Bolt::TypeHandlersC',
     'Neo4j::Bolt::NeoValue',
+
 #    'Neo4j::Bolt::Cxn',
+
 #    'Neo4j::Bolt::ResultStream',
     'Neo4j::Bolt',
   ],
@@ -67,7 +70,7 @@ $build->add_to_cleanup("lib/Neo4j/Bolt/Config.pm");
 # look for libneo4j-client
 my $cc = ExtUtils::CChecker->new( quiet => 1);
 $cc->push_extra_linker_flags( Neo4j::Client::LIBS_ARY() );
-$cc->push_extra_compiler_flags( Neo4j::Client::CCFLAGS_ARY() );
+$cc->push_extra_compiler_flags( Neo4j::Client::DEV_CCFLAGS_ARY() );
 
 my $code_cc = <<'CC';
 #include <stdio.h>

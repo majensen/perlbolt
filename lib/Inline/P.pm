@@ -2,8 +2,13 @@ package
   Inline::P;
 use base Inline::C;
 use Config;
+use Neo4j::Client;
 our $VERSION = '0.01';
 print "HEY\n";
+
+my $nc_ccflags = $Neo4j::Client::DEV_CCFLAGS;
+($nc_ccflags) = $nc_ccflags =~ /(-iquote\S*)/;
+$nc_ccflags =~ s/=//;
 
 sub register {
   return {
@@ -28,7 +33,8 @@ sub write_Makefile_PL {
   # here munge {ILSM}{MAKEFILE}{INC} to remove superfluous quotes and
   # dups
     print STDERR "Inline::C patch write_Makefile_PL\n";
-    $o->{ILSM}{MAKEFILE}{INC} =~ s{"(-.*?-\S+)"}{$1}g;
+  $o->{ILSM}{MAKEFILE}{INC} =~ s{"(-.*?-\S+)"}{$1}g;
+  $o->{ILSM}{MAKEFILE}{INC} .= " $nc_ccflags";
   $o->{ILSM}{MAKEFILE}{INC} =~ s{-fvisibility=hidden}{};
     my %options = (
         VERSION => $o->{API}{version} || '0.00',

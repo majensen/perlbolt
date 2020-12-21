@@ -1,4 +1,4 @@
-# Ce n'est pas un Inline::MakeMaker
+# Ceci n'est pas un Inline::MakeMaker
 package
   Inline::MakeMaker;
 

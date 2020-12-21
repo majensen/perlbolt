@@ -14,15 +14,19 @@ use Inline P => Config => LIBS => $Neo4j::Client::LIBS,
 use Inline P => <<'END_BOLT_TXN_C';
 #include <neo4j-client.h>
 #include <errno.h>
+#include "connection.h"
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define TXNCLASS  "Neo4j::Bolt::Txn"
+#define BUFLEN 128
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
+
+neo4j_value_t SV_to_neo4j_value(SV *sv);
 
 struct txn_obj {
   neo4j_transaction_t *tx;
   int errnum;
   const char* strerror;
-}
+};
 
 typedef struct txn_obj txn_obj_t;
 
@@ -157,14 +161,14 @@ SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode
   txn_obj_t *txn_obj;
   char *climsg;
   new_txn_obj(&txn_obj);
-  (cxn_obj_t) *cxn_obj = C_PTR_OF(cxn_ref, cxn_obj_t);
-  (neo4j_transaction_t) *tx = neo4j_begin_tx(cxn_obj->connection, tx_timeout,
+  cxn_obj_t *cxn_obj = C_PTR_OF(cxn_ref, cxn_obj_t);
+  neo4j_transaction_t *tx = neo4j_begin_tx(cxn_obj->connection, tx_timeout,
                                              mode, dbname);
-  tnx_obj->tx = tx;
+  txn_obj->tx = tx;
   if (tx == NULL) {
     txn_obj->errnum = errno;
     Newx(climsg, BUFLEN, char);
-    tnx_obj->strerror = neo4j_strerror(errno,climsg,BUFLEN);
+    txn_obj->strerror = neo4j_strerror(errno,climsg,BUFLEN);
   }
   SV *txn = newSViv((IV) txn_obj);
   SV *txn_ref = newRV_noinc(txn);
@@ -285,11 +289,11 @@ sub do_query {
   return wantarray ? ($stream, @results) : $stream;
 }
 
-=head NAME
+=head1 NAME
 
 Neo4j::Bolt::Txn - Container for a Neo4j Bolt explicit transaction
 
-=head SYNOPSIS
+=head1 SYNOPSIS
 
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
@@ -309,12 +313,12 @@ Neo4j::Bolt::Txn - Container for a Neo4j Bolt explicit transaction
    $txn->commit;
  }
 
-=head DESCRIPTION
+=head1 DESCRIPTION
 
 L<Neo4j::Bolt::Txn> is a container for a Bolt explicit transaction, a feature
 available in Bolt versions 3.0 and greater.
 
-=head METHODS
+=head1 METHODS
 
 =over
 
@@ -335,6 +339,20 @@ Rollback all changes.
 Completely analogous to same functions in L<Neo4j::Bolt::Cxn>.
 
 =back
+
+=head1 AUTHOR
+
+ Mark A. Jensen
+ CPAN: MAJENSEN
+ majensen -at- cpan -dot- org
+
+=head1 LICENSE
+
+This software is Copyright (c) 2019-2020 by Mark A. Jensen.
+
+This is free software, licensed under:
+
+  The Apache License, Version 2.0, January 2004
 
 =cut
 
