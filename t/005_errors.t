@@ -21,7 +21,7 @@ unless (defined $neo_info) {
   plan skip_all => "DB tests not requested";
 }
 
-my $url = URI->new($neo_info->{host});
+my $url = URI->new("bolt://".$neo_info->{host});
 
 if ($neo_info->{user}) {
   $url->userinfo($neo_info->{user}.':'.$neo_info->{pass});

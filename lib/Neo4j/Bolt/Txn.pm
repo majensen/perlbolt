@@ -1,5 +1,4 @@
 package Neo4j::Bolt::Txn;
-# use Neo4j::Client;
 
 BEGIN {
   our $VERSION = "0.40";
@@ -8,12 +7,6 @@ BEGIN {
 
 require XSLoader;
 XSLoader::load();
-
-# use Inline 'global';
-# use Inline P => Config => LIBS => Neo4j::Client->libs,
-#   INC => Neo4j::Client->cflags,
-#   version => $VERSION,
-#   name => __PACKAGE__;
 
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
@@ -30,7 +23,7 @@ sub new {
     return;
   }
 
-  return $class->begin_($cxn, $params->{tx_timeout}, $params->{mode}, $params->{dbname});
+  return $class->begin_($cxn, $params->{tx_timeout} // -1, $params->{mode} // "w", $params->{dbname} // "");
 }
 
 sub commit { !shift->commit_ }

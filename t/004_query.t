@@ -22,7 +22,7 @@ unless (defined $neo_info) {
   plan skip_all => "DB tests not requested";
 }
 
-my $url = URI->new($neo_info->{host});
+my $url = URI->new("bolt://".$neo_info->{host});
 
 if ($neo_info->{user}) {
   $url->userinfo($neo_info->{user}.':'.$neo_info->{pass});
@@ -35,7 +35,7 @@ unless ($cxn->connected) {
 
 SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
-  like $cxn->protocol_version, qw/^[0-9]+\.[0-9]+$/, "protocol version returned";
+  like $cxn->protocol_version, qr/^[0-9]+\.[0-9]+$/, "protocol version returned";
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
     {},0

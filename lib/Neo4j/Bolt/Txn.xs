@@ -4,10 +4,11 @@
 #include "ingyINLINE.h"
 #include <neo4j-client.h>
 #include <errno.h>
+#include <string.h>
 #include "connection.h"
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define TXNCLASS  "Neo4j::Bolt::Txn"
-#define BUFLEN 128
+#define BUFLEN 256
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 
 neo4j_value_t SV_to_neo4j_value(SV *sv);
@@ -30,7 +31,10 @@ struct cxn_obj {
 void new_txn_obj( txn_obj_t **txn_obj) {
   Newx(*txn_obj,1,txn_obj_t);
   (*txn_obj)->errnum = 0;
-  (*txn_obj)->strerror = (char *)NULL;
+  char *buf;
+  Newx(buf, BUFLEN, char);
+  stpcpy(buf,"");
+  (*txn_obj)->strerror = buf;
   return;
 }
 

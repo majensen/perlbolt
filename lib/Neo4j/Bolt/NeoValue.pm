@@ -8,14 +8,6 @@ BEGIN {
   XSLoader::load();
 }
 
-
-
-# use Inline P => Config =>
-#   LIBS => Neo4j::Client->libs,
-#   INC => Neo4j::Client->cflags,
-#   version => $VERSION,
-#   name => __PACKAGE__;
-
 sub of {
   my ($class, @args) = @_;
   my @ret;

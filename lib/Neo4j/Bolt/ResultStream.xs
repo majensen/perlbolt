@@ -28,7 +28,7 @@ struct rs_obj {
   char *eval_errcode;
   char *eval_errmsg;
   int errnum;
-  const char *strerror;
+  char *strerror;
 };
 
 typedef struct rs_obj rs_obj_t;

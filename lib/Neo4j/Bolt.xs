@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "connection.h"
 #define CXNCLASS "Neo4j::Bolt::Cxn"
-#define BUFLEN 100
+#define BUFLEN 256
 #define ignore_unused_result(func) if (func) { }
 
 struct cxn_obj {
@@ -70,7 +70,8 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
     cxn_obj->errnum = errno;
     cxn_obj->connected = false;
     Newx(climsg, BUFLEN, char);
-    neo4j_strerror(errno, cxn_obj->strerror, BUFLEN-1);
+
+    cxn_obj->strerror = neo4j_strerror(errno, cxn_obj->strerror, BUFLEN-1);
   } else {
     if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
       warn("Bolt connection not secure!");

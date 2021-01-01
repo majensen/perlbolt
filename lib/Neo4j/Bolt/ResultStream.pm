@@ -8,12 +8,6 @@ BEGIN {
   XSLoader::load();
 }
 
-# use Inline P => Config =>
-#   LIBS => Neo4j::Client->libs,
-#   INC => Neo4j::Client->cflags,
-#   version => $VERSION,
-#   name => __PACKAGE__;
-
 sub fetch_next { shift->fetch_next_ }
 sub nfields { shift->nfields_ }
 sub field_names { shift->fieldnames_ }

@@ -1,6 +1,6 @@
 package Neo4j::Bolt;
-# use Neo4j::Client;
 use Cwd qw/realpath getcwd/;
+use Neo4j::Bolt::Txn;
 
 BEGIN {
   our $VERSION = "0.40";
@@ -12,14 +12,6 @@ BEGIN {
   XSLoader::load();
 
 }
-# use Inline 'global';
-# use Inline
-#   P => Config =>
-#   LIBS => Neo4j::Client->libs,
-#   INC => join(' ', Neo4j::Client->cflags,'-I'.realpath('include')),
-#   version => $VERSION,
-#   name => __PACKAGE__;
-
 
 sub connect {
   $_[0]->connect_( $_[1], $_[2] // 0, 0, "", "", "", "" );
