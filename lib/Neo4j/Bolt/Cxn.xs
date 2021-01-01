@@ -4,6 +4,7 @@
 #include "ingyINLINE.h"
 #include <neo4j-client.h>
 #include <errno.h>
+#include <stdio.h>
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 #define BUFLEN 100
@@ -12,7 +13,9 @@ neo4j_value_t SV_to_neo4j_value(SV *sv);
 
 struct cxn_obj {
   neo4j_connection_t *connection;
-  int connected;
+  bool connected;
+  int major_version;
+  int minor_version;
   int errnum;
   const char *strerror;
 };
@@ -185,7 +188,7 @@ int errnum_(SV *cxn_ref) {
 }
 
 const char *errmsg_(SV *cxn_ref) {
-  C_PTR_OF(cxn_ref,cxn_obj_t)->strerror;
+    return (const char *)  C_PTR_OF(cxn_ref,cxn_obj_t)->strerror;
 }
 
 void reset_ (SV *cxn_ref)
@@ -205,6 +208,21 @@ void reset_ (SV *cxn_ref)
 
 const char *server_id_(SV *cxn_ref) {
   return neo4j_server_id( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
+}
+
+const char *protocol_version_(SV *cxn_ref) {
+    if (C_PTR_OF(cxn_ref,cxn_obj_t)->connected)
+    {
+	uint32_t V = C_PTR_OF(cxn_ref,cxn_obj_t)->major_version;
+	uint32_t v = C_PTR_OF(cxn_ref,cxn_obj_t)->minor_version;
+	char *vstr;
+	Newx(vstr, 32, char);
+	snprintf(vstr, 32, "%d.%d",(int)V,(int)v);
+	return vstr;
+    }
+    else {
+	return "";
+    }
 }
 
 void DESTROY (SV *cxn_ref)
@@ -257,6 +275,10 @@ reset_ (cxn_ref)
 const char *
 server_id_ (cxn_ref)
 	SV *	cxn_ref
+
+const char *
+protocol_version_ (cxn_ref)
+        SV *    cxn_ref
 
 void
 DESTROY (cxn_ref)

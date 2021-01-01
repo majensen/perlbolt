@@ -1,4 +1,5 @@
 use Test::More;
+use Test::Exception;
 use Try::Tiny;
 use URI::bolt;
 use Cwd qw/getcwd/;
@@ -28,8 +29,10 @@ if ($neo_info->{user}) {
 
 ok my $badcxn = Neo4j::Bolt->connect("bolt://localhost:16444");
 ok !$badcxn->connected;
-$badcxn->run_query("match (a) return count(a)");
-like $badcxn->errmsg, qr/Not connected/, "client error msg correct";
+like $badcxn->errmsg, qr/Connection refused/, "client error msg correct";
+is $badcxn->protocol_version,"", "protocol version empty";
+throws_ok { $badcxn->run_query("match (a) return count(a)") } qr/No connection/, "query attempt throws";
+
 
 ok my $cxn = Neo4j::Bolt->connect($url->as_string);
 unless ($cxn->connected) {

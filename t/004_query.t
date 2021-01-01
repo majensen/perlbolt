@@ -35,6 +35,7 @@ unless ($cxn->connected) {
 
 SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
+  like $cxn->protocol_version, qw/^[0-9]+\.[0-9]+$/, "protocol version returned";
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
     {},0

@@ -1,5 +1,5 @@
 package Neo4j::Bolt::Cxn;
-#use Neo4j::Client;
+use Carp qw/croak/;
 
 BEGIN {
   our $VERSION = "0.40";
@@ -8,28 +8,23 @@ BEGIN {
   XSLoader::load();
 }
 
-
-# use Inline 'global';
-# use Inline P => Config => LIBS => Neo4j::Client->libs,
-#   INC => Neo4j::Client->cflags,
-#   version => $VERSION,
-#   name => __PACKAGE__;
-
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
 sub reset_cxn { shift->reset_ }
 
 sub server_id { shift->server_id_ }
+sub protocol_version { shift->protocol_version_ }
 
 sub run_query {
   my $self = shift;
   my ($query, $parms) = @_;
   unless ($query) {
-    die "Arg 1 should be Cypher query string";
+    croak "Arg 1 should be Cypher query string";
   }
   if ($parms && !(ref $parms == 'HASH')) {
-    die "Arg 2 should be a hashref of { param => $value, ... }";
+    croak "Arg 2 should be a hashref of { param => $value, ... }";
   }
+  croak "No connection" unless $self->connected;
   return $self->run_query_($query, $parms ? $parms : {}, 0);
 }
 
@@ -37,11 +32,12 @@ sub send_query {
   my $self = shift;
   my ($query, $parms) = @_;
   unless ($query) {
-    die "Arg 1 should be Cypher query string";
+    croak "Arg 1 should be Cypher query string";
   }
   if ($parms && !(ref $parms == 'HASH')) {
-    die "Arg 2 should be a hashref of { param => $value, ... }";
+    croak "Arg 2 should be a hashref of { param => $value, ... }";
   }
+  croak "No connection" unless $self->connected;
   return $self->run_query_($query, $parms ? $parms : {}, 1);
 }
 
@@ -66,7 +62,7 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
  use Neo4j::Bolt;
  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
  unless ($cxn->connected) {
-   print STDERR "Problem connecting: ".$cxn->errmsg;
+   die "Problem connecting: ".$cxn->errmsg;
  }
  $stream = $cxn->run_query(
    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
@@ -89,6 +85,11 @@ a call to C<< Neo4j::Bolt->connect() >>.
 
 True if server connected successfully. If not, see L</"errnum()"> and
 L</"errmsg()">.
+
+=item protocol_version()
+
+Returns a string representing the major and minor Bolt protocol version of the 
+server, as "<major>.<minor>", or the empty string if not connected.
 
 =item run_query($cypher_query, [$param_hash])
 
