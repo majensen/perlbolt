@@ -42,6 +42,7 @@ WriteMakefile(
   PREREQ_PM => {
     'JSON::PP' => 0,
     'URI' => 0,
+    'Neo4j::Client' => '0.43',
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
@@ -50,7 +51,6 @@ WriteMakefile(
     'ExtUtils::MakeMaker' => '7.12',
     'Test::Exception' => 0,
     'Pod::Usage' => 0,
-    'Neo4j::Client' => '0.43',
   },
   # RECOMMENDS => {
   #   'Mozilla::CA' => 0,
