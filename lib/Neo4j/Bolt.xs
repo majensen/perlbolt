@@ -2,39 +2,21 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ingyINLINE.h"
-// #include <neo4j_config_struct.h>
-#include <neo4j-client.h>
+#include "perlbolt.h"
 #include <string.h>
 #include <stdio.h>
 #include "connection.h"
-#define CXNCLASS "Neo4j::Bolt::Cxn"
-#define BUFLEN 256
-#define ignore_unused_result(func) if (func) { }
-
-struct cxn_obj {
-  neo4j_connection_t *connection;
-  bool connected;
-  int major_version;
-  int minor_version;
-  int errnum;
-    char *strerror;
-};
-
-typedef struct cxn_obj cxn_obj_t;
 
 void new_cxn_obj(cxn_obj_t **cxn_obj) {
   Newx(*cxn_obj, 1, cxn_obj_t);
   (*cxn_obj)->connection = (neo4j_connection_t *)NULL;
-  (*cxn_obj)->connected = false;
+  (*cxn_obj)->connected = 0;
   (*cxn_obj)->errnum = 0;
-  (*cxn_obj)->major_version = 0;
-  (*cxn_obj)->minor_version = 0;
-  char *buf;
-  Newx(buf, BUFLEN, char);
-  stpcpy(buf,"");
-  (*cxn_obj)->strerror = buf;
-  return;
-}
+  int major_version = 0;
+  int minor_version = 0;
+  (*cxn_obj)->strerror = "";
+  
+}		 
 
 SV* connect_ ( const char* classname, const char* neo4j_url,
                int timeout, bool encrypt,
@@ -71,7 +53,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
     cxn_obj->connected = false;
     Newx(climsg, BUFLEN, char);
 
-    cxn_obj->strerror = neo4j_strerror(errno, cxn_obj->strerror, BUFLEN-1);
+    cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN-1);
   } else {
     if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
       warn("Bolt connection not secure!");
@@ -79,7 +61,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
     cxn_obj->major_version = cxn_obj->connection->version;
     cxn_obj->minor_version = cxn_obj->connection->minor_version;
     cxn_obj->connected = true;
-    stpcpy(cxn_obj->strerror,"");
+    cxn_obj->strerror = "";
   }
   cxn = newSViv((IV) cxn_obj);
   cxn_ref = newRV_noinc(cxn);

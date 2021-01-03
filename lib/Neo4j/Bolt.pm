@@ -6,7 +6,7 @@ BEGIN {
   our $VERSION = "0.40";
   require Neo4j::Bolt::Cxn;
   require Neo4j::Bolt::Txn;
-  require Neo4j::Bolt::ResultStream;
+  require Neo4j::Bolt::ResultStreamC;
   require Neo4j::Bolt::TypeHandlersC;
   require XSLoader;
   XSLoader::load();

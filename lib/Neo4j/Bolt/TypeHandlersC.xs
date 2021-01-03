@@ -4,31 +4,13 @@
 #include "ingyINLINE.h"
 
 #include <neo4j-client.h>
+#include "perlbolt.h"
 #include "values.h"
 #include <string.h>
-
-#define NODE_CLASS "Neo4j::Bolt::Node"
-#define RELATIONSHIP_CLASS "Neo4j::Bolt::Relationship"
-#define PATH_CLASS "Neo4j::Bolt::Path"
 
 extern neo4j_value_t neo4j_identity(long long);
 extern neo4j_value_t neo4j_node(const neo4j_value_t*);
 extern neo4j_value_t neo4j_relationship(const neo4j_value_t*);
-
-
-/* struct neo4j_struct */
-/* { */
-/*     uint8_t _vt_off; */
-/*     uint8_t _type; */
-/*     uint16_t _pad1; */
-/*     uint8_t signature; */
-/*     uint8_t _pad2; */
-/*     uint16_t nfields; */
-/*     union { */
-/*         const neo4j_value_t *fields; */
-/*         union _neo4j_value_data _pad3; */
-/*     }; */
-/* }; */
 
 /**
 Types

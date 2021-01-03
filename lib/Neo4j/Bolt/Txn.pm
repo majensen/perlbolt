@@ -1,15 +1,18 @@
 package Neo4j::Bolt::Txn;
+use Carp qw/croak/;
 
 BEGIN {
   our $VERSION = "0.40";
   require Neo4j::Bolt::TypeHandlersC;
+  require Neo4j::Bolt::ResultStreamC;
+  require Neo4j::Bolt::ResultStream;  
+  require XSLoader;
+  XSLoader::load();
 }
-
-require XSLoader;
-XSLoader::load();
 
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
+sub cxn { shift->get_connection_ }
 
 sub new {
   my $class = shift;
@@ -23,7 +26,9 @@ sub new {
     return;
   }
 
-  return $class->begin_($cxn, $params->{tx_timeout} // -1, $params->{mode} // "w", $params->{dbname} // "");
+  my $txn = $class->begin_($cxn, $params->{tx_timeout} // -1, $params->{mode} // "w", $params->{dbname} // "");
+  croak "Failed to create transaction (BEGIN failed): ".$txn->errmsg_ if ($txn->errnum_);
+  return $txn;
 }
 
 sub commit { !shift->commit_ }

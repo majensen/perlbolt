@@ -9,17 +9,6 @@ use JSON::PP; # operator overloading for boolean values
 use Neo4j::Bolt::Node;
 use Neo4j::Bolt::Relationship;
 use Neo4j::Bolt::Path;
-#use Neo4j::Client;
-
-
-
-# use Inline 'global';
-# use Inline P => Config =>
-#   LIBS => Neo4j::Client->libs,
-#   INC => Neo4j::Client->cflags,
-#   ccflagsex => '-Wno-comment',
-#   version => $VERSION,
-#   name => __PACKAGE__;
 
 =head1 NAME
 

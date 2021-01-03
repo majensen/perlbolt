@@ -45,13 +45,16 @@ SKIP: {
   ok $txn = Neo4j::Bolt::Txn->new($cxn);
   ok $txn->rollback, "rollback succeeds (new txn)";
   ok !$txn->rollback, "you only live once";
-  ok $txn = Neo4j::Bolt::Txn->new($cxn, { tx_timeout => 10 });
-  $txn->run_query("create (a:zzyyxx12)");
-  my $rs = $cxn->run_query("match (a:zzyyxx12) return count(a)");
+  ok $txn = Neo4j::Bolt::Txn->new($cxn, { tx_timeout => 10000, dbname => "neo4j" });
+  $txn->run_query("create (a:zzyyxx123)");
+  # if you do $cxn->run_query ---- the commit/rollback segfaults......
+  my $rs = $txn->run_query("match (a:zzyyxx123) return count(a)");
   is (($rs->fetch_next)[0], 1, "now you see it");
-  ok $txn->commit;
-  ok $rs = $cxn->run_query("match (a:zzyyxx12) return count(a)");
+  ok $txn->rollback, "rollback";
+  ok $rs = $cxn->run_query("match (a:zzyyxx123) return count(a)");
   ok !$rs->fetch_next, "now you dont";
+  my $badrs = $txn->run_query("match (a) return count(a)");
+  ok !$badrs->success, "run query doesn't work on closed txn";
   
 }
 

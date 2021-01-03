@@ -4,6 +4,8 @@ use Carp qw/croak/;
 BEGIN {
   our $VERSION = "0.40";
   require Neo4j::Bolt::TypeHandlersC;
+  require Neo4j::Bolt::ResultStreamC;
+  require Neo4j::Bolt::ResultStream;
   require XSLoader;
   XSLoader::load();
 }

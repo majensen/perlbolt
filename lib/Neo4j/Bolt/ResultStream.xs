@@ -2,40 +2,9 @@
 #include "perl.h"
 #include "XSUB.h"
 #include "ingyINLINE.h"
+#include "perlbolt.h"
 #include <neo4j-client.h>
-#define RSCLASS  "Neo4j::Bolt::ResultStream"
-#define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
-#define BUFLEN 100
 
-SV* neo4j_value_to_SV( neo4j_value_t value);
-
-struct rs_stats {
-  unsigned long long result_count;
-  unsigned long long available_after;
-  unsigned long long consumed_after;
-  struct neo4j_update_counts *update_counts;
-};
-
-typedef struct rs_stats rs_stats_t;
-
-struct rs_obj {
-  neo4j_result_stream_t *res_stream;
-  int succeed;
-  int fail;
-  int fetched;
-  const struct neo4j_failure_details *failure_details;
-  rs_stats_t *stats;
-  char *eval_errcode;
-  char *eval_errmsg;
-  int errnum;
-  char *strerror;
-};
-
-typedef struct rs_obj rs_obj_t;
-
-void new_rs_obj (rs_obj_t **rs_obj);
-void reset_errstate_rs_obj (rs_obj_t *rs_obj);
-int update_errstate_rs_obj (rs_obj_t *rs_obj);
 
 void fetch_next_ (SV *rs_ref) {
   SV *perl_value;
