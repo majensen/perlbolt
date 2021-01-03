@@ -87,7 +87,9 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
     perror("Parameter arg must be a hash reference\n");
     return &PL_sv_undef;
   }
-  res_stream = neo4j_run_in_tx(tx, cypher_query, params_p);
+  res_stream = (send >= 1 ?
+		neo4j_send_to_tx(tx, cypher_query, params_p) :
+		neo4j_run_in_tx(tx, cypher_query, params_p));
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
   if (send >= 1) {
