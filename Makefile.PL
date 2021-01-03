@@ -50,7 +50,7 @@ WriteMakefile(
     'ExtUtils::MakeMaker' => '7.12',
     'Test::Exception' => 0,
     'Pod::Usage' => 0,
-    'Neo4j::Client' => '0.42',
+    'Neo4j::Client' => '0.43',
   },
   # RECOMMENDS => {
   #   'Mozilla::CA' => 0,
