@@ -14,6 +14,7 @@ env:
 before_install:
   - docker pull $DOCKERH/testneo/testneo:$NEO4J_VER
   - docker run -P -d -p 127.0.0.1:7474:7474 -p 127.0.0.1:7473:7473 -p 127.0.0.1:7687:7687 --name testneo --env NEO4J_AUTH=none $DOCKERH/testneo/testneo:$NEO4J_VER
+  - sleep 20
   # load it with some stuff - note "--network=container:testneo"
   - cat .sample.cypher | docker run -i --network=container:testneo --name cyphershell --entrypoint cypher-shell $DOCKERH/testneo/testneo:$NEO4J_VER
   
