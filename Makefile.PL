@@ -1,6 +1,7 @@
 use v5.10;
 use ExtUtils::MakeMaker;
 use Neo4j::Client;
+use Alien::OpenSSL;
 use File::Spec;
 use Data::Dumper qw/Dumper/;
 use Try::Tiny;
@@ -41,6 +42,7 @@ WriteMakefile(
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',
   PREREQ_PM => {
     'ExtUtils::MakeMaker' => '7.12',
+    'Alien::OpenSSL' => 0,
     'Neo4j::Client' => '0.43',
     'Test::Exception' => 0,
     'Pod::Usage' => 0,
@@ -57,7 +59,7 @@ WriteMakefile(
   #   'Pod::Markdown' => 0,
   # },
   CCFLAGS => Neo4j::Client->cflags,
-  LIBS => Neo4j::Client->libs_static,
+  LIBS => join(' ',Neo4j::Client->libs_static,Alien::OpenSSL->libs_static),
   INC => "-iquote".realpath('.')."/include",
   # avoid a factory libneo4j-client in a standard location (possibly
   # in lddlflags):
