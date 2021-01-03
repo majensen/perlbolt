@@ -1,51 +1,30 @@
 language: perl
 perl:
+  - "5.32"
+  # - "5.28"
   # - "5.26"
-  - "5.24"
-  # - "5.22"
-  # - "5.20"
-  # - "5.18"
+  # - "5.24"
+services:
+  - docker
 env:
-  global:
-  - LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include -fPIC" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   matrix:
-  - NEO4J_VER=3.5.11
-  - NEO4J_VER=3.2.14
-  # - NEO4J_VER=3.0.12
-matrix:
-  allow_failures:
-    - env: NEO4J_VER=3.2.14
+  - NEO4J_VER=4.2
+  - NEO4J_VER=3.5
 
 before_install:
-  - curl -O https://dist.neo4j.org/neo4j-community-$NEO4J_VER-unix.tar.gz
-  - tar -xzf neo4j-community-$NEO4J_VER-unix.tar.gz
-  - neo4j-community-$NEO4J_VER/bin/neo4j start
-  - ln -s neo4j-community-$NEO4J_VER/bin/cypher-shell
-  # fetch a constant tag
-  - git clone https://github.com/cleishm/libneo4j-client.git
-  - pushd libneo4j-client
-  - git fetch --tags --all
-  - git checkout tags/v2.2.0 -b v2.2.0
-  - ./autogen.sh
-  # --with-pic key for Inline::C compile later
-  - ./configure --disable-tools --with-pic --prefix /usr/local
-  - sudo make install
-  - popd
-  # perl pkgs
-  - cpanm Inline::C Try::Tiny ExtUtils::CChecker Test::Pod Test::CPAN::Changes
-
-install:
-  - java -version
-
-  # need to change pass on first access
-  - curl -u neo4j:neo4j -d '{"password":"j4oen"}' -X POST -H 'Accept:application/json' -H'Content-Type:application/json' http://localhost:7474/user/neo4j/password
-  - cat .sample.cypher | ./cypher-shell -u neo4j -p j4oen 
+  - docker pull neo4j:$NEO4J_VER
+  - docker run -P -d -p 127.0.0.1:7474:7474 -p 127.0.0.1:7473:7473 -p 127.0.0.1:7687:7687 --name testneo --env NEO4J_AUTH=none neo4j:$NEO4J_VER
+  # load it with some stuff - note "--network=container:testneo"
+  - cat .sample.cypher | docker run -i --network=container:testneo --name cyphershell --entrypoint cypher-shell neo4j:$NEO4J_VER
   
-#before_script:
-#  - sudo neo4j start
-
+install:
+  - cpanm --installdeps .
+  - echo y$'\n'$'\n'$'\n'$'\n'y | perl Makefile.PL
+  - make
+  
 script:
-  - echo $'\n'y$'\n'$'\n'neo4j$'\n'j4oen$'\n'y | perl Build.PL
-  - cat _build/notes
-  - ./Build 
-  - ./Build test
+  - make test
+  - docker kill testneo
+  - docker rm testneo
+  - docker rm cyphershell
+  
