@@ -1,9 +1,3 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-#include "ingyINLINE.h"
-
-#include <neo4j-client.h>
 #include "perlbolt.h"
 #include "values.h"
 #include <string.h>
@@ -462,7 +456,7 @@ AV* neo4j_path_to_AV( neo4j_value_t value) {
 }
 
 
-MODULE = Neo4j::Bolt::TypeHandlersC  PACKAGE = Neo4j::Bolt::TypeHandlersC  
+MODULE = Neo4j::Bolt::CTypeHandlers  PACKAGE = Neo4j::Bolt::CTypeHandlers
 
 PROTOTYPES: DISABLE
 

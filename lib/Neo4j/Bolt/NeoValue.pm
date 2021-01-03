@@ -1,9 +1,9 @@
 package Neo4j::Bolt::NeoValue;
-# use Neo4j::Client;
 
 BEGIN {
   our $VERSION = "0.40";
-  require Neo4j::Bolt::TypeHandlersC;
+  require Neo4j::Bolt::CTypeHandlers;
+  require Neo4j::Bolt::CResultStream;
   require XSLoader;
   XSLoader::load();
 }

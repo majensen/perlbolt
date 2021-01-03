@@ -1,4 +1,4 @@
-package Neo4j::Bolt::TypeHandlersC;
+package Neo4j::Bolt::CTypeHandlers;
 BEGIN {
   our $VERSION = "0.40";
   require XSLoader;

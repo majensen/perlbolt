@@ -1,10 +1,5 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-#include "ingyINLINE.h"
 #include "perlbolt.h"
-#include <neo4j-client.h>
-
+#include "ingyINLINE.h"
 
 void fetch_next_ (SV *rs_ref) {
   SV *perl_value;

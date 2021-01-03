@@ -1,13 +1,8 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+#include "perlbolt.h"
 #include "ingyINLINE.h"
 
-#include <neo4j-client.h>
-#define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 #define NVCLASS "Neo4j::Bolt::NeoValue"
-extern neo4j_value_t SV_to_neo4j_value(SV*);
-extern SV *neo4j_value_to_SV(neo4j_value_t);
+
 struct neovalue {
   neo4j_value_t value;
 };

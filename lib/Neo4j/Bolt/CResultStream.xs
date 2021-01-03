@@ -86,6 +86,6 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   return fail;
 }
 
-MODULE = Neo4j::Bolt::ResultStreamC  PACKAGE = Neo4j::Bolt::ResultStreamC  
+MODULE = Neo4j::Bolt::CResultStream  PACKAGE = Neo4j::Bolt::CResultStream
 
 PROTOTYPES: DISABLE

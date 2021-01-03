@@ -40,17 +40,17 @@ WriteMakefile(
   NAME => 'Neo4j::Bolt',
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',
   PREREQ_PM => {
+    'ExtUtils::MakeMaker' => '7.12',
+    'Neo4j::Client' => '0.43',
+    'Test::Exception' => 0,
+    'Pod::Usage' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
-    'Neo4j::Client' => '0.43',
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
   LICENSE => 'apache_2_0',
   BUILD_REQUIRES => {
-    'ExtUtils::MakeMaker' => '7.12',
-    'Test::Exception' => 0,
-    'Pod::Usage' => 0,
   },
   # RECOMMENDS => {
   #   'Mozilla::CA' => 0,
@@ -65,6 +65,22 @@ WriteMakefile(
   test => {TESTS => 't/*.t'},
   clean => {FILES => "t/neo_info"},
   XSMULTI => 1,
+  XSBUILD => {
+    xs => {
+      'lib/Neo4j/Bolt/Cxn' => {
+	LDFROM => "lib/Neo4j/Bolt/Cxn\$(OBJ_EXT) lib/Neo4j/Bolt/CResultStream\$(OBJ_EXT) lib/Neo4j/Bolt/CTypeHandlers\$(OBJ_EXT)",
+      },
+      'lib/Neo4j/Bolt/Txn' => {
+	LDFROM => "lib/Neo4j/Bolt/Txn\$(OBJ_EXT) lib/Neo4j/Bolt/CResultStream\$(OBJ_EXT) lib/Neo4j/Bolt/CTypeHandlers\$(OBJ_EXT)",
+      },
+      'lib/Neo4j/Bolt/ResultStream' => {
+	LDFROM => "lib/Neo4j/Bolt/ResultStream\$(OBJ_EXT) lib/Neo4j/Bolt/CResultStream\$(OBJ_EXT) lib/Neo4j/Bolt/CTypeHandlers\$(OBJ_EXT)",
+      },
+      'lib/Neo4j/Bolt/NeoValue' => {
+	LDFROM => "lib/Neo4j/Bolt/NeoValue\$(OBJ_EXT) lib/Neo4j/Bolt/CTypeHandlers\$(OBJ_EXT)",
+      },
+    },
+  },
   META_MERGE => $META,
     
  );

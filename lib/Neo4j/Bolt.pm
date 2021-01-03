@@ -1,13 +1,12 @@
 package Neo4j::Bolt;
 use Cwd qw/realpath getcwd/;
-use Neo4j::Bolt::Txn;
 
 BEGIN {
   our $VERSION = "0.40";
   require Neo4j::Bolt::Cxn;
   require Neo4j::Bolt::Txn;
-  require Neo4j::Bolt::ResultStreamC;
-  require Neo4j::Bolt::TypeHandlersC;
+  require Neo4j::Bolt::ResultStream;
+  require Neo4j::Bolt::CTypeHandlers;
   require XSLoader;
   XSLoader::load();
 

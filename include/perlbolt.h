@@ -1,7 +1,7 @@
-#include <neo4j-client.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <neo4j-client.h>
 
 #define RSCLASS  "Neo4j::Bolt::ResultStream"
 #define TXNCLASS  "Neo4j::Bolt::Txn"

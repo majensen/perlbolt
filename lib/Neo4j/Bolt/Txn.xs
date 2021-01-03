@@ -1,9 +1,6 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-#include "ingyINLINE.h"
 #include "perlbolt.h"
-#include <neo4j-client.h>
+#include "ingyINLINE.h"
+
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
