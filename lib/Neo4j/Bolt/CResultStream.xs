@@ -1,5 +1,5 @@
 #include "perlbolt.h"
-
+#include <stdio.h>
 
 void new_rs_uc( struct neo4j_update_counts **uc) {
   Newx(*uc, 1, struct neo4j_update_counts);
@@ -70,12 +70,12 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
     rs_obj->strerror = neo4j_strerror(fail, climsg, BUFLEN);
     if (fail == NEO4J_STATEMENT_EVALUATION_FAILED) {
       rs_obj->failure_details = neo4j_failure_details(rs_obj->res_stream);
-      evalerr = neo4j_error_code(rs_obj->res_stream);
-      Newx(s, strlen(evalerr)+1,char);
-      rs_obj->eval_errcode = strcpy(s,evalerr);
-      evalmsg = neo4j_error_message(rs_obj->res_stream);
-      Newx(t, strlen(evalmsg)+1,char);
-      rs_obj->eval_errmsg = strcpy(t,evalmsg);
+      Newx(s, strlen(rs_obj->failure_details->code)+1,char);
+      rs_obj->eval_errcode = strncpy(s,rs_obj->failure_details->code, (size_t)
+				     strlen(rs_obj->failure_details->code));
+      Newx(t, strlen(rs_obj->failure_details->message)+1,char);
+      rs_obj->eval_errmsg = strncpy(t,rs_obj->failure_details->message,
+				    (size_t) strlen(rs_obj->failure_details->message));
     }
   }
   else {

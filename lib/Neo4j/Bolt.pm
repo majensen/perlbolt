@@ -11,6 +11,7 @@ BEGIN {
   XSLoader::load();
 
 }
+our $DEFAULT_DB = "neo4j";
 
 sub connect {
   $_[0]->connect_( $_[1], $_[2] // 0, 0, "", "", "", "" );
@@ -145,6 +146,14 @@ Example:
 When neither C<ca_dir> nor C<ca_file> are specified, an attempt will
 be made to use the default trust store instead.
 This requires L<IO::Socket::SSL> or L<Mozilla::CA> to be installed.
+
+=item set_log_level($LEVEL)
+
+When $LEVEL is set to one of the strings C<ERROR WARN INFO DEBUG> or C<TRACE>,
+libneo4j-client native logger will emit log messages at or above the given
+level, on STDERR.
+
+Set to C<NONE> to turn off completely (the default).
 
 =back
 

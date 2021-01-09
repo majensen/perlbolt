@@ -3,9 +3,9 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include "connection.h"
 
-
-SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
+SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send, const char *dbname)
 {
   neo4j_result_stream_t *res_stream;
   cxn_obj_t *cxn_obj;
@@ -37,9 +37,18 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send)
     perror("Parameter arg must be a hash reference\n");
     return &PL_sv_undef;
   }
-  res_stream = (send >= 1 ?
-                neo4j_send(cxn, cypher_query, params_p) :
-                neo4j_run(cxn, cypher_query, params_p));
+  if (cxn->version < 4)
+  {
+      res_stream = (send >= 1 ?
+		    neo4j_send(cxn, cypher_query, params_p) :
+		    neo4j_run(cxn, cypher_query, params_p));
+  }
+  else
+  {
+      res_stream = (send >= 1 ?
+		    neo4j_send_to_db(cxn, cypher_query, params_p, dbname) :
+		    neo4j_run_in_db(cxn, cypher_query, params_p, dbname));
+  }
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
   if (send >= 1) {
@@ -111,11 +120,12 @@ PROTOTYPES: DISABLE
 
 
 SV *
-run_query_ (cxn_ref, cypher_query, params_ref, send)
+run_query_ (cxn_ref, cypher_query, params_ref, send, dbname)
 	SV *	cxn_ref
 	const char *	cypher_query
 	SV *	params_ref
 	int	send
+        const char *    dbname
 
 int
 connected (cxn_ref)

@@ -112,6 +112,30 @@ UV consumed_after_ (SV *rs_ref) {
  }
 }
 
+SV *get_failure_details(SV *rs_ref) {
+    rs_obj_t *rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
+    neo4j_result_stream_t *rs = rs_obj->res_stream;
+    const struct neo4j_failure_details *faild = neo4j_failure_details(rs_obj->res_stream);
+//    if (faild->line == 0)
+//    {
+//	return &PL_sv_undef;
+//    }
+    HV *hv = newHV();
+    // UTF-8 issues here? need SvUTF8_on(pv)?
+    hv_stores(hv, "code", newSVpv(faild->code,0));
+    hv_stores(hv, "message", newSVpv(faild->message,0));
+    hv_stores(hv, "description", newSVpv(faild->description,0));
+    hv_stores(hv, "context", newSVpv(faild->context,0));
+    hv_stores(hv, "line", newSViv( (IV) faild->line ));
+    hv_stores(hv, "column", newSViv( (IV) faild->column ));
+    hv_stores(hv, "offset", newSViv( (IV) faild->offset ));
+    hv_stores(hv, "context_offset", newSViv( (IV) faild->context_offset ));
+    SV* sv = newRV_noinc( (SV*)hv );
+    SvREADONLY_on(sv);
+    return sv;
+}
+    
+
 void update_counts_ (SV *rs_ref) {
   struct neo4j_update_counts *uc;
   Inline_Stack_Vars;
@@ -224,6 +248,10 @@ available_after_ (rs_ref)
 UV
 consumed_after_ (rs_ref)
 	SV *	rs_ref
+
+SV *
+get_failure_details (rs_ref)
+        SV *    rs_ref
 
 void
 update_counts_ (rs_ref)

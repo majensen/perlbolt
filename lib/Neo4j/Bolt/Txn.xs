@@ -11,10 +11,7 @@ void new_txn_obj( txn_obj_t **txn_obj) {
   Newx(*txn_obj,1,txn_obj_t);
   (*txn_obj)->tx = NULL;
   (*txn_obj)->errnum = 0;
-  char *buf;
-  Newx(buf, BUFLEN, char);
-  stpcpy(buf,"");
-  (*txn_obj)->strerror = buf;
+  (*txn_obj)->strerror = "";
   return;
 }
 
@@ -76,6 +73,7 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
   // extract transaction
   txn_obj = C_PTR_OF(txn_ref,txn_obj_t);
   tx = txn_obj->tx;
+  // check tx state: TODO
   // extract params
   if (SvROK(params_ref) && (SvTYPE(SvRV(params_ref))==SVt_PVHV)) {
     params_p = SV_to_neo4j_value(params_ref);

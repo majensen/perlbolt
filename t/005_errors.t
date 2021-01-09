@@ -42,16 +42,17 @@ unless ($cxn->connected) {
 SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
   ok my $stream = $cxn->run_query(
-    "MATCH (a) RETURN labels(a) piece of crap doesn't work",
+    "MATCH (a) RETRUN labels a",
    ), 'label count query';
   ok !$stream->success, "Not Succeeded";
   ok $stream->failure, "Failure";
+
+  my $fd = $stream->get_failure_details();
   like $stream->server_errcode, qr/SyntaxError/, "got syntax error code";
 
   $cxn = Neo4j::Bolt->connect('snarf://localhost:7687');
   like $cxn->errmsg, qr/scheme/, "got errmsg";
   is $cxn->errnum, -12, "got error";
-  diag $cxn->errmsg;
 
 }
 

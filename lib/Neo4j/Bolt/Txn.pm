@@ -9,13 +9,15 @@ BEGIN {
   XSLoader::load();
 }
 
+sub default_db () { $Neo4j::Bolt::DEFAULT_DB // "" }
+
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
 sub cxn { shift->get_connection_ }
 
 sub new {
   my $class = shift;
-  my ($cxn, $params) = @_;
+  my ($cxn, $params, $db) = @_;
   $params //= {};
   unless ($cxn && (ref($cxn) =~ /Cxn$/)) {
     die "Arg 1 should be a Neo4j::Bolt::Cxn";
@@ -25,7 +27,7 @@ sub new {
     return;
   }
 
-  my $txn = $class->begin_($cxn, $params->{tx_timeout} // -1, $params->{mode} // "w", $params->{dbname} // "");
+  my $txn = $class->begin_($cxn, $params->{tx_timeout} // -1, $params->{mode} // "w", $db // default_db );
   croak "Failed to create transaction (BEGIN failed): ".$txn->errmsg_ if ($txn->errnum_);
   return $txn;
 }
@@ -54,7 +56,7 @@ sub send_query {
   if ($parms && !(ref $parms == 'HASH')) {
     die "Arg 2 should be a hashref of { param => $value, ... }";
   }
-  return $self->run_query_($query, $parms ? $parms : {}, 1);
+  return $self->run_query_($query, $parms // {}, 1);
 }
 
 sub do_query {

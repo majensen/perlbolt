@@ -98,6 +98,14 @@ references. These represent Neo4j types according to the following:
     be made to use the default trust store instead.
     This requires [IO::Socket::SSL](https://metacpan.org/pod/IO::Socket::SSL) or [Mozilla::CA](https://metacpan.org/pod/Mozilla::CA) to be installed.
 
+- set\_log\_level($LEVEL)
+
+    When $LEVEL is set to one of the strings `ERROR WARN INFO DEBUG` or `TRACE`,
+    libneo4j-client native logger will emit log messages at or above the given
+    level, on STDERR.
+
+    Set to `NONE` to turn off completely (the default).
+
 # SEE ALSO
 
 [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).

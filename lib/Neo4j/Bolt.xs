@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include "connection.h"
 
+static uint_fast8_t LOG_LEVEL = NEO4J_LOG_TRACE+1;
+static uint_fast32_t LOGGER_FLAGS = 0;
+
 void new_cxn_obj(cxn_obj_t **cxn_obj) {
   Newx(*cxn_obj, 1, cxn_obj_t);
   (*cxn_obj)->connection = (neo4j_connection_t *)NULL;
@@ -13,9 +16,37 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   int major_version = 0;
   int minor_version = 0;
   (*cxn_obj)->strerror = "";
-  
 }		 
 
+int set_log_level( const char* classname, const char* lvl )
+{
+    if(strcmp(lvl,"NONE")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_TRACE+1;
+    }
+    if(strcmp(lvl,"ERROR")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_ERROR;
+    }
+    if(strcmp(lvl,"WARN")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_WARN;
+    }
+    if(strcmp(lvl,"INFO")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_INFO;
+    }
+    if(strcmp(lvl,"DEBUG")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_DEBUG;
+    }
+    if(strcmp(lvl,"TRACE")==0)
+    {
+	LOG_LEVEL = NEO4J_LOG_TRACE;
+    }
+    return (int) LOG_LEVEL;
+}
+    
 SV* connect_ ( const char* classname, const char* neo4j_url,
                int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
@@ -42,7 +73,10 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   if (strlen(tls_pk_pass)) {
       ignore_unused_result(neo4j_config_set_TLS_private_key_password(config, tls_pk_pass));
   }
-
+  if (LOG_LEVEL <= NEO4J_LOG_TRACE)
+  {
+      neo4j_config_set_logger_provider(config, neo4j_std_logger_provider(stderr, LOG_LEVEL, LOGGER_FLAGS));
+  }
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
 
@@ -50,7 +84,6 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
     cxn_obj->errnum = errno;
     cxn_obj->connected = false;
     Newx(climsg, BUFLEN, char);
-
     cxn_obj->strerror = neo4j_strerror(errno, climsg, BUFLEN-1);
   } else {
     if ( encrypt && ! neo4j_connection_is_secure(cxn_obj->connection) ) {
@@ -85,3 +118,8 @@ connect_ (classname, neo4j_url, timeout, encrypt, tls_ca_dir, tls_ca_file, tls_p
 	const char *	tls_pk_file
 	const char *	tls_pk_pass
 
+int
+set_log_level (classname, lvl)
+        const char* classname
+        const char* lvl
+	

@@ -43,7 +43,7 @@ WriteMakefile(
   PREREQ_PM => {
     'ExtUtils::MakeMaker' => '7.12',
     'Alien::OpenSSL' => 0,
-    'Neo4j::Client' => '0.43',
+    'Neo4j::Client' => '0.44',
     'Test::Exception' => 0,
     'Pod::Usage' => 0,
     'JSON::PP' => 0,

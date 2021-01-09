@@ -69,8 +69,6 @@ void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 int update_errstate_rs_obj (rs_obj_t *rs_obj);
 void new_rs_uc( struct neo4j_update_counts **uc);
 void new_rs_stats( rs_stats_t **stats );
-void new_rs_obj (rs_obj_t **rs_obj);
-void reset_errstate_rs_obj (rs_obj_t *rs_obj);
 
 // connection fn
 

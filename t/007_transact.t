@@ -27,7 +27,8 @@ if ($neo_info->{user}) {
   $url->userinfo($neo_info->{user}.':'.$neo_info->{pass});
 }
 diag $url->as_string;
-  
+
+# ok(Neo4j::Bolt->set_log_level("TRACE"), "log level TRACE");
 ok my $cxn = Neo4j::Bolt->connect($url->as_string);
 unless ($cxn->connected) {
   diag "hey ->".$cxn->errmsg;
@@ -48,9 +49,10 @@ SKIP: {
   ok $txn = Neo4j::Bolt::Txn->new($cxn, { tx_timeout => 10000, dbname => "neo4j" });
   $txn->run_query("create (a:zzyyxx123)");
   # if you do $cxn->run_query ---- the commit/rollback segfaults......
-  my $rs = $txn->run_query("match (a:zzyyxx123) return count(a)");
+  my $rs = $cxn->run_query("match (a:zzyyxx123) return count(a)");
   is (($rs->fetch_next)[0], 1, "now you see it");
   ok $txn->rollback, "rollback";
+  #ok $txn->commit, "commit";
   ok $rs = $cxn->run_query("match (a:zzyyxx123) return count(a)");
   ok !$rs->fetch_next, "now you dont";
   my $badrs = $txn->run_query("match (a) return count(a)");

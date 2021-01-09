@@ -8,6 +8,7 @@ BEGIN {
   require XSLoader;
   XSLoader::load();
 }
+sub default_db () { $Neo4j::Bolt::DEFAULT_DB // "" }
 
 sub errnum { shift->errnum_ }
 sub errmsg { shift->errmsg_ }
@@ -18,7 +19,7 @@ sub protocol_version { shift->protocol_version_ }
 
 sub run_query {
   my $self = shift;
-  my ($query, $parms) = @_;
+  my ($query, $parms, $db) = @_;
   unless ($query) {
     croak "Arg 1 should be Cypher query string";
   }
@@ -26,7 +27,7 @@ sub run_query {
     croak "Arg 2 should be a hashref of { param => $value, ... }";
   }
   croak "No connection" unless $self->connected;
-  return $self->run_query_($query, $parms ? $parms : {}, 0);
+  return $self->run_query_($query, $parms // {}, 0, $db // default_db);
 }
 
 sub send_query {
@@ -39,7 +40,7 @@ sub send_query {
     croak "Arg 2 should be a hashref of { param => $value, ... }";
   }
   croak "No connection" unless $self->connected;
-  return $self->run_query_($query, $parms ? $parms : {}, 1);
+  return $self->run_query_($query, $parms ? $parms : {}, 1, $db // default_db );
 }
 
 sub do_query {

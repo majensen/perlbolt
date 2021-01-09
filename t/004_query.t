@@ -38,7 +38,7 @@ SKIP: {
   like $cxn->protocol_version, qr/^[0-9]+\.[0-9]+$/, "protocol version returned";
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
-    {},0
+    {},0,$Neo4j::Bolt::DEFAULT_DB
    ), 'label count query';
   ok $stream->success, "Succeeded";
   ok !$stream->failure, "Not failure";
@@ -79,7 +79,9 @@ SKIP: {
     is $pth->[1]->{end}, $pth->[0]->{id}, 'relationship 2 end correct';
     is $pth->[1]->{start}, $pth->[2]->{id}, 'relationship 2 start correct';
   }
-  ok $stream = $cxn->run_query("CALL db.labels()"), 'call db.labels()';
+  ok $stream = $cxn->run_query("CALL db.schlabels()"), 'call db.labels()';
+  my $fd = $stream->get_failure_details;
+  ok $fd, "got fd";
   my @lbl;
   while ( my @row = $stream->fetch_next ) {
     push @lbl, $row[0];
