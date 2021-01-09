@@ -4,3 +4,4 @@ create (n:thing {name:"he"})-[r:friend_of {type:"umm"}]->(b:thing {name:"she"});
 create (n:thing {name:"it"});
 match (a:thing {name:"she"}),(b:thing {name:"it"}) with a, b create (a)-[r:friend_of {type:"fairweather"}]->(b);
 match (a:thing {name:"she"}), (b:thing {name:"I"}) with a, b create (a)-[r:friend_of {type:"good"}]->(b);
+:exit

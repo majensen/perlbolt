@@ -1,49 +1,10 @@
-package Neo4j::Bolt::TypeHandlersC;
-BEGIN {
-  our $VERSION = "0.40";
-}
-use JSON::PP; # operator overloading for boolean values
-use Neo4j::Bolt::Node;
-use Neo4j::Bolt::Relationship;
-use Neo4j::Bolt::Path;
-use Neo4j::Client;
-
-use Inline 'global';
-use Inline P => Config =>
-  LIBS => $Neo4j::Client::LIBS,
-  INC => $Neo4j::Client::CCFLAGS,
-  ccflagsex => '-Wno-comment',
-  version => $VERSION,
-  name => __PACKAGE__;
-
-use Inline P => <<'END_TYPE_HANDLERS_C';
-
-#include <neo4j-client.h>
-
+#include "perlbolt.h"
+#include "values.h"
 #include <string.h>
-
-#define NODE_CLASS "Neo4j::Bolt::Node"
-#define RELATIONSHIP_CLASS "Neo4j::Bolt::Relationship"
-#define PATH_CLASS "Neo4j::Bolt::Path"
 
 extern neo4j_value_t neo4j_identity(long long);
 extern neo4j_value_t neo4j_node(const neo4j_value_t*);
 extern neo4j_value_t neo4j_relationship(const neo4j_value_t*);
-
-
-struct neo4j_struct
-{
-    uint8_t _vt_off;
-    uint8_t _type;
-    uint16_t _pad1;
-    uint8_t signature;
-    uint8_t _pad2;
-    uint16_t nfields;
-    union {
-        const neo4j_value_t *fields;
-        union _neo4j_value_data _pad3;
-    };
-};
 
 /**
 Types
@@ -494,66 +455,9 @@ AV* neo4j_path_to_AV( neo4j_value_t value) {
   }
 }
 
-END_TYPE_HANDLERS_C
 
-=head1 NAME
+MODULE = Neo4j::Bolt::CTypeHandlers  PACKAGE = Neo4j::Bolt::CTypeHandlers
 
-Neo4j::Bolt::TypeHandlersC - Low level Perl to Bolt converters
+PROTOTYPES: DISABLE
 
-=head1 SYNOPSIS
-
- // how Neo4j::Bolt::ResultStream uses it
-  for (i=0; i<n; i++) {
-    value = neo4j_result_field(result, i);
-    perl_value = neo4j_value_to_SV(value);
-    Inline_Stack_Push( perl_value );
-  }
-
-=head1 DESCRIPTION
-
-L<Neo4j::Bolt::TypeHandlersC> is all C code, managed by L<Inline::C>.
-It tediously defines methods to convert Perl structures to Bolt
-representations, and also tediously defines methods convert Bolt
-data to Perl representations.
-
-=head1 METHODS
-
-=over
-
-=item neo4j_value_t SV_to_neo4j_value(SV *sv)
-
-Attempt to create the appropriate
-L<libneo4j-client|https://github.com/cleishm/libneo4j-client>
-representation of the Perl SV argument.
-
-=item SV* neo4j_value_to_SV( neo4j_value_t value )
-
-Attempt to create the appropriate Perl SV representation of the
-L<libneo4j-client|https://github.com/cleishm/libneo4j-client>
-neo4j_value_t argument.
-
-=back
-
-=head1 SEE ALSO
-
-L<Neo4j::Bolt>, L<Neo4j::Bolt::NeoValue>, L<Inline::C>,
-L<libneo4j-client API|http://neo4j-client.net/doc/latest/neo4j-client_8h.html>.
-
-=head1 AUTHOR
-
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
-
-=head1 LICENSE
-
-This software is Copyright (c) 2019-2020 by Mark A. Jensen.
-
-This is free software, licensed under:
-
-  The Apache License, Version 2.0, January 2004
-
-=cut
-
-1;
 

@@ -41,7 +41,7 @@ ways.
 
 - \_as\_perl()
 
-    Returns a Perl scalar, arrayref, or hashref representing the underlying 
+    Returns a Perl scalar, arrayref, or hashref representing the underlying
     Bolt data stored in the object.
 
 - \_neotype()

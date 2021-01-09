@@ -13,7 +13,7 @@ Neo4j::Bolt::TypeHandlersC - Low level Perl to Bolt converters
 
 # DESCRIPTION
 
-[Neo4j::Bolt::TypeHandlersC](/lib/Neo4j/Bolt/TypeHandlersC.md) is all C code, managed by [Inline::C](https://metacpan.org/pod/Inline::C). 
+[Neo4j::Bolt::TypeHandlersC](/lib/Neo4j/Bolt/TypeHandlersC.md) is all C code, managed by [Inline::C](https://metacpan.org/pod/Inline::C).
 It tediously defines methods to convert Perl structures to Bolt
 representations, and also tediously defines methods convert Bolt
 data to Perl representations.
@@ -28,13 +28,13 @@ data to Perl representations.
 
 - SV\* neo4j\_value\_to\_SV( neo4j\_value\_t value )
 
-    Attempt to create the appropriate Perl SV representation of the 
-    [libneo4j-client](https://github.com/cleishm/libneo4j-client) 
+    Attempt to create the appropriate Perl SV representation of the
+    [libneo4j-client](https://github.com/cleishm/libneo4j-client)
     neo4j\_value\_t argument.
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::NeoValue](/lib/Neo4j/Bolt/NeoValue.md), [Inline::C](https://metacpan.org/pod/Inline::C), 
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::NeoValue](/lib/Neo4j/Bolt/NeoValue.md), [Inline::C](https://metacpan.org/pod/Inline::C),
 [libneo4j-client API](http://neo4j-client.net/doc/latest/neo4j-client_8h.html).
 
 # AUTHOR

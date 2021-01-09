@@ -7,7 +7,7 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
     use Neo4j::Bolt;
     $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
     unless ($cxn->connected) {
-      print STDERR "Problem connecting: ".$cxn->errmsg;
+      die "Problem connecting: ".$cxn->errmsg;
     }
     $stream = $cxn->run_query(
       "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
@@ -28,6 +28,11 @@ a call to `Neo4j::Bolt->connect()`.
 
     True if server connected successfully. If not, see ["errnum()"](#errnum) and
     ["errmsg()"](#errmsg).
+
+- protocol\_version()
+
+    Returns a string representing the major and minor Bolt protocol version of the 
+    server, as "&lt;major>.&lt;minor>", or the empty string if not connected.
 
 - run\_query($cypher\_query, \[$param\_hash\])
 
@@ -52,31 +57,17 @@ a call to `Neo4j::Bolt->connect()`.
     `CREATE (a:Bloog {prop1:"blarg"})` ), since it returns the $stream
     with ["update\_counts" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#update_counts.md) ready for reading.
 
-- run\_query\_( $cypher\_query, $param\_hash, $send )
-
-    Run a [Cypher](https://neo4j.com/docs/cypher-manual/current/) query on
-    the server. Returns a [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md) which can be iterated
-    to retrieve query results as Perl types and structures. `$param_hash` is
-    a hashref of the form `{ param => $value, ... }`. If there are no params
-    to be set, use `{}`. 
-
-    If `$send` is 1, run\_query\_ will simply send the query and discard
-    any results (including query stats). Set `$send` to 0 and follow up
-    with ["fetch\_next\_()" in Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream#fetch_next_.md) to retrieve results.
-
-    Easier to use `run_query`, `send_query`, `do_query`.
-
 - reset\_cxn()
 
     Send a RESET message to the Neo4j server. According to the [Bolt
     protocol](https://boltprotocol.org/v1/), this should force any currently
-    processing query to abort, forget any pending queries, clear any 
-    failure state, dispose of outstanding result records, and roll back 
+    processing query to abort, forget any pending queries, clear any
+    failure state, dispose of outstanding result records, and roll back
     the current transaction.
 
 - errnum(), errmsg()
 
-    Current error state of the connection. If 
+    Current error state of the connection. If
 
         $cxn->connected == $cxn->errnum == 0
 
