@@ -18,10 +18,17 @@ my $META = {
     bugtracker => 'https://github.com/majensen/perlbolt/issues',
     repository => 'https://github.com/majensen/perlbolt.git',
   },
-  x_contributors => {
+  x_contributors => [
     'Mark A. Jensen <majensen@cpan.org>',
     'Arne Johannessen <ajnn@cpan.org>',
-   },
+  ],
+  prereqs => {
+    runtime => {
+      recommends => {
+        'Mozilla::CA' => 0,
+      },
+    },
+  },
 };
 
 my $neo_info = prompt_for_db();
@@ -40,24 +47,27 @@ if ($neo_info) {
 WriteMakefile(
   NAME => 'Neo4j::Bolt',
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',
-  PREREQ_PM => {
+  MIN_PERL_VERSION => '5.010',
+  CONFIGURE_REQUIRES => {
+    'Alien::OpenSSL' => 0,
     'ExtUtils::MakeMaker' => '7.12',
+    'Neo4j::Client' => '0.44',
+    'Try::Tiny' => 0,
+  },
+  BUILD_REQUIRES => {
+  },
+  PREREQ_PM => {
     'Alien::OpenSSL' => 0,
     'Neo4j::Client' => '0.44',
-    'Test::Exception' => 0,
-    'Pod::Usage' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
+  },
+  TEST_REQUIRES => {
+    'Test::Exception' => 0,
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
   LICENSE => 'apache_2_0',
-  BUILD_REQUIRES => {
-  },
-  # RECOMMENDS => {
-  #   'Mozilla::CA' => 0,
-  #   'Pod::Markdown' => 0,
-  # },
   CCFLAGS => Neo4j::Client->cflags,
   LIBS => join(' ',Neo4j::Client->libs_static,Alien::OpenSSL->libs_static),
   INC => "-iquote".realpath('.')."/include",
