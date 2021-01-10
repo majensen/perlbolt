@@ -24,7 +24,6 @@ SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode
   neo4j_transaction_t *tx = neo4j_begin_tx(cxn_obj->connection, tx_timeout,
                                              mode, dbname);
 
-  fprintf(stderr, ">%d< >%s< >%s<\n", tx->timeout, tx->mode, tx->dbname);
   txn_obj->tx = tx;
   if (tx == NULL) {
     txn_obj->errnum = errno;
