@@ -1,7 +1,7 @@
 package Neo4j::Bolt::NeoValue;
 
 BEGIN {
-  our $VERSION = "0.41";
+  our $VERSION = "0.4101";
   require Neo4j::Bolt::CTypeHandlers;
   require Neo4j::Bolt::CResultStream;
   require XSLoader;

@@ -2,7 +2,7 @@ package Neo4j::Bolt::ResultStream;
 # use Neo4j::Client;
 
 BEGIN {
-  our $VERSION = "0.41";
+  our $VERSION = "0.4101";
   require Neo4j::Bolt::Cxn;
   require Neo4j::Bolt::CResultStream;
   require XSLoader;
