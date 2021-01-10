@@ -32,11 +32,6 @@ data to Perl representations.
     [libneo4j-client](https://github.com/cleishm/libneo4j-client)
     neo4j\_value\_t argument.
 
-# BUGS
-
-Bolt v1 is limited to 64-bit floats. If Perl is compiled with
-`-Duserlongdouble`, loss of floating point precision may occur.
-
 # SEE ALSO
 
 [Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Bolt::NeoValue](/lib/Neo4j/Bolt/NeoValue.md), [Inline::C](https://metacpan.org/pod/Inline::C),

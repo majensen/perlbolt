@@ -2,9 +2,9 @@ use v5.10;
 use ExtUtils::MakeMaker;
 use Neo4j::Client;
 use Alien::OpenSSL;
-use File::Spec;
-use Data::Dumper qw/Dumper/;
+use Data::Dumper;
 use Try::Tiny;
+use File::Spec;
 use Config;
 use Cwd qw/realpath/;
 use strict;
@@ -41,11 +41,8 @@ WriteMakefile(
   NAME => 'Neo4j::Bolt',
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',
   PREREQ_PM => {
-    'ExtUtils::MakeMaker' => '7.12',
     'Alien::OpenSSL' => 0,
     'Neo4j::Client' => '0.44',
-    'Test::Exception' => 0,
-    'Pod::Usage' => 0,
     'JSON::PP' => 0,
     'URI' => 0,
   },
@@ -53,6 +50,16 @@ WriteMakefile(
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
   LICENSE => 'apache_2_0',
   BUILD_REQUIRES => {
+    'Alien::OpenSSL' => 0,
+    'Neo4j::Client' => '0.44',
+    'Test::Exception' => 0,
+    'Pod::Usage' => 0,
+  },
+  CONFIGURE_REQUIRES => {
+    'ExtUtils::MakeMaker' => '7.12',
+    'Try::Tiny' => '0',
+    'Neo4j::Client' => '0.44',
+    'Alien::OpenSSL' => 0,
   },
   # RECOMMENDS => {
   #   'Mozilla::CA' => 0,
