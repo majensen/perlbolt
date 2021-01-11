@@ -54,6 +54,9 @@ WriteMakefile(
     'Neo4j::Client' => '0.46',
     'Try::Tiny' => 0,
   },
+  BUILD_REQUIRES => {
+    # Nothing beyond CONFIGURE_REQUIRES, so we're all set here!
+  },
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,
     'Neo4j::Client' => '0.46',
@@ -63,19 +66,13 @@ WriteMakefile(
   TEST_REQUIRES => {
     'Test::Exception' => 0,
   },
+  DEVELOP_REQUIRES => {
+    'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
+    #'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
+  },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
   LICENSE => 'apache_2_0',
-  BUILD_REQUIRES => {
-    'Alien::OpenSSL' => 0,
-    'Neo4j::Client' => '0.46',
-    'Test::Exception' => 0,
-    'Pod::Usage' => 0,
-  },
-  # RECOMMENDS => {
-  #   'Mozilla::CA' => 0,
-  #   'Pod::Markdown' => 0,
-  # },
   CCFLAGS => Neo4j::Client->cflags,
   LIBS => join(' ',Neo4j::Client->libs_static,Alien::OpenSSL->libs_static),
   INC => "-iquote".realpath('.')."/include",
