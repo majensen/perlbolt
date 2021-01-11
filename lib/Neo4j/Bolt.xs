@@ -79,7 +79,6 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   }
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
-
   if (cxn_obj->connection == NULL) {
     cxn_obj->errnum = errno;
     cxn_obj->connected = false;

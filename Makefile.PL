@@ -51,12 +51,12 @@ WriteMakefile(
   CONFIGURE_REQUIRES => {
     'Alien::OpenSSL' => 0,
     'ExtUtils::MakeMaker' => '7.12',
-    'Neo4j::Client' => '0.44',
+    'Neo4j::Client' => '0.46',
     'Try::Tiny' => 0,
   },
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,
-    'Neo4j::Client' => '0.44',
+    'Neo4j::Client' => '0.46',
     'JSON::PP' => 0,
     'URI' => 0,
   },
@@ -68,7 +68,7 @@ WriteMakefile(
   LICENSE => 'apache_2_0',
   BUILD_REQUIRES => {
     'Alien::OpenSSL' => 0,
-    'Neo4j::Client' => '0.44',
+    'Neo4j::Client' => '0.46',
     'Test::Exception' => 0,
     'Pod::Usage' => 0,
   },

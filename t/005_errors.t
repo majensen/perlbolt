@@ -53,7 +53,14 @@ SKIP: {
   $cxn = Neo4j::Bolt->connect('snarf://localhost:7687');
   like $cxn->errmsg, qr/scheme/, "got errmsg";
   is $cxn->errnum, -12, "got error";
-
+  
+  $url->userinfo($neo_info->{user}.':blarf');
+  if ($neo_info->{pass}) {
+    $cxn = Neo4j::Bolt->connect($url->as_string);
+    ok (!$cxn->connected, "bad pass, not connected");
+    like $cxn->errmsg, qr/password is invalid/, "got unauthorized";
+  }
+  
 }
 
 done_testing;
