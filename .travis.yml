@@ -19,7 +19,7 @@ before_install:
   - cat .sample.cypher | docker run -i --network=container:testneo --name cyphershell --entrypoint cypher-shell $DOCKERH/testneo/testneo:$NEO4J_VER
   
 install:
-  - for dep in JSON::PP URI ExtUtils::MakeMaker Test::Exception Pod::Usage Neo4j::Client Mozilla::CA Alien::OpenSSL ; do cpanm $dep ; done ; 
+  - for dep in JSON::PP URI ExtUtils::MakeMaker Test::Exception Pod::Usage Neo4j::Client Neo4j::Types Mozilla::CA Alien::OpenSSL ; do cpanm $dep ; done ; 
   - echo y$'\n'$'\n'$'\n'$'\n'y | perl Makefile.PL
   - make
   

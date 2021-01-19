@@ -60,6 +60,8 @@ WriteMakefile(
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,
     'Neo4j::Client' => '0.46',
+    'Neo4j::Types' => '1.00',
+    'parent' => 0,  # parent was first released with perl v5.10.1
     'JSON::PP' => 0,
     'URI' => 0,
   },
