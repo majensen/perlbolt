@@ -28,6 +28,12 @@ my $META = {
         'Mozilla::CA' => 0,
       },
     },
+    develop => {
+      requires => {
+	'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
+	#'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
+      },
+    },
   },
 };
 
@@ -67,10 +73,6 @@ WriteMakefile(
   },
   TEST_REQUIRES => {
     'Test::Exception' => 0,
-  },
-  DEVELOP_REQUIRES => {
-    'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
-    #'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
