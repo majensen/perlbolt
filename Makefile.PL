@@ -70,6 +70,7 @@ WriteMakefile(
     'parent' => 0,  # parent was first released with perl v5.10.1
     'JSON::PP' => 0,
     'URI' => 0,
+    'XSLoader' => '0.14',  # XSLoader::load()
   },
   TEST_REQUIRES => {
     'Test::Exception' => 0,
