@@ -73,6 +73,10 @@ neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
   STRLEN len;
   char *k0,*k;
   k = SvPV(sv,len);
+  if (! SvUTF8(sv)) {
+    k0 = (char *) bytes_to_utf8((U8 *)k, &len);
+    return neo4j_ustring(k0, len);
+  }
   Newx(k0,len+1,char);
   memcpy(k0,k,(size_t) len);
   *(k0+len) = 0;
@@ -302,7 +306,7 @@ SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
   SV* pv;
   len = neo4j_string_length(value);
   pv = newSVpvn(neo4j_string_to_alloc_str(value), len);
-  SvUTF8_on(pv);  // depends on libneo4j-client output being valid UTF-8, always
+  sv_utf8_decode(pv);
   return pv;
 }
 
