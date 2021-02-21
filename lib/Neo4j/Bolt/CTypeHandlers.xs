@@ -163,7 +163,8 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   HE *ent;
   char *k,*k0;
   SV *v;
-  int n,retlen;
+  int n;
+  STRLEN retlen;
   neo4j_map_entry_t *map_ents;
   if (!HvTOTALKEYS(hv)) {
     return neo4j_null;
@@ -172,9 +173,9 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   hv_iterinit(hv);
   n=0;
   while ((ent = hv_iternext(hv))) {
-    k = hv_iterkey(ent,&retlen);
+    k = SvPVutf8(hv_iterkeysv(ent), retlen);
     Newx(k0,retlen+1,char);
-    strncpy(k0,k,retlen);
+    memcpy(k0,k,retlen);
     *(k0+retlen)=0;
     map_ents[n] = neo4j_map_entry( k0, SV_to_neo4j_value(hv_iterval(hv,ent)));
     n++;
@@ -360,6 +361,7 @@ AV* neo4j_list_to_AV( neo4j_value_t value ) {
 
 HV* neo4j_map_to_HV( neo4j_value_t value ) {
   int i,n;
+  I32 klen;
   char *ks;
   const neo4j_map_entry_t *entry;
   HV *hv;
@@ -371,8 +373,11 @@ HV* neo4j_map_to_HV( neo4j_value_t value ) {
     ks = neo4j_string_to_alloc_str(entry->key);
     sv = neo4j_value_to_SV(entry->value);
     SvREFCNT_inc(sv);
-    if (hv_store(hv, ks, neo4j_string_length(entry->key), sv,0) ==
-	NULL) {
+    klen = neo4j_string_length(entry->key);
+    if (! is_utf8_invariant_string((U8 *)ks, (STRLEN)klen)) {
+      klen = -klen;
+    }
+    if (hv_store(hv, ks, klen, sv, 0) == NULL) {
       SvREFCNT_dec(sv);
       fprintf(stderr, "Failed to create hash entry for key '%s'\n",ks);
     }
