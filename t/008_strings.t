@@ -2,11 +2,14 @@ use strict;
 use warnings;
 use Test::More;
 use Encode ();
+use File::Spec;
+use URI;
+use Neo4j::Bolt;
 use Neo4j::Bolt::NeoValue;
 
 # String encoding, esp. to and from UTF-8
 
-plan tests => 7 + 14;
+plan tests => 7 + 14 + 18;
 
 my ($i, $o, $v);
 
@@ -75,6 +78,83 @@ for (my $k = 0; $k < @seq; ) {
   $o = $seq[$k++];
   $v = Neo4j::Bolt::NeoValue->_new_from_perl( to_str($i) );
   is to_hex($v->_as_perl), $o, "byte sequence $i";
+}
+
+# Cypher statements
+# (which are strings as well, but use a different code path in Cxn/Txn)
+
+my $neo_info;
+my $nif = File::Spec->catfile('t','neo_info');
+if (-e $nif ) {
+    local $/;
+    open my $fh, "<", $nif or die $!;
+    my $val = <$fh>;
+    $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
+    eval $val;
+}
+
+my $cxn;
+if (defined $neo_info && $neo_info->{tests}) {
+  my $url = URI->new("bolt://$neo_info->{host}");
+  $url->userinfo("$neo_info->{user}:$neo_info->{pass}") if $neo_info->{user};
+  $cxn = Neo4j::Bolt->connect("$url");
+}
+
+SKIP: {
+  skip "statement tests require server connection", 18 unless $cxn && $cxn->connected;
+  my ($q, $id);
+  
+  use utf8;
+  $i = "\x{100}";
+  $q = "RETURN '$i'";
+  eval { Encode::_utf8_on($q) };  # SVf_UTF8 should already be on...
+  $v = ($cxn->run_query($q)->fetch_next)[0];
+  is to_hex($v), to_hex($i), "Unicode char in Cxn run_query";
+  (undef, $v) = $cxn->do_query($q);
+  is to_hex($v->[0]), to_hex($i), "Unicode char in Cxn do_query";
+  
+  no utf8;
+  $i = "\x{c4}\x{80}";
+  $q = "RETURN '$i'";
+  eval { Encode::_utf8_off($q) };  # SVf_UTF8 should already be off...
+  $v = ($cxn->run_query($q)->fetch_next)[0];
+  isnt to_hex($v), "U 100", "bytes in Cxn run_query - input not treated as UTF-8";
+  ok utf8::is_utf8($v), "bytes in Cxn run_query - output encoded in UTF-8";
+  (undef, $v) = $cxn->do_query($q);
+  isnt to_hex($v->[0]), "U 100", "bytes in Cxn do_query - input not treated as UTF-8";
+  ok utf8::is_utf8($v->[0]), "bytes in Cxn do_query - output encoded in UTF-8";
+  
+  skip "transaction tests require Bolt version 3+", 12 if $cxn->protocol_version lt "3.0";
+  ok my $txn = Neo4j::Bolt::Txn->new($cxn), "begin transaction";
+  
+  use utf8;
+  $i = "\x{100}";
+  eval { Encode::_utf8_on($i) };  # SVf_UTF8 should already be on...
+  (undef, $v) = $txn->do_query("CREATE (n) RETURN '$i', id(n)");
+  is to_hex($v->[0]), to_hex($i), "Unicode char in Txn do_query";
+  $id = {id => $v->[1]};
+  $v = $txn->send_query("MATCH (n) WHERE id(n) = \$id SET n.t = '$i'", $id);
+  ok $v->success(), "Txn send_query 1";
+  ($v, $o) = $txn->run_query("MATCH (n) WHERE id(n) = \$id RETURN n.t, '$i'", $id)->fetch_next;
+  is to_hex($v), to_hex($i), "Unicode char in Txn send_query";
+  is to_hex($o), to_hex($i), "Unicode char in Txn run_query";
+  
+  no utf8;
+  $i = "\x{c4}\x{80}";
+  eval { Encode::_utf8_off($i) };  # SVf_UTF8 should already be off...
+  (undef, $v) = $txn->do_query("CREATE (n) RETURN '$i', id(n)");
+  isnt to_hex($v->[0]), "U 100", "bytes in Txn do_query - input not treated as UTF-8";
+  ok utf8::is_utf8($v->[0]), "bytes in Txn do_query - output encoded in UTF-8";
+  $id = {id => $v->[1]};
+  $v = $txn->send_query("MATCH (n) WHERE id(n) = \$id SET n.t = '$i'", $id);
+  ok $v->success(), "Txn send_query 2";
+  ($v, $o) = $txn->run_query("MATCH (n) WHERE id(n) = \$id RETURN n.t, '$i'", $id)->fetch_next;
+  isnt to_hex($v), "U 100", "bytes in Txn send_query - input not treated as UTF-8";
+  ok utf8::is_utf8($v), "bytes in Txn send_query - output encoded in UTF-8";
+  isnt to_hex($o), "U 100", "bytes in Txn run_query - input not treated as UTF-8";
+  ok utf8::is_utf8($o), "bytes in Txn run_query - output encoded in UTF-8";
+  
+  $txn->rollback;
 }
 
 done_testing;
