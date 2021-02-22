@@ -72,11 +72,11 @@ neo4j_value_t SVnv_to_neo4j_float (SV *sv) {
 neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
   STRLEN len;
   char *k0,*k;
+  SV *sv2;
   k = SvPV(sv,len);
-  if (! SvUTF8(sv)) {
-    k0 = (char *) bytes_to_utf8((U8 *)k, &len);
-    return neo4j_ustring(k0, len);
-  }
+  // create duplicate to keep SvPVutf8 from changing the original SV
+  sv2 = newSVpvn_flags(k, len, SvFLAGS(sv) & SVf_UTF8 | SVs_TEMP);
+  k = SvPVutf8(sv2, len);
   Newx(k0,len+1,char);
   memcpy(k0,k,(size_t) len);
   *(k0+len) = 0;
