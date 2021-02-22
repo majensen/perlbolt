@@ -162,7 +162,7 @@ neo4j_value_t AV_to_neo4j_list(AV *av) {
 neo4j_value_t HV_to_neo4j_map (HV *hv) {
   HE *ent;
   char *k,*k0;
-  SV *v;
+  SV *v,*ksv;
   int n;
   STRLEN retlen;
   neo4j_map_entry_t *map_ents;
@@ -173,7 +173,8 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   hv_iterinit(hv);
   n=0;
   while ((ent = hv_iternext(hv))) {
-    k = SvPVutf8(hv_iterkeysv(ent), retlen);
+    ksv = hv_iterkeysv(ent);
+    k = SvPVutf8(ksv, retlen);
     Newx(k0,retlen+1,char);
     memcpy(k0,k,retlen);
     *(k0+retlen)=0;
