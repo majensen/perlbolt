@@ -72,11 +72,15 @@ neo4j_value_t SVnv_to_neo4j_float (SV *sv) {
 neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
   STRLEN len;
   char *k0,*k;
+  SV *sv2;
   k = SvPV(sv,len);
+  // create duplicate to keep SvPVutf8 from changing the original SV
+  sv2 = newSVpvn_flags(k, len, SvFLAGS(sv) & SVf_UTF8 | SVs_TEMP);
+  k = SvPVutf8(sv2, len);
   Newx(k0,len+1,char);
-  strncpy(k0,k,(size_t) len);
+  memcpy(k0,k,(size_t) len);
   *(k0+len) = 0;
-  return neo4j_string(k0);
+  return neo4j_ustring(k0, len);
 }
 
 neo4j_value_t SV_to_neo4j_value(SV *sv) {
@@ -158,8 +162,9 @@ neo4j_value_t AV_to_neo4j_list(AV *av) {
 neo4j_value_t HV_to_neo4j_map (HV *hv) {
   HE *ent;
   char *k,*k0;
-  SV *v;
-  int n,retlen;
+  SV *v,*ksv;
+  int n;
+  STRLEN retlen;
   neo4j_map_entry_t *map_ents;
   if (!HvTOTALKEYS(hv)) {
     return neo4j_null;
@@ -168,9 +173,10 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   hv_iterinit(hv);
   n=0;
   while ((ent = hv_iternext(hv))) {
-    k = hv_iterkey(ent,&retlen);
+    ksv = hv_iterkeysv(ent);
+    k = SvPVutf8(ksv, retlen);
     Newx(k0,retlen+1,char);
-    strncpy(k0,k,retlen);
+    memcpy(k0,k,retlen);
     *(k0+retlen)=0;
     map_ents[n] = neo4j_map_entry( k0, SV_to_neo4j_value(hv_iterval(hv,ent)));
     n++;
@@ -298,9 +304,11 @@ SV* neo4j_int_to_SViv( neo4j_value_t value ) {
 }
 
 SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
+  STRLEN len;
   SV* pv;
-  pv = newSVpv(neo4j_string_to_alloc_str(value), 0);
-  SvUTF8_on(pv);  // depends on libneo4j-client output being valid UTF-8, always
+  len = neo4j_string_length(value);
+  pv = newSVpvn(neo4j_string_to_alloc_str(value), len);
+  sv_utf8_decode(pv);
   return pv;
 }
 
@@ -354,6 +362,7 @@ AV* neo4j_list_to_AV( neo4j_value_t value ) {
 
 HV* neo4j_map_to_HV( neo4j_value_t value ) {
   int i,n;
+  I32 klen;
   char *ks;
   const neo4j_map_entry_t *entry;
   HV *hv;
@@ -365,8 +374,11 @@ HV* neo4j_map_to_HV( neo4j_value_t value ) {
     ks = neo4j_string_to_alloc_str(entry->key);
     sv = neo4j_value_to_SV(entry->value);
     SvREFCNT_inc(sv);
-    if (hv_store(hv, ks, neo4j_string_length(entry->key), sv,0) ==
-	NULL) {
+    klen = neo4j_string_length(entry->key);
+    if (! is_utf8_invariant_string((U8 *)ks, (STRLEN)klen)) {
+      klen = -klen;
+    }
+    if (hv_store(hv, ks, klen, sv, 0) == NULL) {
       SvREFCNT_dec(sv);
       fprintf(stderr, "Failed to create hash entry for key '%s'\n",ks);
     }

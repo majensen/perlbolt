@@ -1,7 +1,7 @@
 package
   Neo4j::Bolt::CResultStream;
 BEGIN {
-  our $VERSION = "0.4201";
+  our $VERSION = "0.4202";
   require XSLoader;
   XSLoader::load();
 }
