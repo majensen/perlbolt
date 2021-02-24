@@ -2,7 +2,7 @@ package Neo4j::Bolt::Txn;
 use Carp qw/croak/;
 
 BEGIN {
-  our $VERSION = "0.4201";
+  our $VERSION = "0.4202";
   require Neo4j::Bolt::CTypeHandlers;
   require Neo4j::Bolt::ResultStream;  
   require XSLoader;
