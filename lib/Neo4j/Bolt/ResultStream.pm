@@ -139,6 +139,14 @@ client (you) to pull them all.
 
 =back
 
+=head1 LIMITATIONS
+
+The results of Cypher C<EXPLAIN> or C<PROFILE> queries are
+currently unsupported. If you need to access such results,
+consider using L<Neo4j::Driver> or the interactive
+L<Neo4j Browser|https://neo4j.com/docs/browser-manual/current/>
+instead of this module.
+
 =head1 SEE ALSO
 
 L<Neo4j::Bolt>, L<Neo4j::Bolt::Cxn>.
