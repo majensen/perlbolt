@@ -148,7 +148,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
 neo4j_value_t AV_to_neo4j_list(AV *av) {
   int i,n;
   neo4j_value_t *items;
-  n = av_top_index(av);
+  n = av_len(av);
   if (n < 0) {
     return neo4j_null;
   }
@@ -205,7 +205,7 @@ neo4j_value_t HV_to_neo4j_node(HV *hv) {
   } else {
     lbls = NULL;
   }
-  if (lbls && SvTYPE((SV*)lbls) == SVt_PVAV && av_top_index(lbls) >= 0) {
+  if (lbls && SvTYPE((SV*)lbls) == SVt_PVAV && av_len(lbls) >= 0) {
     fields[1] = AV_to_neo4j_list(lbls);
   } else {
     fields[1] = neo4j_list( &neo4j_null, 0 );
