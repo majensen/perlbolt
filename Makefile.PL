@@ -53,7 +53,7 @@ if ($neo_info) {
 WriteMakefile(
   NAME => 'Neo4j::Bolt',
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',
-  MIN_PERL_VERSION => '5.010001',
+  MIN_PERL_VERSION => '5.012',
   CONFIGURE_REQUIRES => {
     'Alien::OpenSSL' => 0,
     'ExtUtils::MakeMaker' => '7.12',

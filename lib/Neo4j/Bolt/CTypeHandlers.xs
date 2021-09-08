@@ -148,8 +148,9 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
 neo4j_value_t AV_to_neo4j_list(AV *av) {
   int i,n;
   neo4j_value_t *items;
-  n = av_top_index(av);
+  n = av_len(av);
   if (n < 0) {
+    // empty list (av_len returns the top index)
     return neo4j_null;
   }
   Newx(items, n+1, neo4j_value_t);
@@ -205,7 +206,8 @@ neo4j_value_t HV_to_neo4j_node(HV *hv) {
   } else {
     lbls = NULL;
   }
-  if (lbls && SvTYPE((SV*)lbls) == SVt_PVAV && av_top_index(lbls) >= 0) {
+  if (lbls && SvTYPE((SV*)lbls) == SVt_PVAV && av_len(lbls) >= 0) {
+    // non-empty list (av_len returns the top index)
     fields[1] = AV_to_neo4j_list(lbls);
   } else {
     fields[1] = neo4j_list( &neo4j_null, 0 );
@@ -375,7 +377,8 @@ HV* neo4j_map_to_HV( neo4j_value_t value ) {
     sv = neo4j_value_to_SV(entry->value);
     SvREFCNT_inc(sv);
     klen = neo4j_string_length(entry->key);
-    if (! is_utf8_invariant_string((U8 *)ks, (STRLEN)klen)) {
+    if (! is_ascii_string((U8 *)ks, (STRLEN)klen)) {
+      // treat key as utf8 (as opposed to single-byte)
       klen = -klen;
     }
     if (hv_store(hv, ks, klen, sv, 0) == NULL) {
