@@ -157,6 +157,11 @@ Set to C<NONE> to turn off completely (the default).
 
 =back
 
+=head1 INSTALLATION
+
+Visit L<Neo4j::Bolt|https://metacpan.org/pod/Neo4j::Bolt> on CPAN
+for the newest released version and installation instructions.
+
 =head1 SEE ALSO
 
 L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
