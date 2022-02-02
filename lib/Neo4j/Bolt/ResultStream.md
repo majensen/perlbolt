@@ -98,7 +98,7 @@ of the response as Perl arrays (not arrayrefs).
 
 The results of Cypher `EXPLAIN` or `PROFILE` queries are
 currently unsupported. If you need to access such results,
-consider using [Neo4j::Driver](/lib/Neo4j/Driver.md) or the interactive
+consider using [Neo4j::Driver](https://metacpan.org/pod/Neo4j::Driver) or the interactive
 [Neo4j Browser](https://neo4j.com/docs/browser-manual/current/)
 instead of this module.
 

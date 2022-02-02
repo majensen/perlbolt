@@ -22,7 +22,7 @@ $md = path($md);
 my $mdstr = '';
 my $p2m = Pod::Markdown->new();
 $p2m->local_module_url_prefix('github::');
-$p2m->local_module_re(qr/^Neo4j::/);
+$p2m->local_module_re(qr/^Neo4j::Bolt(?:$|::)/);
 $p2m->output_string(\$mdstr);
 $p2m->parse_file("$pm");
 
