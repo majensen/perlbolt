@@ -1,5 +1,4 @@
 use v5.10;
-use Path::Tiny;
 use Try::Tiny;
 use strict;
 use warnings;
@@ -7,9 +6,12 @@ use warnings;
 my $have_p2m = eval "require Pod::Markdown; 1";
 
 unless ($have_p2m) {
-  print "Don't have Pod::Markdown\n";
-  exit 1;
+  print "Don't have Pod::Markdown; skipping pod2md.PL\n";
+  exit 0;
 }
+require Path::Tiny;
+Path::Tiny->import;
+
 # write POD as <Module>.md in relevant lib/ subdirs
 my $pm = path(shift);
 return unless $pm->basename =~ /\.pm$/;

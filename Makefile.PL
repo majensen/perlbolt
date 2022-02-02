@@ -33,8 +33,13 @@ my $META = {
 	'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
 	#'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
       },
+      recommends => {
+        'Path::Tiny' => 0,  # pod2md.PL
+        'Pod::Markdown' => 0,  # pod2md.PL
+      },
     },
   },
+  'meta-spec' => { version => 2 },
 };
 
 my $neo_info = prompt_for_db();
