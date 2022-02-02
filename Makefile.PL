@@ -85,6 +85,17 @@ WriteMakefile(
   LDDLFLAGS => join(' ',Neo4j::Client->libs_static,$LDDLFLAGS),
   test => {TESTS => 't/*.t'},
   clean => {FILES => "t/neo_info"},
+  PL_FILES => { "pod2md.PL" => [qw(
+				    lib/Neo4j/Bolt.pm
+				    lib/Neo4j/Bolt/CResultStream.pm
+				    lib/Neo4j/Bolt/Cxn.pm
+				    lib/Neo4j/Bolt/NeoValue.pm
+				    lib/Neo4j/Bolt/Node.pm
+				    lib/Neo4j/Bolt/Path.pm
+				    lib/Neo4j/Bolt/Relationship.pm
+				    lib/Neo4j/Bolt/ResultStream.pm
+				    lib/Neo4j/Bolt/Txn.pm
+				 )]},
   XSMULTI => 1,
   XSBUILD => {
     xs => {
