@@ -1,6 +1,9 @@
 *~
 */*~
 **/_Inline/**
+**/*.c
+**/*.bs
+**/*.o
 .DS_Store
 **/.DS_Store
 

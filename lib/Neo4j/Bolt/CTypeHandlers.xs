@@ -33,6 +33,18 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv);
 neo4j_value_t AV_to_neo4j_path(AV *av);
 neo4j_value_t SV_to_neo4j_value(SV *sv);
 
+neo4j_value_t SVpv_to_neo4j_elementid(SV *sv);
+
+neo4j_value_t SViv_to_neo4j_date(SV *sv);
+neo4j_value_t SViv_to_neo4j_localtime(SV *sv);
+
+neo4j_value_t HV_to_neo4j_time(HV *hv);
+neo4j_value_t HV_to_neo4j_datetime(HV *hv);
+neo4j_value_t HV_to_neo4j_localdatetime(HV *hv);
+neo4j_value_t HV_to_neo4j_duration(HV *hv);
+
+neo4j_value_t HV_to_neo4j_point(HV *hv);
+
 SV* neo4j_bool_to_SViv( neo4j_value_t value );
 SV* neo4j_bytes_to_SVpv( neo4j_value_t value );
 SV* neo4j_float_to_SVnv( neo4j_value_t value );
@@ -44,6 +56,22 @@ AV* neo4j_path_to_AV( neo4j_value_t value);
 AV* neo4j_list_to_AV( neo4j_value_t value );
 HV* neo4j_map_to_HV( neo4j_value_t value );
 SV* neo4j_value_to_SV( neo4j_value_t value );
+
+SV* neo4j_elementid_to_SVpv( neo4j_value_t value);
+
+SV* neo4j_date_to_SViv( neo4j_value_t value);
+SV* neo4j_localtime_to_SViv( neo4j_value_t value);
+
+HV* neo4j_date_to_HV( neo4j_value_t value);
+HV* neo4j_time_to_HV( neo4j_value_t value);
+HV* neo4j_localtime_to_HV( neo4j_value_t value);
+HV* neo4j_datetime_to_HV(neo4j_value_t value);
+HV* neo4j_localdatetime_to_HV(neo4j_value_t value);
+HV* neo4j_duration_to_HV(neo4j_value_t value);
+HV* neo4j_point_to_HV(neo4j_value_t value);
+
+
+
 
 long long neo4j_identity_value(neo4j_value_t value);
 char *neo4j_string_to_alloc_str(neo4j_value_t value);
@@ -279,6 +307,118 @@ neo4j_value_t AV_to_neo4j_path(AV *av) {
   return neo4j_null;
 }
 
+neo4j_value_t SVpv_to_neo4j_elementid(SV *sv) {
+  STRLEN len;
+  char *k0,*k;
+  SV *sv2;
+  k = SvPV(sv,len);
+  // create duplicate to keep SvPVutf8 from changing the original SV
+  sv2 = newSVpvn_flags(k, len, SvFLAGS(sv) & SVf_UTF8 | SVs_TEMP);
+  k = SvPVutf8(sv2, len);
+  Newx(k0,len+1,char);
+  memcpy(k0,k,(size_t) len);
+  *(k0+len) = 0;
+  return neo4j_elementid((const char *)k0);
+}
+
+neo4j_value_t SViv_to_neo4j_date(SV *sv) {
+    neo4j_value_t *fields;
+    Newx(fields, 1, neo4j_value_t);
+    fields[0] = SViv_to_neo4j_int(sv);
+    return neo4j_date(fields);
+}
+
+neo4j_value_t SViv_to_neo4j_localtime(SV *sv) {
+    neo4j_value_t *fields;
+    Newx(fields, 1, neo4j_value_t);
+    fields[0] = SViv_to_neo4j_int(sv);
+    return neo4j_localtime(fields);
+}
+
+neo4j_value_t HV_to_neo4j_time(HV *hv) {
+  neo4j_value_t *fields;
+  SV **nsecs_p, **offset_secs_p;
+  Newx(fields, 2, neo4j_value_t);
+  nsecs_p = hv_fetchs(hv, "nsecs", 0);
+  offset_secs_p = hv_fetchs(hv, "offset_secs", 0);
+  
+  fields[0] = neo4j_int( nsecs_p ? SvIV( *nsecs_p ) : -1 );
+  fields[1] = neo4j_int( offset_secs_p ? SvIV( *offset_secs_p ) : 0);
+  return neo4j_time(fields);
+}
+
+neo4j_value_t HV_to_neo4j_datetime(HV *hv) {
+  SV **secs_p, **nsecs_p, **offset_p;
+  neo4j_value_t *fields;
+  Newx(fields, 3, neo4j_value_t);
+
+  secs_p = hv_fetchs(hv, "secs", 0);
+  nsecs_p = hv_fetchs(hv, "nsecs", 0);
+  offset_p = hv_fetchs(hv, "offset_secs", 0);
+
+  fields[0] = neo4j_int( secs_p ? SvIV( *secs_p ) : -1 );
+  fields[1] = neo4j_int( nsecs_p ? SvIV( *nsecs_p ) : -1 );
+  fields[2] = neo4j_int( offset_p ? SvIV( *offset_p ) : -1 );
+
+  return neo4j_datetime(fields);
+}
+
+neo4j_value_t HV_to_neo4j_localdatetime(HV *hv) {
+  SV **secs_p, **nsecs_p;
+  neo4j_value_t *fields;
+  Newx(fields, 2, neo4j_value_t);
+
+  secs_p = hv_fetchs(hv, "secs", 0);
+  nsecs_p = hv_fetchs(hv, "nsecs", 0);
+
+  fields[0] = neo4j_int( secs_p ? SvIV( *secs_p ) : -1 );
+  fields[1] = neo4j_int( nsecs_p ? SvIV( *nsecs_p ) : -1 );
+
+  return neo4j_localdatetime(fields);
+}
+
+
+neo4j_value_t HV_to_neo4j_duration(HV *hv) {
+    SV **months_p, **days_p, **secs_p, **nsecs_p;
+  neo4j_value_t *fields;
+  Newx(fields, 4, neo4j_value_t);
+
+  months_p = hv_fetchs(hv, "months", 0);
+  days_p = hv_fetchs(hv, "days", 0);
+  secs_p = hv_fetchs(hv, "secs", 0);
+  nsecs_p = hv_fetchs(hv, "nsecs", 0);
+
+  fields[0] = neo4j_int( months_p ? SvIV( *months_p ) : -1 );
+  fields[1] = neo4j_int( days_p ? SvIV( *days_p ) : -1 );
+  fields[2] = neo4j_int( secs_p ? SvIV( *secs_p ) : -1 );
+  fields[3] = neo4j_int( nsecs_p ? SvIV( *nsecs_p ) : -1 );
+
+  return neo4j_duration(fields);
+}
+
+neo4j_value_t HV_to_neo4j_point(HV *hv) {
+  SV **srid_p, **x_p, **y_p, **z_p;
+  neo4j_value_t *fields;
+  Newx(fields, 4, neo4j_value_t);
+
+  x_p = hv_fetchs(hv, "x", 0);
+  y_p = hv_fetchs(hv, "y", 0);
+  z_p = hv_fetchs(hv, "z", 0);
+  srid_p = hv_fetchs(hv, "srid", 0);  
+
+  fields[0] = neo4j_int( srid_p ? SvIV( *srid_p ) : -1 );
+  fields[1] = neo4j_float( x_p ? SvNV( *x_p ) : 0.0 );
+  fields[2] = neo4j_float( y_p ? SvNV( *y_p ) : 0.0 );
+  fields[3] = neo4j_float( z_p ? SvNV( *z_p ) : 0.0 );
+
+  if (z_p) {
+      return neo4j_point3d(fields);
+  }
+  else {
+      return neo4j_point2d(fields);
+  }
+}
+
 long long neo4j_identity_value(neo4j_value_t value)
 {
   value._type = NEO4J_INT;
@@ -317,33 +457,74 @@ SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
 SV* neo4j_value_to_SV( neo4j_value_t value ) {
   neo4j_type_t the_type;
   the_type = neo4j_type( value );
-  if ( the_type ==  NEO4J_BOOL) {
+  switch (the_type)
+  {
+  case NEO4J_BOOL:
     return neo4j_bool_to_SViv(value);
-  } else if ( the_type ==  NEO4J_BYTES) {
+    break;
+  case NEO4J_BYTES:
     return neo4j_bytes_to_SVpv(value);
-  } else if ( the_type ==  NEO4J_FLOAT) {
+    break;
+  case NEO4J_FLOAT:
     return neo4j_float_to_SVnv(value);
-  } else if ( the_type ==  NEO4J_INT) {
+    break;
+  case NEO4J_INT:
     return neo4j_int_to_SViv(value);
-  } else if ( the_type ==  NEO4J_NODE) {
+    break;
+  case NEO4J_NODE:
     return sv_bless( newRV_noinc((SV*)neo4j_node_to_HV( value )),
                      gv_stashpv(NODE_CLASS, GV_ADD) );
-  } else if ( the_type ==  NEO4J_RELATIONSHIP) {
+    break;
+  case NEO4J_RELATIONSHIP:
     return sv_bless( newRV_noinc((SV*)neo4j_relationship_to_HV( value )),
                      gv_stashpv(RELATIONSHIP_CLASS, GV_ADD) );
-  } else if ( the_type ==  NEO4J_NULL) {
+    break;
+  case NEO4J_NULL:
     return newSV(0);
-  } else if ( the_type ==  NEO4J_LIST) {
+    break;
+  case NEO4J_LIST:
     return newRV_noinc((SV*)neo4j_list_to_AV( value ));
-  } else if ( the_type ==  NEO4J_MAP) {
+    break;
+  case NEO4J_MAP:
     return newRV_noinc( (SV*)neo4j_map_to_HV( value ));
-  } else if ( the_type == NEO4J_PATH ){
+    break;
+  case NEO4J_PATH:
     return sv_bless( newRV_noinc((SV*)neo4j_path_to_AV( value )),
                      gv_stashpv(PATH_CLASS, GV_ADD) );
-
-  } else if ( the_type ==  NEO4J_STRING) {
+    break;
+  case NEO4J_STRING:
     return neo4j_string_to_SVpv(value);
-  } else {
+    break;
+  case NEO4J_ELEMENTID:
+    return neo4j_elementid_to_SVpv(value);
+    break;
+  case NEO4J_DATE:
+    return neo4j_date_to_SViv(value);
+    break;
+  case NEO4J_TIME:
+    return neo4j_time_to_SViv(value);
+    break;
+  case NEO4J_LOCALTIME:
+    return neo4j_localtime_to_SViv(value);
+    break;
+  case NEO4J_DATETIME:
+    return sv_bless( newRV_noinc((SV*)neo4j_datetime_to_HV( value )),
+                     gv_stashpv(DATETIME_CLASS, GV_ADD) );
+    break;
+  case NEO4J_LOCALDATETIME:
+    return sv_bless( newRV_noinc((SV*)neo4j_localdatetime_to_HV( value )),
+                     gv_stashpv(DATETIME_CLASS, GV_ADD) );
+    break;
+  case NEO4J_DURATION:
+    return sv_bless( newRV_noinc((SV*)neo4j_duration_to_HV( value )),
+                     gv_stashpv(DURATION_CLASS, GV_ADD) );
+    break;
+  case NEO4J_POINT2D:
+  case NEO4J_POINT3D:
+    return sv_bless( newRV_noinc((SV*)neo4j_point_to_HV( value )),
+                     gv_stashpv(POINT_CLASS, GV_ADD) );
+    break;
+  default:
     warn("Unknown neo4j_value type encountered");
     return newSV(0);
   }
@@ -396,9 +577,6 @@ HV* neo4j_node_to_HV( neo4j_value_t value ) {
   I32 retlen;
   long long id;
   neo4j_value_t labels,props;
-  // const struct neo4j_struct *V;
-  // V = (const struct neo4j_struct *)&value;
-  // printf(neo4j_typestr(neo4j_type(V->fields[0])));
 
   hv = newHV();
   id = neo4j_identity_value(neo4j_node_identity(value));
@@ -468,6 +646,61 @@ AV* neo4j_path_to_AV( neo4j_value_t value) {
     }
     return av;
   }
+}
+
+HV* neo4j_date_to_HV( neo4j_value_t value) {
+  HV *hv;
+  long long days;
+  hv = newHV();
+  days = neo4j_date_days(value);
+  hv_stores(hv, "neo4j_type", newSVpvs("DATE"));
+  hv_stores(hv, "epoch_days", newSViv( (IV) id ));
+  return hv;
+}
+
+HV* neo4j_time_to_HV( neo4j_value_t value) {
+    HV *hv;
+    long long nsecs, offset_secs;
+    hv = newHV();
+    nsecs = neo4j_time_nsecs(value);
+    offset_secs = neo4j_time_secs_offset(value);
+    hv_stores(hv, "neo4j_type", newSVpvs("TIME"));
+    hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+    hv_stores(hv, "offset_secs", newSViv( (IV) offset_secs ));
+    return hv;
+}
+
+HV* neo4j_localtime_to_HV( neo4j_value_t value) {
+    HV *hv;
+    long long nsecs;
+    hv = newHV();
+    nsecs = neo4j_localtime_nsecs(value);
+    hv_stores(hv, "neo4j_type", newSVpvs("LOCALTIME"));
+    hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+    return hv;
+}
+
+HV* neo4j_datetime_to_HV(neo4j_value_t value) {
+    HV *hv;
+    long long secs, nsecs, offset_secs;
+    hv = newHV();
+    secs = neo4j_datetime_secs(value);
+    nsecs = neo4j_datetime_nsecs(value);
+    offset_secs = neo4j_datetime_secs_offset(value);
+    hv_stores(hv, "neo4j_type", newSVpvs("DATETIME"));
+    hv_stores(hv, "epoch_secs", newSViv( (IV) secs ));
+    hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+    hv_stores(hv, "offset_secs", newSViv( (IV) offset_secs ));
+    return hv;
+}
+
+HV* neo4j_localdatetime_to_HV(neo4j_value_t value) {
+}
+
+HV* neo4j_duration_to_HV(neo4j_value_t value) {
+}
+
+HV* neo4j_point_to_HV(neo4j_value_t value) {
 }
 
 

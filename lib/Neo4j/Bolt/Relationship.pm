@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Relationship;
 # ABSTRACT: Representation of Neo4j Relationship
 
-$Neo4j::Bolt::Relationship::VERSION = '0.4203';
+$Neo4j::Bolt::Relationship::VERSION = '0.5000';
 
 use strict;
 use warnings;
@@ -94,7 +94,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Relationship>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2020-2021 by Arne Johannessen
+This software is Copyright (c) 2020-2023 by Arne Johannessen
 
 This is free software, licensed under:
 

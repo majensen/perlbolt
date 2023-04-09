@@ -9,6 +9,9 @@
 #define NODE_CLASS "Neo4j::Bolt::Node"
 #define RELATIONSHIP_CLASS "Neo4j::Bolt::Relationship"
 #define PATH_CLASS "Neo4j::Bolt::Path"
+#define DATETIME_CLASS "Neo4j::Bolt::DateTime"
+#define DURATION_CLASS "Neo4j::Bolt::Duration"
+#define POINT_CLASS "Neo4j::Bolt::Point"
 #define BUFLEN 256
 
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))

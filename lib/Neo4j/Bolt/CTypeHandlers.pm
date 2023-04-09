@@ -1,6 +1,6 @@
 package Neo4j::Bolt::CTypeHandlers;
 BEGIN {
-  our $VERSION = "0.4203";
+  our $VERSION = "0.5000";
   require XSLoader;
   XSLoader::load();
 }
