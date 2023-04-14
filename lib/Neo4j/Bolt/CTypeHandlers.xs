@@ -39,6 +39,8 @@ neo4j_value_t SViv_to_neo4j_date(SV *sv);
 neo4j_value_t SViv_to_neo4j_localtime(SV *sv);
 
 neo4j_value_t HV_to_neo4j_time(HV *hv);
+neo4j_value_t HV_to_neo4j_localtime(HV *hv);
+neo4j_value_t HV_to_neo4j_date(HV *hv);
 neo4j_value_t HV_to_neo4j_datetime(HV *hv);
 neo4j_value_t HV_to_neo4j_localdatetime(HV *hv);
 neo4j_value_t HV_to_neo4j_duration(HV *hv);
@@ -58,9 +60,6 @@ HV* neo4j_map_to_HV( neo4j_value_t value );
 SV* neo4j_value_to_SV( neo4j_value_t value );
 
 SV* neo4j_elementid_to_SVpv( neo4j_value_t value);
-
-SV* neo4j_date_to_SViv( neo4j_value_t value);
-SV* neo4j_localtime_to_SViv( neo4j_value_t value);
 
 HV* neo4j_date_to_HV( neo4j_value_t value);
 HV* neo4j_time_to_HV( neo4j_value_t value);
@@ -141,7 +140,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
       return AV_to_neo4j_list( (AV*) thing );
     }
     else if (t == SVt_PVHV) { //hash
-      // determine if is a map, node, or reln
+      // determine if is a map, node, reln, or struct-base type
       hv = (HV *)thing;
       if (sv_isobject(sv)) {
         if (sv_isa(sv, NODE_CLASS)) { // node
@@ -150,9 +149,20 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
         if (sv_isa(sv, RELATIONSHIP_CLASS)) { // reln
           return HV_to_neo4j_relationship(hv);
         }
+	if (sv_isa(sv, DATETIME_CLASS)) {
+	    // determine object desired - specify in neo4j_type key?
+	}
+	if (sv_isa(sv, DURATION_CLASS)) {
+	    return HV_to_neo4j_duration(hv);
+	}
+	if (sv_isa(sv, POINT_CLASS)) {
+	    return HV_to_neo4j_point(hv);
+	}
         warn("Unknown blessed hash reference type encountered");
       }
-      return HV_to_neo4j_map(hv); // map
+      else {
+	  return HV_to_neo4j_map(hv); // map
+      }
     }
   }
   else {
@@ -347,12 +357,34 @@ neo4j_value_t HV_to_neo4j_time(HV *hv) {
   return neo4j_time(fields);
 }
 
+neo4j_value_t HV_to_neo4j_date(HV *hv) {
+    SV **svp;
+    svp = hv_fetchs(hv, "epoch_days", 0);
+    if (svp == NULL) {
+	warn("Can't create neo4j_date: no epoch_days value in hash");
+	return neo4j_null;
+    } else {
+	return SViv_to_neo4j_date(&svp);
+    }
+}
+
+neo4j_value_t HV_to_neo4j_localtime(HV *hv) {
+    SV **svp;
+    svp = hv_fetchs(hv, "nsecs", 0);
+    if (svp == NULL) {
+	warn("Can't create neo4j_date: no nsecs value in hash");
+	return neo4j_null;
+    } else {
+	return SViv_to_neo4j_localtime(&svp);
+    }
+}
+
 neo4j_value_t HV_to_neo4j_datetime(HV *hv) {
   SV **secs_p, **nsecs_p, **offset_p;
   neo4j_value_t *fields;
   Newx(fields, 3, neo4j_value_t);
 
-  secs_p = hv_fetchs(hv, "secs", 0);
+  secs_p = hv_fetchs(hv, "epoch_secs", 0);
   nsecs_p = hv_fetchs(hv, "nsecs", 0);
   offset_p = hv_fetchs(hv, "offset_secs", 0);
 
@@ -454,77 +486,78 @@ SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
   return pv;
 }
 
+SV* neo4j_elementid_to_SVpv( neo4j_value_t value ) {
+    return neo4j_string_to_SVpv(value);
+}
+
 SV* neo4j_value_to_SV( neo4j_value_t value ) {
   neo4j_type_t the_type;
   the_type = neo4j_type( value );
-  switch (the_type)
-  {
-  case NEO4J_BOOL:
+  if (the_type == NEO4J_BOOL) {
     return neo4j_bool_to_SViv(value);
-    break;
-  case NEO4J_BYTES:
+  }
+  else if (the_type == NEO4J_BYTES) {
     return neo4j_bytes_to_SVpv(value);
-    break;
-  case NEO4J_FLOAT:
+  }
+  else if (the_type == NEO4J_FLOAT) {
     return neo4j_float_to_SVnv(value);
-    break;
-  case NEO4J_INT:
+  }
+  else if (the_type == NEO4J_INT) {
     return neo4j_int_to_SViv(value);
-    break;
-  case NEO4J_NODE:
+  }
+  else if (the_type == NEO4J_NODE) {
     return sv_bless( newRV_noinc((SV*)neo4j_node_to_HV( value )),
                      gv_stashpv(NODE_CLASS, GV_ADD) );
-    break;
-  case NEO4J_RELATIONSHIP:
+  }
+  else if (the_type == NEO4J_RELATIONSHIP) {
     return sv_bless( newRV_noinc((SV*)neo4j_relationship_to_HV( value )),
                      gv_stashpv(RELATIONSHIP_CLASS, GV_ADD) );
-    break;
-  case NEO4J_NULL:
+  }
+  else if (the_type == NEO4J_NULL) {
     return newSV(0);
-    break;
-  case NEO4J_LIST:
+  }
+  else if (the_type == NEO4J_LIST) {
     return newRV_noinc((SV*)neo4j_list_to_AV( value ));
-    break;
-  case NEO4J_MAP:
+  }
+  else if (the_type == NEO4J_MAP) {
     return newRV_noinc( (SV*)neo4j_map_to_HV( value ));
-    break;
-  case NEO4J_PATH:
+  }
+  else if (the_type == NEO4J_PATH) {
     return sv_bless( newRV_noinc((SV*)neo4j_path_to_AV( value )),
                      gv_stashpv(PATH_CLASS, GV_ADD) );
-    break;
-  case NEO4J_STRING:
+  }
+  else if (the_type == NEO4J_STRING) {
     return neo4j_string_to_SVpv(value);
-    break;
-  case NEO4J_ELEMENTID:
+  }
+  else if (the_type == NEO4J_ELEMENTID) {
     return neo4j_elementid_to_SVpv(value);
-    break;
-  case NEO4J_DATE:
-    return neo4j_date_to_SViv(value);
-    break;
-  case NEO4J_TIME:
-    return neo4j_time_to_SViv(value);
-    break;
-  case NEO4J_LOCALTIME:
-    return neo4j_localtime_to_SViv(value);
-    break;
-  case NEO4J_DATETIME:
+  }
+  else if (the_type == NEO4J_DATE) {
+    return neo4j_date_to_HV(value);
+  }
+  else if (the_type == NEO4J_TIME) {
+    return neo4j_time_to_HV(value);
+  }
+  else if (the_type == NEO4J_LOCALTIME) {
+    return neo4j_localtime_to_HV(value);
+  }
+  else if (the_type == NEO4J_DATETIME) {
     return sv_bless( newRV_noinc((SV*)neo4j_datetime_to_HV( value )),
                      gv_stashpv(DATETIME_CLASS, GV_ADD) );
-    break;
-  case NEO4J_LOCALDATETIME:
+  }
+  else if (the_type == NEO4J_LOCALDATETIME) {
     return sv_bless( newRV_noinc((SV*)neo4j_localdatetime_to_HV( value )),
                      gv_stashpv(DATETIME_CLASS, GV_ADD) );
-    break;
-  case NEO4J_DURATION:
+  }
+  else if (the_type == NEO4J_DURATION) {
     return sv_bless( newRV_noinc((SV*)neo4j_duration_to_HV( value )),
                      gv_stashpv(DURATION_CLASS, GV_ADD) );
-    break;
-  case NEO4J_POINT2D:
-  case NEO4J_POINT3D:
+  }
+  else if (the_type == NEO4J_POINT2D || the_type == NEO4J_POINT3D) {
     return sv_bless( newRV_noinc((SV*)neo4j_point_to_HV( value )),
                      gv_stashpv(POINT_CLASS, GV_ADD) );
-    break;
-  default:
+  }
+  else {
     warn("Unknown neo4j_value type encountered");
     return newSV(0);
   }
@@ -654,7 +687,7 @@ HV* neo4j_date_to_HV( neo4j_value_t value) {
   hv = newHV();
   days = neo4j_date_days(value);
   hv_stores(hv, "neo4j_type", newSVpvs("DATE"));
-  hv_stores(hv, "epoch_days", newSViv( (IV) id ));
+  hv_stores(hv, "epoch_days", newSViv( (IV) days ));
   return hv;
 }
 
@@ -695,12 +728,59 @@ HV* neo4j_datetime_to_HV(neo4j_value_t value) {
 }
 
 HV* neo4j_localdatetime_to_HV(neo4j_value_t value) {
+    HV *hv;
+    long long epoch_secs, nsecs;
+    hv = newHV();
+    epoch_secs = neo4j_localdatetime_secs(value);
+    nsecs = neo4j_localdatetime_nsecs(value);
+    hv_stores(hv, "neo4j_type", newSVpvs("LOCALDATETIME"));
+    hv_stores(hv, "epoch_secs", newSViv( (IV) secs ));
+    hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+    return hv;
 }
 
 HV* neo4j_duration_to_HV(neo4j_value_t value) {
+    HV *hv;
+    long long months, days, secs, nsecs;
+    hv = newHV();
+    months = neo4j_duration_months(value);
+    days = neo4j_duration_days(value);
+    secs = neo4j_duration_secs(value);
+    nsecs = neo4j_duration_nsecs(value);
+    hv_stores(hv, "months", newSViv( (IV) months ));
+    hv_stores(hv, "days", newSViv( (IV) days ));    
+    hv_stores(hv, "secs", newSViv( (IV) secs ));
+    hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+    return hv;
 }
 
 HV* neo4j_point_to_HV(neo4j_value_t value) {
+    HV *hv;
+    long long srid;
+    double x, y, z;
+    hv = newHV();
+    if (neo4j_type(value) == NEO4J_POINT2D) {
+	srid = neo4j_point2d_srid(value);
+	x = neo4j_point2d_x(value);
+	y = neo4j_point2d_y(value);
+    }
+    else if (neo4j_type(value) == NEO4J_POINT3D) {
+	srid = neo4j_point3d_srid(value);
+	x = neo4j_point3d_x(value);
+	y = neo4j_point3d_y(value);
+	z = neo4j_point3d_z(value);	
+    }
+    else {
+        warn("Arg is not a neo4j point type");	
+	return hv;
+    }
+    hv_stores(hv, "srid", newSViv( (IV) srid ));
+    hv_stores(hv, "x", newSVnv( (NV) x ));
+    hv_stores(hv, "y", newSVnv( (NV) y ));
+    if (neo4j_type(value) == NEO4J_POINT3D) {
+	hv_stores(hv, "z", newSVnv( (NV) z ));
+    }
+    return hv;
 }
 
 
