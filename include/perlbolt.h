@@ -16,6 +16,7 @@
 
 #define C_PTR_OF(perl_obj,c_type) ((c_type *)SvIV(SvRV(perl_obj)))
 #define ignore_unused_result(func) if (func) { }
+#define value_to_blessed_sv(the_value,the_func,THE_CLASS) (sv_bless(newRV_noinc((SV*) the_func(the_value)),gv_stashpv(THE_CLASS,GV_ADD)))
 
 struct cxn_obj {
   neo4j_connection_t *connection;

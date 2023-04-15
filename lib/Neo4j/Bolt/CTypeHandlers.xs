@@ -69,9 +69,6 @@ HV* neo4j_localdatetime_to_HV(neo4j_value_t value);
 HV* neo4j_duration_to_HV(neo4j_value_t value);
 HV* neo4j_point_to_HV(neo4j_value_t value);
 
-
-
-
 long long neo4j_identity_value(neo4j_value_t value);
 char *neo4j_string_to_alloc_str(neo4j_value_t value);
 
@@ -150,7 +147,28 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
           return HV_to_neo4j_relationship(hv);
         }
 	if (sv_isa(sv, DATETIME_CLASS)) {
-	    // determine object desired - specify in neo4j_type key?
+	    // determine time by "signature"
+	    if (hv_fetchs(hv, "epoch_days",0) != NULL) {
+		return HV_to_neo4j_date(hv);
+	    }
+	    else {
+		if (hv_fetchs(hv, "epoch_secs",0) != NULL) {
+		    return HV_to_neo4j_datetime(hv);
+		}
+		else {
+		    if (hv_fetchs(hv, "offset_secs",0) != NULL) {
+			return HV_to_neo4j_time(hv);
+		    }
+		    else {
+			if (hv_fetchs(hv, "secs",0) != NULL) {
+			    return HV_to_neo4j_localdatetime(hv);
+			}
+			else {
+			    return HV_to_neo4j_localtime(hv);
+			}
+		    }
+		}
+	    }
 	}
 	if (sv_isa(sv, DURATION_CLASS)) {
 	    return HV_to_neo4j_duration(hv);
@@ -364,7 +382,7 @@ neo4j_value_t HV_to_neo4j_date(HV *hv) {
 	warn("Can't create neo4j_date: no epoch_days value in hash");
 	return neo4j_null;
     } else {
-	return SViv_to_neo4j_date(&svp);
+	return SViv_to_neo4j_date(*svp);
     }
 }
 
@@ -375,7 +393,7 @@ neo4j_value_t HV_to_neo4j_localtime(HV *hv) {
 	warn("Can't create neo4j_date: no nsecs value in hash");
 	return neo4j_null;
     } else {
-	return SViv_to_neo4j_localtime(&svp);
+	return SViv_to_neo4j_localtime(*svp);
     }
 }
 
@@ -506,12 +524,10 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
     return neo4j_int_to_SViv(value);
   }
   else if (the_type == NEO4J_NODE) {
-    return sv_bless( newRV_noinc((SV*)neo4j_node_to_HV( value )),
-                     gv_stashpv(NODE_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_node_to_HV,NODE_CLASS);
   }
   else if (the_type == NEO4J_RELATIONSHIP) {
-    return sv_bless( newRV_noinc((SV*)neo4j_relationship_to_HV( value )),
-                     gv_stashpv(RELATIONSHIP_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_relationship_to_HV,RELATIONSHIP_CLASS);
   }
   else if (the_type == NEO4J_NULL) {
     return newSV(0);
@@ -523,8 +539,9 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
     return newRV_noinc( (SV*)neo4j_map_to_HV( value ));
   }
   else if (the_type == NEO4J_PATH) {
-    return sv_bless( newRV_noinc((SV*)neo4j_path_to_AV( value )),
-                     gv_stashpv(PATH_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_path_to_AV,PATH_CLASS);
+//    return sv_bless( newRV_noinc((SV*)neo4j_path_to_AV( value )),
+//                     gv_stashpv(PATH_CLASS, GV_ADD) );
   }
   else if (the_type == NEO4J_STRING) {
     return neo4j_string_to_SVpv(value);
@@ -533,29 +550,27 @@ SV* neo4j_value_to_SV( neo4j_value_t value ) {
     return neo4j_elementid_to_SVpv(value);
   }
   else if (the_type == NEO4J_DATE) {
-    return neo4j_date_to_HV(value);
+      return value_to_blessed_sv(value,neo4j_date_to_HV,DATETIME_CLASS);
   }
   else if (the_type == NEO4J_TIME) {
-    return neo4j_time_to_HV(value);
+      return value_to_blessed_sv(value,neo4j_time_to_HV,DATETIME_CLASS);
   }
   else if (the_type == NEO4J_LOCALTIME) {
-    return neo4j_localtime_to_HV(value);
+      return value_to_blessed_sv(value,neo4j_localtime_to_HV,DATETIME_CLASS);
   }
   else if (the_type == NEO4J_DATETIME) {
-    return sv_bless( newRV_noinc((SV*)neo4j_datetime_to_HV( value )),
-                     gv_stashpv(DATETIME_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_datetime_to_HV,DATETIME_CLASS);
+//    return sv_bless( newRV_noinc((SV*)neo4j_datetime_to_HV( value )),
+//                     gv_stashpv(DATETIME_CLASS, GV_ADD) );
   }
   else if (the_type == NEO4J_LOCALDATETIME) {
-    return sv_bless( newRV_noinc((SV*)neo4j_localdatetime_to_HV( value )),
-                     gv_stashpv(DATETIME_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_localdatetime_to_HV,DATETIME_CLASS);
   }
   else if (the_type == NEO4J_DURATION) {
-    return sv_bless( newRV_noinc((SV*)neo4j_duration_to_HV( value )),
-                     gv_stashpv(DURATION_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_duration_to_HV,DURATION_CLASS);
   }
   else if (the_type == NEO4J_POINT2D || the_type == NEO4J_POINT3D) {
-    return sv_bless( newRV_noinc((SV*)neo4j_point_to_HV( value )),
-                     gv_stashpv(POINT_CLASS, GV_ADD) );
+      return value_to_blessed_sv(value,neo4j_point_to_HV,POINT_CLASS);
   }
   else {
     warn("Unknown neo4j_value type encountered");
@@ -734,7 +749,7 @@ HV* neo4j_localdatetime_to_HV(neo4j_value_t value) {
     epoch_secs = neo4j_localdatetime_secs(value);
     nsecs = neo4j_localdatetime_nsecs(value);
     hv_stores(hv, "neo4j_type", newSVpvs("LOCALDATETIME"));
-    hv_stores(hv, "epoch_secs", newSViv( (IV) secs ));
+    hv_stores(hv, "epoch_secs", newSViv( (IV) epoch_secs ));
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
     return hv;
 }
