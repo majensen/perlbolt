@@ -241,22 +241,25 @@ neo4j_value_t HV_to_neo4j_map (HV *hv) {
   return neo4j_map( map_ents, HvTOTALKEYS(hv) );
 }
 
-// neo4j_node(neo4j_value_t fields[3]) is not exposed in the API
+// neo4j_node(neo4j_value_t fields[4]) is not exposed in the API
 // fields[0] is a NEO4J_IDENTITY
 // fields[1] is a NEO4J_LIST of node labels (NEO4J_STRINGs)
 //   (note REST::Neo4p::Node doesn't store a list of labels in the
 //   simple rendering! Fix!)
 // fields[2] is a NEO4J_MAP of properties
+// fields[3] is a NEO4J_ELEMENTID
+
 neo4j_value_t HV_to_neo4j_node(HV *hv) {
-  SV **node_id_p, **lbls_ref_p, **props_ref_p;
+  SV **node_id_p, **lbls_ref_p, **props_ref_p, **elt_id_p;
   AV *lbls;
   HV *props;
   neo4j_value_t *fields;
   neo4j_map_entry_t null_ent;
-  Newx(fields, 3, neo4j_value_t);
+  Newx(fields, 4, neo4j_value_t);
 
-  node_id_p = hv_fetch(hv, "id", 2, 0);
-  lbls_ref_p = hv_fetch(hv, "labels", 6, 0);
+  node_id_p = hv_fetchs(hv, "id", 0);
+  lbls_ref_p = hv_fetchs(hv, "labels", 0);
+  elt_id_p = hv_fetchs(hv, "element_id", 0);
   if (lbls_ref_p && SvROK(*lbls_ref_p)) {
     lbls = (AV*) SvRV(*lbls_ref_p);
   } else {
@@ -269,8 +272,9 @@ neo4j_value_t HV_to_neo4j_node(HV *hv) {
     fields[1] = neo4j_list( &neo4j_null, 0 );
   }
   fields[0] = neo4j_identity( node_id_p ? SvIV( *node_id_p ) : -1 );
-
-  props_ref_p = hv_fetch(hv, "properties", 10, 0);
+  fields[3] = elt_id_p ? SVpv_to_neo4j_elementid( (SV*) *elt_id_p ) :
+      neo4j_null;
+  props_ref_p = hv_fetchs(hv, "properties", 0);
   if (props_ref_p && SvROK(*props_ref_p)) {
     props = (HV*) SvRV(*props_ref_p);
   } else {
@@ -286,25 +290,32 @@ neo4j_value_t HV_to_neo4j_node(HV *hv) {
 }
 
 
-// neo4j_relationship( neo4j_value_t fields[5] ) is not exposed in API
+// neo4j_relationship( neo4j_value_t fields[8] ) is not exposed in API
 // field[0] is NEO4J_IDENTITY (id of the relationship)
 // field[1] is NEO4J_IDENTITY (id of the start node))
 // field[2] is NEO4J_IDENTITY (id of the end node))
 // field[3] is NEO4J_STRING (relationship type)
 // field[4] is NEO4J_MAP (properties)
+// field[5] is NEO4J_ELEMENTID (elt id of the relationship)
+// field[6] is NEO4J_ELEMENTID (elt id of the start node))
+// field[7] is NEO4J_ELEMENTID (elt id of the end node))
 
 neo4j_value_t HV_to_neo4j_relationship(HV *hv) {
   SV **reln_id_p, **start_id_p, **end_id_p, **type_p, **props_ref_p;
+  SV **reln_eid_p, **start_eid_p, **end_eid_p;
   HV *props;
   neo4j_value_t *fields;
   neo4j_map_entry_t null_ent;
 
   Newx(fields, 5, neo4j_value_t);
 
-  reln_id_p = hv_fetch(hv, "id", 2, 0);
-  start_id_p = hv_fetch(hv, "start", 5, 0);
-  end_id_p = hv_fetch(hv, "end", 3, 0);
-  type_p = hv_fetch(hv, "type", 4, 0);
+  reln_id_p = hv_fetchs(hv, "id", 0);
+  start_id_p = hv_fetchs(hv, "start", 0);
+  end_id_p = hv_fetchs(hv, "end", 0);
+  type_p = hv_fetchs(hv, "type", 0);
+  reln_eid_p = hv_fetchs(hv, "element_id", 0);
+  start_eid_p = hv_fetchs(hv, "element_start", 0);
+  end_eid_p = hv_fetchs(hv, "element_end", 0);
 
   fields[0] = neo4j_identity( reln_id_p ? SvIV( *reln_id_p ) : -1 );
   fields[1] = neo4j_identity( start_id_p ? SvIV( *start_id_p ) : -1 );
@@ -314,6 +325,12 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv) {
   } else {
     fields[3] = neo4j_string("");
   }
+  fields[5] = reln_eid_p ? SVpv_to_neo4j_elementid( (SV*) *reln_eid_p ) :
+      neo4j_null;
+  fields[6] = start_eid_p ? SVpv_to_neo4j_elementid( (SV*) *start_eid_p ) :
+      neo4j_null;
+  fields[7] = end_eid_p ? SVpv_to_neo4j_elementid( (SV*) *end_eid_p ) :
+      neo4j_null;
 
   props_ref_p = hv_fetch(hv, "properties", 10, 0);
   if (props_ref_p && SvROK(*props_ref_p)) {
