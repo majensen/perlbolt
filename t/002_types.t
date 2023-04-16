@@ -27,28 +27,28 @@ $v = Neo4j::Bolt::NeoValue->_new_from_perl({ this => "is", a => 5, hash => "map"
 is $v->_neotype, "Map", "Map";
 is_deeply $v->_as_perl,{ this => "is", a => 5, hash => "map"}, "roundtrip";
 
-$i = bless { id => 154732534 }, "Neo4j::Bolt::Node";
+$i = bless { id => 154732534, element_id => "154732534" }, "Neo4j::Bolt::Node";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Empty node";
 is_deeply $v->_as_perl,$i,"Empty node roundtrip";
-$i = bless { id => 154732534, properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
+$i = bless { id => 154732534, element_id => "154732534", properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Node with Props";
 is_deeply $v->_as_perl,$i,"Node with Props roundtrip";
-$i = bless { id => 154732534, labels=>['lab','el'], properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
+$i = bless { id => 154732534, element_id => "154732534", labels=>['lab','el'], properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Node";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Node", "Node with Props & Labels";
 is_deeply $v->_as_perl,$i,"Node with Props & Labels roundtrip";
 
-$i = bless { id => 154732534, start => 53243, end => 235367, type => "IS_THING", properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Relationship";
+$i = bless { id => 154732534, element_id => "154732534", start => 53243, start_element_id => "53243", end => 235367, end_element_id => "235367", type => "IS_THING", properties => {these => "are", some => "props"} }, "Neo4j::Bolt::Relationship";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Relationship", "Relationship with Type and Props";
 is_deeply $v->_as_perl,$i,"Rel with Type and Props roundtrip";
-$i = bless { id => 154732534, start => 53243, end => 235367, type => "IS_THING"}, "Neo4j::Bolt::Relationship";
+$i = bless { id => 154732534, element_id => "154732534", start => 53243, start_element_id => "53243", end => 235367, end_element_id => "235367", type => "IS_THING"}, "Neo4j::Bolt::Relationship";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Relationship", "Relationship with Type only";
 is_deeply $v->_as_perl,$i,"Rel with Type only roundtrip";
-$i = bless { id => 154732534, start => 53243, end => 235367}, "Neo4j::Bolt::Relationship";
+$i = bless { id => 154732534, element_id => "154732534", start => 53243, start_element_id => "53243", end => 235367, end_element_id => "235367"}, "Neo4j::Bolt::Relationship";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Relationship", "Relationship with no type";
 is_deeply $v->_as_perl,$i,"Rel with no type roundtrip";

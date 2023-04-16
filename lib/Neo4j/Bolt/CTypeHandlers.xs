@@ -307,7 +307,7 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv) {
   neo4j_value_t *fields;
   neo4j_map_entry_t null_ent;
 
-  Newx(fields, 5, neo4j_value_t);
+  Newx(fields, 8, neo4j_value_t);
 
   reln_id_p = hv_fetchs(hv, "id", 0);
   start_id_p = hv_fetchs(hv, "start", 0);
@@ -682,7 +682,7 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   hv_stores(hv, "start", newSViv( (IV) start_id ));
   hv_stores(hv, "start_element_id", newSVpv(neo4j_ustring_value(start_elt_id),0));  
   hv_stores(hv, "end", newSViv( (IV) end_id ));
-  hv_stores(hv, "end_element_id", newSVpv(neo4j_ustring_value(start_elt_id),0));    
+  hv_stores(hv, "end_element_id", newSVpv(neo4j_ustring_value(end_elt_id),0));    
   SvPV(type,len);
   retlen = (I32) len;
   if (retlen) {
