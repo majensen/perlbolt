@@ -13,6 +13,7 @@ sub as_simple {
   
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_node} = $self->{id};
+  $simple{_element_id} = $self->{element_id};
   $simple{_labels} = defined $self->{labels} ? $self->{labels} : [];
   return \%simple;
 }
@@ -31,6 +32,7 @@ Neo4j::Bolt::Node - Representation of a Neo4j Node
  $node = ( $cxn->run_query($q)->fetch_next )[0];
  
  $node_id    = $node->{id};
+ $node_eltid = $node->{element_id};
  $labels     = $node->{labels} // [];
  @labels     = @$labels;
  $properties = $node->{properties} // {};

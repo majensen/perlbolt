@@ -314,8 +314,8 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv) {
   end_id_p = hv_fetchs(hv, "end", 0);
   type_p = hv_fetchs(hv, "type", 0);
   reln_eid_p = hv_fetchs(hv, "element_id", 0);
-  start_eid_p = hv_fetchs(hv, "element_start", 0);
-  end_eid_p = hv_fetchs(hv, "element_end", 0);
+  start_eid_p = hv_fetchs(hv, "start_element_id", 0);
+  end_eid_p = hv_fetchs(hv, "end_element_id", 0);
 
   fields[0] = neo4j_identity( reln_id_p ? SvIV( *reln_id_p ) : -1 );
   fields[1] = neo4j_identity( start_id_p ? SvIV( *start_id_p ) : -1 );
@@ -639,15 +639,18 @@ HV* neo4j_node_to_HV( neo4j_value_t value ) {
   HV *hv, *props_hv;
   char *k;
   SV *v;
+  neo4j_value_t elt_id;
   I32 retlen;
   long long id;
   neo4j_value_t labels,props;
 
   hv = newHV();
   id = neo4j_identity_value(neo4j_node_identity(value));
+  elt_id = neo4j_node_elementid(value);
   labels = neo4j_node_labels(value);
   props_hv = neo4j_map_to_HV(neo4j_node_properties(value));
   hv_stores(hv, "id", newSViv( (IV) id ));
+  hv_stores(hv, "element_id", newSVpv(neo4j_ustring_value(elt_id),0));
   if (neo4j_list_length(labels)) {
     hv_stores(hv, "labels", neo4j_value_to_SV(labels));
   }
@@ -664,15 +667,22 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   STRLEN len;
   I32 retlen;
   long long reln_id,start_id,end_id;
+  neo4j_value_t elt_id, start_elt_id, end_elt_id;
   hv = newHV();
   reln_id = neo4j_identity_value(neo4j_relationship_identity(value));
+  elt_id = neo4j_relationship_elementid(value);
   start_id = neo4j_identity_value(neo4j_relationship_start_node_identity(value));
+  start_elt_id = neo4j_relationship_start_node_elementid(value);
   end_id = neo4j_identity_value(neo4j_relationship_end_node_identity(value));
+  end_elt_id = neo4j_relationship_end_node_elementid(value);  
   type = neo4j_string_to_SVpv(neo4j_relationship_type(value));
   props_hv = neo4j_map_to_HV(neo4j_relationship_properties(value));
   hv_stores(hv, "id", newSViv( (IV) reln_id ));
+  hv_stores(hv, "element_id", newSVpv(neo4j_ustring_value(elt_id),0));  
   hv_stores(hv, "start", newSViv( (IV) start_id ));
+  hv_stores(hv, "start_element_id", newSVpv(neo4j_ustring_value(start_elt_id),0));  
   hv_stores(hv, "end", newSViv( (IV) end_id ));
+  hv_stores(hv, "end_element_id", newSVpv(neo4j_ustring_value(start_elt_id),0));    
   SvPV(type,len);
   retlen = (I32) len;
   if (retlen) {
@@ -718,10 +728,11 @@ HV* neo4j_date_to_HV( neo4j_value_t value) {
   long long days;
   hv = newHV();
   days = neo4j_date_days(value);
-  hv_stores(hv, "neo4j_type", newSVpvs("DATE"));
+  hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
   hv_stores(hv, "epoch_days", newSViv( (IV) days ));
   return hv;
 }
+
 
 HV* neo4j_time_to_HV( neo4j_value_t value) {
     HV *hv;
@@ -729,7 +740,7 @@ HV* neo4j_time_to_HV( neo4j_value_t value) {
     hv = newHV();
     nsecs = neo4j_time_nsecs(value);
     offset_secs = neo4j_time_secs_offset(value);
-    hv_stores(hv, "neo4j_type", newSVpvs("TIME"));
+    hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
     hv_stores(hv, "offset_secs", newSViv( (IV) offset_secs ));
     return hv;
@@ -740,7 +751,7 @@ HV* neo4j_localtime_to_HV( neo4j_value_t value) {
     long long nsecs;
     hv = newHV();
     nsecs = neo4j_localtime_nsecs(value);
-    hv_stores(hv, "neo4j_type", newSVpvs("LOCALTIME"));
+    hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
     return hv;
 }
@@ -752,7 +763,7 @@ HV* neo4j_datetime_to_HV(neo4j_value_t value) {
     secs = neo4j_datetime_secs(value);
     nsecs = neo4j_datetime_nsecs(value);
     offset_secs = neo4j_datetime_secs_offset(value);
-    hv_stores(hv, "neo4j_type", newSVpvs("DATETIME"));
+    hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
     hv_stores(hv, "epoch_secs", newSViv( (IV) secs ));
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
     hv_stores(hv, "offset_secs", newSViv( (IV) offset_secs ));
@@ -765,7 +776,7 @@ HV* neo4j_localdatetime_to_HV(neo4j_value_t value) {
     hv = newHV();
     epoch_secs = neo4j_localdatetime_secs(value);
     nsecs = neo4j_localdatetime_nsecs(value);
-    hv_stores(hv, "neo4j_type", newSVpvs("LOCALDATETIME"));
+    hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
     hv_stores(hv, "epoch_secs", newSViv( (IV) epoch_secs ));
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
     return hv;

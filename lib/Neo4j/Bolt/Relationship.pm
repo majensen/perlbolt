@@ -13,8 +13,11 @@ sub as_simple {
   
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_relationship} = $self->{id};
+  $simple{_element_id} = $self->{element_id};
   $simple{_start} = $self->{start};
+  $simple{_start_element_id} = $self->{start_element_id};
   $simple{_end} = $self->{end};
+  $simple{_end_element_id} = $self->{end_element_id};
   $simple{_type} = $self->{type};
   return \%simple;
 }
