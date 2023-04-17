@@ -153,19 +153,18 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
 	    }
 	    else {
 		if (hv_fetchs(hv, "epoch_secs",0) != NULL) {
-		    return HV_to_neo4j_datetime(hv);
+		    if (hv_fetchs(hv, "offset_secs",0) != NULL) {
+			return HV_to_neo4j_datetime(hv);
+		    } else {
+			return HV_to_neo4j_localdatetime(hv);
+		    }
 		}
 		else {
 		    if (hv_fetchs(hv, "offset_secs",0) != NULL) {
 			return HV_to_neo4j_time(hv);
 		    }
 		    else {
-			if (hv_fetchs(hv, "secs",0) != NULL) {
-			    return HV_to_neo4j_localdatetime(hv);
-			}
-			else {
-			    return HV_to_neo4j_localtime(hv);
-			}
+			return HV_to_neo4j_localtime(hv);
 		    }
 		}
 	    }
@@ -435,7 +434,7 @@ neo4j_value_t HV_to_neo4j_localdatetime(HV *hv) {
   neo4j_value_t *fields;
   Newx(fields, 2, neo4j_value_t);
 
-  secs_p = hv_fetchs(hv, "secs", 0);
+  secs_p = hv_fetchs(hv, "epoch_secs", 0);
   nsecs_p = hv_fetchs(hv, "nsecs", 0);
 
   fields[0] = neo4j_int( secs_p ? SvIV( *secs_p ) : -1 );

@@ -7,7 +7,7 @@ use strict;
 use warnings;
 use DateTime;
 
-use parent 'Neo4j::Types::Duration';
+# use parent 'Neo4j::Types::Duration';
 
 sub as_DTDuration {
   my ($self) = @_;
