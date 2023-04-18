@@ -62,10 +62,18 @@ SKIP: {
     is ref $pth, 'Neo4j::Bolt::Path', 'got path as Neo4j::Bolt::Path';
     is scalar @$pth, 3, 'path array length';
     is ref $pth->[0], 'Neo4j::Bolt::Node', 'got start node as Neo4j::Bolt::Node';
+    ok defined $pth->[0]->{element_id}, 'node element_id defined';
+    diag $pth->[0]->{element_id};
     is ref $pth->[2], 'Neo4j::Bolt::Node', 'got end node as Neo4j::Bolt::Node';
     is ref $pth->[1], 'Neo4j::Bolt::Relationship', 'relationship is a Neo4j::Bolt::Relationship';
     is $pth->[1]->{start}, $pth->[0]->{id}, 'relationship start correct';
     is $pth->[1]->{end}, $pth->[2]->{id}, 'relationship end correct';
+    ok $pth->[1]->{element_id}, 'relationship element id defined';
+    diag $pth->[1]->{element_id};    
+    ok $pth->[1]->{start_element_id}, 'relationship start element id defined';
+    diag $pth->[1]->{start_element_id};    
+    ok $pth->[1]->{end_element_id}, 'relationship end element id defined';
+    diag $pth->[1]->{end_element_id};        
   }
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   

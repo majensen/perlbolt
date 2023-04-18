@@ -695,28 +695,40 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
 
 AV* neo4j_path_to_AV( neo4j_value_t value) {
   int i,n,last_node_id,node_id;
+  
   AV* av;
   struct neo4j_struct *v;
   _Bool dir;
   SV* rel_sv;
-  neo4j_value_t node;
+  neo4j_value_t node, node_elt_id, last_node_elt_id;
   av = newAV();
   n = neo4j_path_length(value);
   node = neo4j_path_get_node(value, 0);
   av_push(av, neo4j_value_to_SV( node ));
   last_node_id = neo4j_identity_value( neo4j_node_identity(node) );
+  last_node_elt_id = neo4j_node_elementid(node);
   if (n==0) {
     return av;
   } else {
     for (i=1; i<=n; i++) {
       node = neo4j_path_get_node(value,i);
       node_id = neo4j_identity_value( neo4j_node_identity(node) );
+      node_elt_id = neo4j_node_elementid(node);
       rel_sv = neo4j_value_to_SV(neo4j_path_get_relationship(value,i-1,&dir));
       hv_stores( (HV*) SvRV(rel_sv), "start", newSViv( (IV) (dir ? last_node_id : node_id)));
+      hv_stores(
+	  (HV*) SvRV(rel_sv), "start_element_id",
+	  newSVpv( neo4j_ustring_value(dir? last_node_elt_id : node_elt_id), 0 )
+	  );      
       hv_stores( (HV*) SvRV(rel_sv), "end", newSViv( (IV) (dir ? node_id : last_node_id)));
+      hv_stores(
+	  (HV*) SvRV(rel_sv), "end_element_id",
+	  newSVpv( neo4j_ustring_value(dir? node_elt_id : last_node_elt_id), 0 )
+	  );
       av_push(av, rel_sv);
       av_push(av, neo4j_value_to_SV(node));
       last_node_id = node_id;
+      last_node_elt_id = node_elt_id;
     }
     return av;
   }
