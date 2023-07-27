@@ -31,6 +31,7 @@ lib/URI/bolt.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
+pod2md.PL
 README
 README.md
 t/001_useok.t
