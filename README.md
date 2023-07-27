@@ -2,7 +2,7 @@
 
 Neo4j::Bolt - query Neo4j using Bolt protocol
 
-[![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
+[![Build Status](https://github.com/majensen/perlbolt/actions/workflows/tests.yaml/badge.svg)](https://github.com/majensen/perlbolt/actions/workflows/tests.yaml)
 
 # SYNOPSIS
 
