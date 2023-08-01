@@ -78,6 +78,7 @@ WriteMakefile(
   },
   TEST_REQUIRES => {
     'Test::Exception' => 0,
+    'Test::Neo4j::Types' => '0.05',
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],

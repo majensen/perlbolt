@@ -23,6 +23,7 @@ on test => sub {
   requires 'IPC::Run';
   requires 'Test::Exception';
   requires 'Test::More';
+  requires 'Test::Neo4j::Types', '0.05';
   requires 'blib';
   recommends 'Test::CPAN::Changes';  # 099_cpan_changes.t
   recommends 'Test::Pod';  # 098_pod.t

@@ -1,16 +1,31 @@
 package Neo4j::Bolt::Node;
 # ABSTRACT: Representation of Neo4j Node
 
-$Neo4j::Bolt::Node::VERSION = '0.4203';
+$Neo4j::Bolt::Node::VERSION = '0.4205';
 
 use strict;
 use warnings;
 
 use parent 'Neo4j::Types::Node';
 
+sub id { shift->{id} }
+
+sub properties { shift->{properties} // {} }
+
+sub get {
+  my $self = shift;
+  my ($property) = @_;
+  return $self->{properties}->{$property};
+}
+
+sub labels {
+  my $self = shift;
+  return my @empty unless defined $self->{labels};
+  return @{$self->{labels}};
+}
+
 sub as_simple {
-  my ($self) = @_;
-  
+  my $self = shift;
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_node} = $self->{id};
   $simple{_labels} = defined $self->{labels} ? $self->{labels} : [];
@@ -48,7 +63,7 @@ a Cypher query that returns nodes from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This package inherits from L<Neo4j::Types::Node>, which
+This class performs the L<Neo4j::Types::Node> role, which
 offers an object-oriented interface to the node's
 properties and metadata. This is entirely optional to use.
 
@@ -57,7 +72,21 @@ L<Neo4j::Bolt::Node> instances will be created.
 
 =head1 METHODS
 
-This package inherits all methods from L<Neo4j::Types::Node>.
+This class provides the following methods defined by
+L<Neo4j::Types::Node>:
+
+=over
+
+=item * L<B<get()>|Neo4j::Types::Node/"get">
+
+=item * L<B<id()>|Neo4j::Types::Node/"id">
+
+=item * L<B<labels()>|Neo4j::Types::Node/"labels">
+
+=item * L<B<properties()>|Neo4j::Types::Node/"properties">
+
+=back
+
 The following additional method is provided:
 
 =over
