@@ -58,7 +58,7 @@ void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
 int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   const char *evalerr, *evalmsg;
   char *climsg;
-  char *s, *t;
+  size_t code_len, msg_len;
   int fail;
   fail = neo4j_check_failure(rs_obj->res_stream);
   if (fail != 0) {
@@ -70,12 +70,12 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
     rs_obj->strerror = neo4j_strerror(fail, climsg, BUFLEN);
     if (fail == NEO4J_STATEMENT_EVALUATION_FAILED) {
       rs_obj->failure_details = neo4j_failure_details(rs_obj->res_stream);
-      Newx(s, strlen(rs_obj->failure_details->code)+1,char);
-      rs_obj->eval_errcode = strncpy(s,rs_obj->failure_details->code, (size_t)
-				     strlen(rs_obj->failure_details->code));
-      Newx(t, strlen(rs_obj->failure_details->message)+1,char);
-      rs_obj->eval_errmsg = strncpy(t,rs_obj->failure_details->message,
-				    (size_t) strlen(rs_obj->failure_details->message));
+      code_len = strlen(rs_obj->failure_details->code) + 1;
+      msg_len = strlen(rs_obj->failure_details->message) + 1;
+      Newx(rs_obj->eval_errcode, code_len, char);
+      Newx(rs_obj->eval_errmsg, msg_len, char);
+      strncpy(rs_obj->eval_errcode, rs_obj->failure_details->code, code_len);
+      strncpy(rs_obj->eval_errmsg, rs_obj->failure_details->message, msg_len);
     }
   }
   else {
