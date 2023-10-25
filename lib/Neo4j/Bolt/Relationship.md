@@ -26,7 +26,7 @@ a Cypher query that returns relationships from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This package inherits from [Neo4j::Types::Relationship](/lib/Neo4j/Types/Relationship.md), which
+This class performs the [Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship) role, which
 offers an object-oriented interface to the relationship's
 properties and metadata. This is entirely optional to use.
 
@@ -35,7 +35,16 @@ If a query returns the same relationship twice, two separate
 
 # METHODS
 
-This package inherits all methods from [Neo4j::Types::Relationship](/lib/Neo4j/Types/Relationship.md).
+This class provides the following methods defined by
+[Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship):
+
+- [**get()**](https://metacpan.org/pod/Neo4j::Types::Relationship#get)
+- [**id()**](https://metacpan.org/pod/Neo4j::Types::Relationship#id)
+- [**properties()**](https://metacpan.org/pod/Neo4j::Types::Relationship#properties)
+- [**start\_id()**](https://metacpan.org/pod/Neo4j::Types::Relationship#start_id)
+- [**end\_id()**](https://metacpan.org/pod/Neo4j::Types::Relationship#end_id)
+- [**type()**](https://metacpan.org/pod/Neo4j::Types::Relationship#type)
+
 The following additional method is provided:
 
 - as\_simple()

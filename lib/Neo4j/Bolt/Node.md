@@ -26,7 +26,7 @@ a Cypher query that returns nodes from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This package inherits from [Neo4j::Types::Node](/lib/Neo4j/Types/Node.md), which
+This class performs the [Neo4j::Types::Node](https://metacpan.org/pod/Neo4j::Types::Node) role, which
 offers an object-oriented interface to the node's
 properties and metadata. This is entirely optional to use.
 
@@ -35,7 +35,14 @@ If a query returns the same node twice, two separate
 
 # METHODS
 
-This package inherits all methods from [Neo4j::Types::Node](/lib/Neo4j/Types/Node.md).
+This class provides the following methods defined by
+[Neo4j::Types::Node](https://metacpan.org/pod/Neo4j::Types::Node):
+
+- [**get()**](https://metacpan.org/pod/Neo4j::Types::Node#get)
+- [**id()**](https://metacpan.org/pod/Neo4j::Types::Node#id)
+- [**labels()**](https://metacpan.org/pod/Neo4j::Types::Node#labels)
+- [**properties()**](https://metacpan.org/pod/Neo4j::Types::Node#properties)
+
 The following additional method is provided:
 
 - as\_simple()

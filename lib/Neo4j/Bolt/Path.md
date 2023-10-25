@@ -25,7 +25,7 @@ a Cypher query that returns paths from a Neo4j database.
 Their nodes, relationships and metadata can be accessed
 as shown in the synopsis above.
 
-This package inherits from [Neo4j::Types::Path](/lib/Neo4j/Types/Path.md), which
+This class performs the [Neo4j::Types::Path](https://metacpan.org/pod/Neo4j::Types::Path) role, which
 offers an object-oriented interface to the paths's
 elements and metadata. This is entirely optional to use.
 
@@ -34,7 +34,13 @@ If a query returns the same path twice, two separate
 
 # METHODS
 
-This package inherits all methods from [Neo4j::Types::Path](/lib/Neo4j/Types/Path.md).
+This class provides the following methods defined by
+[Neo4j::Types::Path](https://metacpan.org/pod/Neo4j::Types::Path):
+
+- [**elements()**](https://metacpan.org/pod/Neo4j::Types::Path#elements)
+- [**nodes()**](https://metacpan.org/pod/Neo4j::Types::Path#nodes)
+- [**relationships()**](https://metacpan.org/pod/Neo4j::Types::Path#relationships)
+
 The following additional method is provided:
 
 - as\_simple()

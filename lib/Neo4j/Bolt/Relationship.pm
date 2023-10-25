@@ -8,9 +8,21 @@ use warnings;
 
 use parent 'Neo4j::Types::Relationship';
 
+sub id { shift->{id} }
+sub start_id { shift->{start} }
+sub end_id { shift->{end} }
+
+sub type { shift->{type} }
+sub properties { shift->{properties} // {} }
+
+sub get {
+  my $self = shift;
+  my ($property) = @_;
+  return $self->{properties}->{$property};
+}
+
 sub as_simple {
-  my ($self) = @_;
-  
+  my $self = shift;
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_relationship} = $self->{id};
   $simple{_element_id} = $self->{element_id};
@@ -54,7 +66,7 @@ a Cypher query that returns relationships from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This package inherits from L<Neo4j::Types::Relationship>, which
+This class performs the L<Neo4j::Types::Relationship> role, which
 offers an object-oriented interface to the relationship's
 properties and metadata. This is entirely optional to use.
 
@@ -63,7 +75,25 @@ L<Neo4j::Bolt::Relationship> instances will be created.
 
 =head1 METHODS
 
-This package inherits all methods from L<Neo4j::Types::Relationship>.
+This class provides the following methods defined by
+L<Neo4j::Types::Relationship>:
+
+=over
+
+=item * L<B<get()>|Neo4j::Types::Relationship/"get">
+
+=item * L<B<id()>|Neo4j::Types::Relationship/"id">
+
+=item * L<B<properties()>|Neo4j::Types::Relationship/"properties">
+
+=item * L<B<start_id()>|Neo4j::Types::Relationship/"start_id">
+
+=item * L<B<end_id()>|Neo4j::Types::Relationship/"end_id">
+
+=item * L<B<type()>|Neo4j::Types::Relationship/"type">
+
+=back
+
 The following additional method is provided:
 
 =over

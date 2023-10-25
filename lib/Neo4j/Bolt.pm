@@ -49,7 +49,7 @@ sub connect_tls {
 
 Neo4j::Bolt - query Neo4j using Bolt protocol
 
-=for markdown [![Build Status](https://travis-ci.org/majensen/perlbolt.svg?branch=master)](https://travis-ci.org/majensen/perlbolt)
+=for markdown [![Build Status](https://github.com/majensen/perlbolt/actions/workflows/tests.yaml/badge.svg)](https://github.com/majensen/perlbolt/actions/workflows/tests.yaml)
 
 =head1 SYNOPSIS
 
