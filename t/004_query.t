@@ -29,6 +29,7 @@ if ($neo_info->{user}) {
 }
 
 ok my $cxn = Neo4j::Bolt->connect($url->as_string), "attempt connection";
+ok $cxn->connected, "server connection successful for requested DB tests";
 unless ($cxn->connected) {
   diag $cxn->errmsg;
 }
@@ -36,6 +37,7 @@ unless ($cxn->connected) {
 SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
   like $cxn->protocol_version, qr/^[0-9]+\.[0-9]+$/, "protocol version returned";
+  diag "Bolt version " . $cxn->protocol_version;  # debug aid
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
     {},0,$Neo4j::Bolt::DEFAULT_DB
