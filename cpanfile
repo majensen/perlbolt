@@ -2,7 +2,7 @@ requires 'Alien::OpenSSL';
 requires 'DateTime';
 requires 'JSON::PP';
 requires 'Neo4j::Client', '0.46';
-requires 'Neo4j::Types', '1.00';
+requires 'Neo4j::Types', '2.00';
 requires 'URI';
 requires 'XSLoader', '0.14';  # XSLoader::load()
 requires 'perl', '5.012';

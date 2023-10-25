@@ -8,6 +8,33 @@ use warnings;
 
 use parent 'Neo4j::Types::Relationship';
 
+sub element_id {
+  my $self = shift;
+  if ($self->{element_id} eq $self->{id}) {
+    warnings::warnif 'Neo4j::Types', 'element_id unavailable';
+    return $self->{id};
+  }
+  return $self->{element_id};
+}
+
+sub start_element_id {
+  my $self = shift;
+  if ($self->{start_element_id} eq $self->{start}) {
+    warnings::warnif 'Neo4j::Types', 'start_element_id unavailable';
+    return $self->{start};
+  }
+  return $self->{start_element_id};
+}
+
+sub end_element_id {
+  my $self = shift;
+  if ($self->{end_element_id} eq $self->{end}) {
+    warnings::warnif 'Neo4j::Types', 'end_element_id unavailable';
+    return $self->{end};
+  }
+  return $self->{end_element_id};
+}
+
 sub id { shift->{id} }
 sub start_id { shift->{start} }
 sub end_id { shift->{end} }

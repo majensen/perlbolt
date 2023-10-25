@@ -8,6 +8,15 @@ use warnings;
 
 use parent 'Neo4j::Types::Node';
 
+sub element_id {
+  my $self = shift;
+  if ($self->{element_id} eq $self->{id}) {
+    warnings::warnif 'Neo4j::Types', 'element_id unavailable';
+    return $self->{id};
+  }
+  return $self->{element_id};
+}
+
 sub id { shift->{id} }
 
 sub properties { shift->{properties} // {} }

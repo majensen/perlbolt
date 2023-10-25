@@ -73,7 +73,7 @@ WriteMakefile(
     'Alien::OpenSSL' => 0,
     'DateTime' => 0,
     'Neo4j::Client' => '0.51',
-    'Neo4j::Types' => '1.00',
+    'Neo4j::Types' => '2.00',
     'JSON::PP' => 0,
     'URI' => 0,
     'XSLoader' => '0.14',  # XSLoader::load()
