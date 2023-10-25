@@ -1,9 +1,11 @@
+use strict;
+use warnings;
 use Test::More;
 use Neo4j::Bolt::NeoValue;
 use Neo4j::Bolt::DateTime;
 
 my ($i, $v, $vv);
-diag "create neo4j_values from hashes";
+#diag "create neo4j_values from hashes";
 
 $i = bless { epoch_days => 29*365 }, "Neo4j::Bolt::DateTime";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);

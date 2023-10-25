@@ -8,6 +8,15 @@ use warnings;
 
 use parent 'Neo4j::Types::Point';
 
+sub srid {
+	shift->{srid}
+}
+
+sub coordinates {
+	my $self = shift;
+	return map {$self->{$_}} defined $self->{'z'} ? qw(x y z) : qw(x y);
+}
+
 1;
 
 __END__
@@ -30,11 +39,30 @@ Neo4j::Bolt::Point - Representation of a Neo4j geographic point structure
 L<Neo4j::Bolt::Point> instances are created by executing
 a Cypher query that returns a location value
 from the Neo4j database.
+They can also be created locally and passed to Neo4j as
+query parameter. See L<Neo4j::Types::Generic/"Point">.
 
 The values in the Bolt structure are described at
 L<https://neo4j.com/docs/bolt/current/bolt/structure-semantics/>. The
 Neo4j::Bolt::Point object possesses number values for the keys C<x>,
-C<y>, and C<z> (if present, and an integer code for C<srid>.
+C<y>, and C<z> (if present), and an integer code for C<srid>.
+
+This class conforms to the L<Neo4j::Types::Point> API,
+which offers an object-oriented interface to the point's
+SRID and coordinates. This is entirely optional to use.
+
+=head1 METHODS
+
+This class provides the following methods defined by
+L<Neo4j::Types::Point>:
+
+=over
+
+=item * L<B<coordinates()>|Neo4j::Types::Point/"coordinates">
+
+=item * L<B<srid()>|Neo4j::Types::Point/"srid">
+
+=back
 
 =head1 SEE ALSO
 

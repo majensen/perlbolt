@@ -30,7 +30,7 @@ my $META = {
     },
     develop => {
       requires => {
-        'Devel::PPPort' => '3.59',
+        'Devel::PPPort' => '3.63',
 	'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
 	#'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
       },
@@ -55,6 +55,14 @@ if ($neo_info) {
     print STDERR "$_; skipping live db tests\n";
   };
 }
+
+my @ccflags;
+
+# NEO4J_BOLT_TYPES_FAST enables special case code in CTypeHandlers that will
+#  read the hash ref entries of Neo4j::Bolt::DateTime & friends directly when
+#  used as query parameters. Without it, they will be read using the generic
+#  Neo4j::Types methods instead. This works just as well, but is slower.
+push @ccflags, '-DNEO4J_BOLT_TYPES_FAST' unless $ENV{NO_NEO4J_BOLT_TYPES_FAST};
 
 WriteMakefile(
   NAME => 'Neo4j::Bolt',
@@ -85,7 +93,7 @@ WriteMakefile(
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
   LICENSE => 'apache_2_0',
-  CCFLAGS => Neo4j::Client->cflags,
+  CCFLAGS => join(' ',Neo4j::Client->cflags,@ccflags),
   LIBS => join(' ',Neo4j::Client->libs_static,Alien::OpenSSL->libs_static),
   INC => "-iquote".realpath('.')."/include",
   # avoid a factory libneo4j-client in a standard location (possibly

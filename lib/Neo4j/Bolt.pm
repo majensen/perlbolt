@@ -92,11 +92,14 @@ references. These represent Neo4j types according to the following:
  Float            scalar
  String           scalar
  Bytes            scalar
+ DateTime         hashref   (Neo4j::Bolt::DateTime)
+ Duration         hashref   (Neo4j::Bolt::Duration)
+ Point            hashref   (Neo4j::Bolt::Point)
  List             arrayref
  Map              hashref
- Node             hashref  (Neo4j::Bolt::Node)
- Relationship     hashref  (Neo4j::Bolt::Relationship)
- Path             arrayref (Neo4j::Bolt::Path)
+ Node             hashref   (Neo4j::Bolt::Node)
+ Relationship     hashref   (Neo4j::Bolt::Relationship)
+ Path             arrayref  (Neo4j::Bolt::Path)
 
 L<Nodes|Neo4j::Bolt::Node>, L<Relationships|Neo4j::Bolt::Relationship> and
 L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
@@ -118,6 +121,24 @@ L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
  bless [
    $node1, $reln12, $node2, $reln23, $node3, ...
  ], 'Neo4j::Bolt::Path'
+
+For further details, see the individual modules:
+
+=over 
+
+=item * L<Neo4j::Bolt::DateTime>
+
+=item * L<Neo4j::Bolt::Duration>
+
+=item * L<Neo4j::Bolt::Node>
+
+=item * L<Neo4j::Bolt::Path>
+
+=item * L<Neo4j::Bolt::Point>
+
+=item * L<Neo4j::Bolt::Relationship>
+
+=back
 
 =head1 METHODS
 
@@ -159,7 +180,7 @@ Set to C<NONE> to turn off completely (the default).
 
 =head1 SEE ALSO
 
-L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
+L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>, L<Neo4j::Types>.
 
 =head1 AUTHOR
 
@@ -171,13 +192,13 @@ L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>.
 
 =over
 
-=item Arne Johannessen (@johannessen)
+=item * Arne Johannessen (L<AJNN|https://metacpan.org/author/AJNN>)
 
 =back
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2021 by Mark A. Jensen.
+This software is Copyright (c) 2019-2023 by Mark A. Jensen.
 
 This is free software, licensed under:
 

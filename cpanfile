@@ -31,7 +31,7 @@ on test => sub {
 };
 
 on develop => sub {
-  requires 'Devel::PPPort', '3.59';
+  requires 'Devel::PPPort', '3.63';
   requires 'Inline::C';  # in t/Boltfile.pm, used via xt/003_stream.t
   #requires 'IPC::Run';  # in t/lib/NeoCon.pm, but not actually used anywhere
   recommends 'Path::Tiny';  # pod2md.PL

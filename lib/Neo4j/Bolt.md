@@ -45,11 +45,14 @@ references. These represent Neo4j types according to the following:
     Float            scalar
     String           scalar
     Bytes            scalar
+    DateTime         hashref   (Neo4j::Bolt::DateTime)
+    Duration         hashref   (Neo4j::Bolt::Duration)
+    Point            hashref   (Neo4j::Bolt::Point)
     List             arrayref
     Map              hashref
-    Node             hashref  (Neo4j::Bolt::Node)
-    Relationship     hashref  (Neo4j::Bolt::Relationship)
-    Path             arrayref (Neo4j::Bolt::Path)
+    Node             hashref   (Neo4j::Bolt::Node)
+    Relationship     hashref   (Neo4j::Bolt::Relationship)
+    Path             arrayref  (Neo4j::Bolt::Path)
 
 [Nodes](/lib/Neo4j/Bolt/Node.md), [Relationships](/lib/Neo4j/Bolt/Relationship.md) and
 [Paths](/lib/Neo4j/Bolt/Path.md) are represented in the following formats:
@@ -71,6 +74,15 @@ references. These represent Neo4j types according to the following:
     bless [
       $node1, $reln12, $node2, $reln23, $node3, ...
     ], 'Neo4j::Bolt::Path'
+
+For further details, see the individual modules:
+
+- [Neo4j::Bolt::DateTime](/lib/Neo4j/Bolt/DateTime.md)
+- [Neo4j::Bolt::Duration](/lib/Neo4j/Bolt/Duration.md)
+- [Neo4j::Bolt::Node](/lib/Neo4j/Bolt/Node.md)
+- [Neo4j::Bolt::Path](/lib/Neo4j/Bolt/Path.md)
+- [Neo4j::Bolt::Point](/lib/Neo4j/Bolt/Point.md)
+- [Neo4j::Bolt::Relationship](/lib/Neo4j/Bolt/Relationship.md)
 
 # METHODS
 
@@ -108,7 +120,7 @@ references. These represent Neo4j types according to the following:
 
 # SEE ALSO
 
-[Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).
+[Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md), [Neo4j::Types](https://metacpan.org/pod/Neo4j::Types).
 
 # AUTHOR
 
@@ -118,11 +130,11 @@ references. These represent Neo4j types according to the following:
 
 # CONTRIBUTORS
 
-- Arne Johannessen (@johannessen)
+- Arne Johannessen ([AJNN](https://metacpan.org/author/AJNN))
 
 # LICENSE
 
-This software is Copyright (c) 2019-2021 by Mark A. Jensen.
+This software is Copyright (c) 2019-2023 by Mark A. Jensen.
 
 This is free software, licensed under:
 

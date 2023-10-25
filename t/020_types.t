@@ -1,7 +1,9 @@
+use strict;
+use warnings;
 use Test::More;
 use Neo4j::Bolt::NeoValue;
 
-diag "create neo4j_values from SVs";
+#diag "create neo4j_values from SVs";
 my $i = 100;
 my $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Integer", "Integer";

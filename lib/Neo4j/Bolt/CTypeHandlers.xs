@@ -34,8 +34,14 @@ neo4j_value_t HV_to_neo4j_relationship(HV *hv);
 neo4j_value_t AV_to_neo4j_path(AV *av);
 neo4j_value_t SV_to_neo4j_value(SV *sv);
 
+neo4j_value_t object_to_neo4j_value(SV *sv);
+neo4j_value_t object_to_neo4j_datetime(SV *sv);
+neo4j_value_t object_to_neo4j_duration(SV *sv);
+neo4j_value_t object_to_neo4j_point(SV *sv);
+
 neo4j_value_t SVpv_to_neo4j_elementid(SV *sv);
 
+#ifdef NEO4J_BOLT_TYPES_FAST
 neo4j_value_t SViv_to_neo4j_date(SV *sv);
 neo4j_value_t SViv_to_neo4j_localtime(SV *sv);
 
@@ -47,6 +53,7 @@ neo4j_value_t HV_to_neo4j_localdatetime(HV *hv);
 neo4j_value_t HV_to_neo4j_duration(HV *hv);
 
 neo4j_value_t HV_to_neo4j_point(HV *hv);
+#endif /* NEO4J_BOLT_TYPES_FAST */
 
 SV* neo4j_bool_to_SViv( neo4j_value_t value );
 SV* neo4j_bytes_to_SVpv( neo4j_value_t value );
@@ -111,7 +118,9 @@ neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
 neo4j_value_t SV_to_neo4j_value(SV *sv) {
   SV *ref;
   svtype reftype;
+#ifdef NEO4J_BOLT_TYPES_FAST
   bool is_zoned;
+#endif /* NEO4J_BOLT_TYPES_FAST */
   
   if ( !SvOK(sv) ) {
     return neo4j_null;
@@ -139,6 +148,8 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
         if (sv_isa(sv, RELATIONSHIP_CLASS)) {
           return HV_to_neo4j_relationship( (HV*) ref );
         }
+#ifdef NEO4J_BOLT_TYPES_FAST
+       // special case if it's a Neo4j::Bolt object
        if (sv_isa(sv, DATETIME_CLASS)) {
           // determine type by "signature"
           if (hv_fetchs((HV*) ref, "epoch_days", 0) != NULL) {
@@ -163,8 +174,9 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
         if (sv_isa(sv, POINT_CLASS)) {
           return HV_to_neo4j_point( (HV*) ref );
         }
+#endif /* NEO4J_BOLT_TYPES_FAST */
       }
-      warn("Class %s is not a Neo4j::Bolt type", sv_reftype(ref, 1));
+      return object_to_neo4j_value(sv);
     }
     
     if (reftype < SVt_PVAV) { // unblessed scalar ref
@@ -198,6 +210,235 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
   }
   perror("Can't handle this scalar");
   return neo4j_null;
+}
+
+neo4j_value_t object_to_neo4j_value(SV *sv) {
+  // try to get a neo4j_value_t by using the Neo4j::Types API
+  dSP;
+  I32 count;
+  SV *ref;
+  svtype reftype;
+  
+  ENTER;
+  SAVETMPS;
+  
+  enum {
+    DateTime, Duration, Point
+  } type;
+  for ( type = 0; type < 3; ++type ) {
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
+    PUSHs(sv);
+    switch (type) {
+      case DateTime: mPUSHs(newSVpvs("Neo4j::Types::DateTime"));  break;
+      case Duration: mPUSHs(newSVpvs("Neo4j::Types::Duration"));  break;
+      case Point:    mPUSHs(newSVpvs("Neo4j::Types::Point"));     break;
+    }
+    PUTBACK;
+    count = call_method("isa", G_SCALAR);
+    if (count != 1) {
+      croak("isa returned %i values, 1 was expected", (int)count);
+    }
+    SPAGAIN;
+    if (POPi) {
+      break;
+    }
+  }
+  
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+  
+  switch (type) {
+    case DateTime:
+      return object_to_neo4j_datetime( sv );
+    case Duration:
+      return object_to_neo4j_duration( sv );
+    case Point:
+      return object_to_neo4j_point( sv );
+  }
+  
+  ref = SvRV(sv);
+  reftype = SvTYPE(ref);
+  warn("Class %s is not a Neo4j::Types implementation", sv_reftype(ref, 1));
+  switch (reftype) {
+    case SVt_PVAV:
+      return AV_to_neo4j_list( (AV*) ref );
+    case SVt_PVHV:
+      return HV_to_neo4j_map( (HV*) ref );
+    default:
+      return neo4j_null;
+  }
+}
+
+neo4j_value_t object_to_neo4j_datetime(SV *sv) {
+  dSP;
+  I32 count;
+  int i;
+  U32 ok[4], tz_name_ok;
+  IV iv[4];
+  SV *iv_sv, *tz_name_sv;
+  neo4j_value_t tz_name, *fields;
+  
+  ENTER;
+  SAVETMPS;
+  
+  enum {
+    days, seconds, nanos, tz_offset
+  };
+  static const char * const methods[4] = {
+    "days", "seconds", "nanoseconds", "tz_offset"
+  };
+  for (i = 0; i < 4; ++i) {
+    PUSHMARK(SP);
+    XPUSHs(sv);
+    PUTBACK;
+    count = call_method(methods[i], G_SCALAR);
+    if (count != 1) {
+      croak("Neo4j::Types::DateTime::%s returned %i values, 1 was expected", methods[i], (int)count);
+    }
+    SPAGAIN;
+    iv_sv = POPs;
+    ok[i] = SvOK(iv_sv);
+    iv[i] = ok[i] ? SvIV(iv_sv) : 0;
+  }
+  
+  PUSHMARK(SP);
+  XPUSHs(sv);
+  PUTBACK;
+  count = call_method("tz_name", G_SCALAR);
+  if (count != 1) {
+    croak("Neo4j::Types::DateTime::tz_name returned %i values, 1 was expected", (int)count);
+  }
+  SPAGAIN;
+  tz_name_sv = POPs;
+  tz_name_ok = SvOK(tz_name_sv);
+  if (tz_name_ok) {
+    tz_name = SVpv_to_neo4j_string(tz_name_sv);
+  }
+  
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+  
+  if (ok[seconds] || ok[nanos]) {
+    if (ok[days]) {
+      if (ok[tz_offset] || tz_name_ok) { // ZONED DATETIME
+        Newx(fields, 3, neo4j_value_t);
+        fields[0] = neo4j_int( (long long) iv[days] * 86400LL + iv[seconds] );
+        fields[1] = neo4j_int( (long long) iv[nanos] );
+        if (tz_name_ok) {
+          //fields[2] = tz_name;
+          //return neo4j_datetimezoneid(fields);
+          if (! ok[tz_offset]) {
+            warn("Named timezones unsupported by Neo4j::Bolt");
+            return neo4j_null;
+          }
+        }
+        //else {
+          fields[2] = neo4j_int( (long long) iv[tz_offset] );
+          return neo4j_datetime(fields);
+        //}
+      }
+      else { // LOCAL DATETIME
+        Newx(fields, 2, neo4j_value_t);
+        fields[0] = neo4j_int( (long long) iv[days] * 86400LL + iv[seconds] );
+        fields[1] = neo4j_int( (long long) iv[nanos] );
+        return neo4j_localdatetime(fields);
+      }
+    }
+    else {
+      if (ok[tz_offset]) { // ZONED TIME
+        Newx(fields, 2, neo4j_value_t);
+        fields[0] = neo4j_int( (long long) iv[seconds] * 1000000000LL + iv[nanos] );
+        fields[1] = neo4j_int( (long long) iv[tz_offset] );
+        return neo4j_time(fields);
+      }
+      else { // LOCAL TIME
+        Newx(fields, 1, neo4j_value_t);
+        fields[0] = neo4j_int( (long long) iv[seconds] * 1000000000LL + iv[nanos] );
+        return neo4j_localtime(fields);
+      }
+    }
+  }
+  else { // DATE
+    Newx(fields, 1, neo4j_value_t);
+    fields[0] = neo4j_int( (long long) iv[days] );
+    return neo4j_date(fields);
+  }
+}
+
+neo4j_value_t object_to_neo4j_duration(SV *sv) {
+  dSP;
+  I32 count;
+  int i;
+  neo4j_value_t *fields;
+  Newx(fields, 4, neo4j_value_t);
+  
+  ENTER;
+  SAVETMPS;
+  
+  static const char * const methods[4] = {
+    "months", "days", "seconds", "nanoseconds"
+  };
+  for (i = 0; i < 4; ++i) {
+    PUSHMARK(SP);
+    XPUSHs(sv);
+    PUTBACK;
+    count = call_method(methods[i], G_SCALAR);
+    if (count != 1) {
+      croak("Neo4j::Types::Duration::%s returned %i values, 1 was expected", methods[i], (int)count);
+    }
+    SPAGAIN;
+    fields[i] = neo4j_int( POPi );
+  }
+  
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+
+  return neo4j_duration(fields);
+}
+
+neo4j_value_t object_to_neo4j_point(SV *sv) {
+  dSP;
+  I32 count;
+  neo4j_value_t *fields;
+  Newx(fields, 4, neo4j_value_t);
+  
+  ENTER;
+  SAVETMPS;
+  
+  PUSHMARK(SP);
+  XPUSHs(sv);
+  PUTBACK;
+  count = call_method("srid", G_SCALAR);
+  if (count != 1) {
+    croak("Neo4j::Types::Point::srid returned %i values, 1 was expected", (int)count);
+  }
+  SPAGAIN;
+  fields[0] = neo4j_int( POPi );
+  
+  PUSHMARK(SP);
+  XPUSHs(sv);
+  PUTBACK;
+  count = call_method("coordinates", G_LIST);
+  SPAGAIN;
+  for ( ; count > 3 ; --count ) { POPs; }
+  fields[3] = neo4j_float( count >= 3 ? POPn : 0.0 ); // z
+  fields[2] = neo4j_float( count >= 2 ? POPn : 0.0 ); // y
+  fields[1] = neo4j_float( count >= 1 ? POPn : 0.0 ); // x
+  
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+  
+  if (count == 3) {
+    return neo4j_point3d(fields);
+  }
+  else {
+    return neo4j_point2d(fields);
+  }
 }
 
 neo4j_value_t AV_to_neo4j_list(AV *av) {
@@ -363,6 +604,7 @@ neo4j_value_t SVpv_to_neo4j_elementid(SV *sv) {
   return neo4j_elementid((const char *)k0);
 }
 
+#ifdef NEO4J_BOLT_TYPES_FAST
 neo4j_value_t SViv_to_neo4j_date(SV *sv) {
     neo4j_value_t *fields;
     Newx(fields, 1, neo4j_value_t);
@@ -482,6 +724,7 @@ neo4j_value_t HV_to_neo4j_point(HV *hv) {
       return neo4j_point2d(fields);
   }
 }
+#endif /* NEO4J_BOLT_TYPES_FAST */
 
 long long neo4j_identity_value(neo4j_value_t value)
 {
