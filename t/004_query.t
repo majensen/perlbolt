@@ -68,11 +68,11 @@ SKIP: {
     is ref $pth->[1], 'Neo4j::Bolt::Relationship', 'relationship is a Neo4j::Bolt::Relationship';
     is $pth->[1]->{start}, $pth->[0]->{id}, 'relationship start correct';
     is $pth->[1]->{end}, $pth->[2]->{id}, 'relationship end correct';
-    ok $pth->[1]->{element_id}, 'relationship element id defined';
+    ok defined $pth->[1]->{element_id}, 'relationship element id defined';
     diag $pth->[1]->{element_id};    
-    ok $pth->[1]->{start_element_id}, 'relationship start element id defined';
+    ok defined $pth->[1]->{start_element_id}, 'relationship start element id defined';
     diag $pth->[1]->{start_element_id};    
-    ok $pth->[1]->{end_element_id}, 'relationship end element id defined';
+    ok defined $pth->[1]->{end_element_id}, 'relationship end element id defined';
     diag $pth->[1]->{end_element_id};        
   }
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
