@@ -108,96 +108,95 @@ neo4j_value_t SVpv_to_neo4j_string (SV *sv) {
 }
 
 neo4j_value_t SV_to_neo4j_value(SV *sv) {
-  int t;
-  SV *thing;
-  HV *hv;
-
-  if (!SvOK(sv) ) {
+  SV *ref;
+  svtype reftype;
+  bool is_zoned;
+  
+  if ( !SvOK(sv) ) {
     return neo4j_null;
   }
-  if (SvROK(sv)) { // a ref
-    thing = SvRV(sv);
-    t = SvTYPE(thing);
-    if ( t < SVt_PVAV) { // scalar ref
-      if ((sv_isobject(sv) && sv_isa(sv, "JSON::PP::Boolean")) || (SvIOK(thing) && SvIV(thing) >> 1 == 0)) {
-        // boolean (accepts JSON::PP, Types::Serialiser, literal \1 and \0)
-        return SViv_to_neo4j_bool(thing);
+  SvGETMAGIC(sv);
+  if (SvROK(sv)) {
+    ref = SvRV(sv);
+    reftype = SvTYPE(ref);
+    
+    if (SvOBJECT(ref)) {
+      if (reftype < SVt_PVAV) { // blessed scalar ref
+        if (sv_isa(sv, "JSON::PP::Boolean")) {
+          return SViv_to_neo4j_bool(ref);
+        }
+      }
+      if (reftype == SVt_PVAV) { // blessed array ref
+        if (sv_isa(sv, PATH_CLASS)) {
+          return AV_to_neo4j_path( (AV*) ref );  // unimplemented
+        }
+      }
+      if (reftype == SVt_PVHV) { // blessed hash ref
+        if (sv_isa(sv, NODE_CLASS)) {
+          return HV_to_neo4j_node( (HV*) ref );
+        }
+        if (sv_isa(sv, RELATIONSHIP_CLASS)) {
+          return HV_to_neo4j_relationship( (HV*) ref );
+        }
+       if (sv_isa(sv, DATETIME_CLASS)) {
+          // determine type by "signature"
+          if (hv_fetchs((HV*) ref, "epoch_days", 0) != NULL) {
+            return HV_to_neo4j_date( (HV*) ref );
+          }
+          is_zoned = hv_fetchs((HV*) ref, "offset_secs", 0) != NULL
+                  || hv_fetchs((HV*) ref, "tz_name", 0) != NULL;
+          if (hv_fetchs((HV*) ref, "epoch_secs", 0) != NULL) {
+            return is_zoned
+                   ? HV_to_neo4j_datetime( (HV*) ref )
+                   : HV_to_neo4j_localdatetime( (HV*) ref );
+          }
+          else {
+            return is_zoned
+                   ? HV_to_neo4j_time( (HV*) ref )
+                   : HV_to_neo4j_localtime( (HV*) ref );
+          }
+        }
+        if (sv_isa(sv, DURATION_CLASS)) {
+          return HV_to_neo4j_duration( (HV*) ref );
+        }
+        if (sv_isa(sv, POINT_CLASS)) {
+          return HV_to_neo4j_point( (HV*) ref );
+        }
+      }
+      warn("Class %s is not a Neo4j::Bolt type", sv_reftype(ref, 1));
+    }
+    
+    if (reftype < SVt_PVAV) { // unblessed scalar ref
+      if (SvIOK(ref) && SvIV(ref) >> 1 == 0) { // literal \1 or \0
+        return SViv_to_neo4j_bool(ref);
+      }
+      return SV_to_neo4j_value(ref);
+    }
+    if (reftype == SVt_PVAV) { // unblessed array ref
+      return AV_to_neo4j_list( (AV*) ref );
+    }
+    if (reftype == SVt_PVHV) { // unblessed hash ref
+      return HV_to_neo4j_map( (HV*) ref );
+    }
+    warn("Unknown reference type (%i) encountered", reftype);
+    return neo4j_null;
+    
+  }
+  else { // scalar
+    if (SvNIOK(sv) && ! SvPOK(sv)) { // created_as_number
+      if (SvIOK(sv)) {
+        return SViv_to_neo4j_int(sv);
       }
       else {
-        return SV_to_neo4j_value(thing);
+        return SVnv_to_neo4j_float(sv);
       }
     }
-    else if (t == SVt_PVAV) { //array
-      if (sv_isobject(sv)) {
-        if (sv_isa(sv, PATH_CLASS)) { // path
-          return AV_to_neo4j_path( (AV*) thing );
-        }
-        warn("Unknown blessed array reference type encountered");
-      }
-      return AV_to_neo4j_list( (AV*) thing );
-    }
-    else if (t == SVt_PVHV) { //hash
-      // determine if is a map, node, reln, or struct-base type
-      hv = (HV *)thing;
-      if (sv_isobject(sv)) {
-        if (sv_isa(sv, NODE_CLASS)) { // node
-          return HV_to_neo4j_node(hv);
-        }
-        if (sv_isa(sv, RELATIONSHIP_CLASS)) { // reln
-          return HV_to_neo4j_relationship(hv);
-        }
-	if (sv_isa(sv, DATETIME_CLASS)) {
-	    // determine time by "signature"
-	    if (hv_fetchs(hv, "epoch_days",0) != NULL) {
-		return HV_to_neo4j_date(hv);
-	    }
-	    else {
-		if (hv_fetchs(hv, "epoch_secs",0) != NULL) {
-		    if (hv_fetchs(hv, "offset_secs",0) != NULL) {
-			return HV_to_neo4j_datetime(hv);
-		    } else {
-			return HV_to_neo4j_localdatetime(hv);
-		    }
-		}
-		else {
-		    if (hv_fetchs(hv, "offset_secs",0) != NULL) {
-			return HV_to_neo4j_time(hv);
-		    }
-		    else {
-			return HV_to_neo4j_localtime(hv);
-		    }
-		}
-	    }
-	}
-	if (sv_isa(sv, DURATION_CLASS)) {
-	    return HV_to_neo4j_duration(hv);
-	}
-	if (sv_isa(sv, POINT_CLASS)) {
-	    return HV_to_neo4j_point(hv);
-	}
-        warn("Unknown blessed hash reference type encountered");
-      }
-      else {
-	  return HV_to_neo4j_map(hv); // map
-      }
+    if (SvPOK(sv)) {
+      return SVpv_to_neo4j_string(sv);
     }
   }
-  else {
-   if (SvIOK(sv)) {
-     return SViv_to_neo4j_int(sv);
-   }
-   else if (SvNOK(sv)) {
-     return SVnv_to_neo4j_float(sv);
-   } 
-   else if (SvPOK(sv)) {
-     return SVpv_to_neo4j_string(sv);
-   }
-   else {
-     perror("Can't handle this scalar");
-     return neo4j_null;
-   }
-  }
- return neo4j_null;
+  perror("Can't handle this scalar");
+  return neo4j_null;
 }
 
 neo4j_value_t AV_to_neo4j_list(AV *av) {
