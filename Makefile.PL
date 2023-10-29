@@ -30,6 +30,7 @@ my $META = {
     },
     develop => {
       requires => {
+        'Devel::PPPort' => '3.59',
 	'Inline::C' => 0,  # in t/Boltfile.pm, used via xt/003_stream.t
 	#'IPC::Run' => 0,  # in t/lib/NeoCon.pm, but not actually used anywhere
       },
@@ -91,7 +92,7 @@ WriteMakefile(
   # in lddlflags):
   LDDLFLAGS => join(' ',Neo4j::Client->libs_static,$LDDLFLAGS),
   test => {TESTS => 't/*.t'},
-  clean => {FILES => "t/neo_info"},
+  clean => {FILES => "include/ppport.h t/neo_info"},
   PL_FILES => { "pod2md.PL" => [qw(
 				    lib/Neo4j/Bolt.pm
 				    lib/Neo4j/Bolt/CResultStream.pm
@@ -126,6 +127,17 @@ WriteMakefile(
   META_MERGE => $META,
     
  );
+
+sub MY::postamble {
+  # Generate ppport.h automatically (keep it out of the repository)
+  return <<"END";
+config ::
+\t\$(NOECHO) \$(PERLRUN) "-MDevel::PPPort" -E "-f 'include/ppport.h' or do { say 'Writing ppport.h'; Devel::PPPort::WriteFile('include/ppport.h')}"
+
+END
+  # To have ppport.h run a code analysis:
+  #   perl include/ppport.h --compat-version 5.012 --cplusplus lib/*/*.xs lib/*/*/*.xs
+}
 
 sub prompt_for_db {
   my %neo_info;
