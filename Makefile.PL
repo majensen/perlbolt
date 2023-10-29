@@ -70,6 +70,7 @@ WriteMakefile(
   },
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,
+    'DateTime' => 0,
     'Neo4j::Client' => '0.51',
     'Neo4j::Types' => '1.00',
     'JSON::PP' => 0,
@@ -95,9 +96,12 @@ WriteMakefile(
 				    lib/Neo4j/Bolt.pm
 				    lib/Neo4j/Bolt/CResultStream.pm
 				    lib/Neo4j/Bolt/Cxn.pm
+				    lib/Neo4j/Bolt/DateTime.pm
+				    lib/Neo4j/Bolt/Duration.pm
 				    lib/Neo4j/Bolt/NeoValue.pm
 				    lib/Neo4j/Bolt/Node.pm
 				    lib/Neo4j/Bolt/Path.pm
+				    lib/Neo4j/Bolt/Point.pm
 				    lib/Neo4j/Bolt/Relationship.pm
 				    lib/Neo4j/Bolt/ResultStream.pm
 				    lib/Neo4j/Bolt/Txn.pm

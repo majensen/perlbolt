@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Duration;
 # ABSTRACT: Representation of Neo4j duration struct
 
-$Neo4j::Bolt::Node::VERSION = '0.5000';
+$Neo4j::Bolt::Duration::VERSION = '0.5000';
 
 use strict;
 use warnings;

@@ -8,6 +8,10 @@ lib/Neo4j/Bolt.xs
 lib/Neo4j/Bolt/Cxn.md
 lib/Neo4j/Bolt/Cxn.pm
 lib/Neo4j/Bolt/Cxn.xs
+lib/Neo4j/Bolt/DateTime.md
+lib/Neo4j/Bolt/DateTime.pm
+lib/Neo4j/Bolt/Duration.md
+lib/Neo4j/Bolt/Duration.pm
 lib/Neo4j/Bolt/NeoValue.md
 lib/Neo4j/Bolt/NeoValue.pm
 lib/Neo4j/Bolt/NeoValue.xs
@@ -15,6 +19,8 @@ lib/Neo4j/Bolt/Node.md
 lib/Neo4j/Bolt/Node.pm
 lib/Neo4j/Bolt/Path.md
 lib/Neo4j/Bolt/Path.pm
+lib/Neo4j/Bolt/Point.md
+lib/Neo4j/Bolt/Point.pm
 lib/Neo4j/Bolt/Relationship.md
 lib/Neo4j/Bolt/Relationship.pm
 lib/Neo4j/Bolt/ResultStream.md
@@ -36,6 +42,7 @@ README
 README.md
 t/001_useok.t
 t/002_types.t
+t/003_struct_types.t
 t/004_query.t
 t/005_errors.t
 t/007_transact.t

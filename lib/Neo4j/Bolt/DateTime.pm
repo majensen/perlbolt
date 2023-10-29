@@ -1,7 +1,7 @@
 package Neo4j::Bolt::DateTime;
 # ABSTRACT: Representation of Neo4j date/time related structs
 
-$Neo4j::Bolt::Node::VERSION = '0.5000';
+$Neo4j::Bolt::DateTime::VERSION = '0.5000';
 
 use strict;
 use warnings;

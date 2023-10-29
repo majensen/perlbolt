@@ -1,7 +1,7 @@
 package Neo4j::Bolt::Point;
 # ABSTRACT: Representation of Neo4j geographic point structs
 
-$Neo4j::Bolt::Node::VERSION = '0.5000';
+$Neo4j::Bolt::Point::VERSION = '0.5000';
 
 use strict;
 use warnings;
