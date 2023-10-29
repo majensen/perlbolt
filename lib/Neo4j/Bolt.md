@@ -106,6 +106,11 @@ references. These represent Neo4j types according to the following:
 
     Set to `NONE` to turn off completely (the default).
 
+# INSTALLATION
+
+Visit [Neo4j::Bolt](https://metacpan.org/pod/Neo4j::Bolt) on CPAN
+for the newest released version and installation instructions.
+
 # SEE ALSO
 
 [Neo4j::Bolt::Cxn](/lib/Neo4j/Bolt/Cxn.md), [Neo4j::Bolt::ResultStream](/lib/Neo4j/Bolt/ResultStream.md).
