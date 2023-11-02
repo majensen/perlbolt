@@ -12,6 +12,7 @@ use Neo4j::Bolt::Path;
 use Neo4j::Bolt::Point;
 use Neo4j::Bolt::DateTime;
 use Neo4j::Bolt::Duration;
+use Neo4j::Bolt::Bytes;
 
 =head1 NAME
 

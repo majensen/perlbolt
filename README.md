@@ -44,7 +44,7 @@ references. These represent Neo4j types according to the following:
     Int              scalar
     Float            scalar
     String           scalar
-    Bytes            scalar
+    Bytes            scalarref (Neo4j::Bolt::Bytes)
     DateTime         hashref   (Neo4j::Bolt::DateTime)
     Duration         hashref   (Neo4j::Bolt::Duration)
     Point            hashref   (Neo4j::Bolt::Point)
@@ -77,6 +77,7 @@ references. These represent Neo4j types according to the following:
 
 For further details, see the individual modules:
 
+- [Neo4j::Bolt::Bytes](/lib/Neo4j/Bolt/Bytes.md)
 - [Neo4j::Bolt::DateTime](/lib/Neo4j/Bolt/DateTime.md)
 - [Neo4j::Bolt::Duration](/lib/Neo4j/Bolt/Duration.md)
 - [Neo4j::Bolt::Node](/lib/Neo4j/Bolt/Node.md)

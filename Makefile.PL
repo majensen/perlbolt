@@ -88,7 +88,7 @@ WriteMakefile(
   },
   TEST_REQUIRES => {
     'Test::Exception' => 0,
-    'Test::Neo4j::Types' => '0.05',
+    'Test::Neo4j::Types' => '0.06',
   },
   ABSTRACT => "Neo4j server agent using Bolt protocol",
   AUTHOR => ['Mark A. Jensen (majensen -at- cpan -dot- org)'],
@@ -103,6 +103,7 @@ WriteMakefile(
   clean => {FILES => "include/ppport.h t/neo_info"},
   PL_FILES => { "pod2md.PL" => [qw(
 				    lib/Neo4j/Bolt.pm
+				    lib/Neo4j/Bolt/Bytes.pm
 				    lib/Neo4j/Bolt/CResultStream.pm
 				    lib/Neo4j/Bolt/Cxn.pm
 				    lib/Neo4j/Bolt/DateTime.pm

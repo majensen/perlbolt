@@ -6,6 +6,8 @@ include/ppport.h
 lib/Neo4j/Bolt.md
 lib/Neo4j/Bolt.pm
 lib/Neo4j/Bolt.xs
+lib/Neo4j/Bolt/Bytes.md
+lib/Neo4j/Bolt/Bytes.pm
 lib/Neo4j/Bolt/Cxn.md
 lib/Neo4j/Bolt/Cxn.pm
 lib/Neo4j/Bolt/Cxn.xs
@@ -50,6 +52,7 @@ t/021_types_roles.t
 t/022_types_as_simple.t
 t/023_struct_types.t
 t/024_struct_types_gen.t
+t/025_types_bytes.t
 t/028_types_strings.t
 t/098_pod.t
 t/099_cpan_changes.t

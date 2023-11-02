@@ -91,7 +91,7 @@ references. These represent Neo4j types according to the following:
  Int              scalar
  Float            scalar
  String           scalar
- Bytes            scalar
+ Bytes            scalarref (Neo4j::Bolt::Bytes)
  DateTime         hashref   (Neo4j::Bolt::DateTime)
  Duration         hashref   (Neo4j::Bolt::Duration)
  Point            hashref   (Neo4j::Bolt::Point)
@@ -125,6 +125,8 @@ L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
 For further details, see the individual modules:
 
 =over 
+
+=item * L<Neo4j::Bolt::Bytes>
 
 =item * L<Neo4j::Bolt::DateTime>
 

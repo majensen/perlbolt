@@ -38,6 +38,7 @@ neo4j_value_t object_to_neo4j_value(SV *sv);
 neo4j_value_t object_to_neo4j_datetime(SV *sv);
 neo4j_value_t object_to_neo4j_duration(SV *sv);
 neo4j_value_t object_to_neo4j_point(SV *sv);
+neo4j_value_t object_to_neo4j_bytes(SV *sv);
 
 neo4j_value_t SVpv_to_neo4j_elementid(SV *sv);
 
@@ -223,7 +224,7 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
   SAVETMPS;
   
   enum {
-    DateTime, Duration, Point
+    DateTime, Duration, Point, Bytes
   } type;
   for ( type = 0; type < 3; ++type ) {
     PUSHMARK(SP);
@@ -233,6 +234,7 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
       case DateTime: mPUSHs(newSVpvs("Neo4j::Types::DateTime"));  break;
       case Duration: mPUSHs(newSVpvs("Neo4j::Types::Duration"));  break;
       case Point:    mPUSHs(newSVpvs("Neo4j::Types::Point"));     break;
+      case Bytes:    mPUSHs(newSVpvs("Neo4j::Types::ByteArray")); break;
     }
     PUTBACK;
     count = call_method("isa", G_SCALAR);
@@ -256,6 +258,8 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
       return object_to_neo4j_duration( sv );
     case Point:
       return object_to_neo4j_point( sv );
+    case Bytes:
+      return object_to_neo4j_bytes( sv );
   }
   
   ref = SvRV(sv);
@@ -439,6 +443,30 @@ neo4j_value_t object_to_neo4j_point(SV *sv) {
   else {
     return neo4j_point2d(fields);
   }
+}
+
+neo4j_value_t object_to_neo4j_bytes(SV *sv) {
+  dSP;
+  I32 count;
+  STRLEN len;
+  char *pv, *bytes;
+  ENTER;
+  SAVETMPS;
+  PUSHMARK(SP);
+  XPUSHs(sv);
+  PUTBACK;
+  count = call_method("as_string", G_SCALAR);
+  if (count != 1) {
+    croak("Neo4j::Types::ByteArray::as_string returned %i values, 1 was expected", (int)count);
+  }
+  SPAGAIN;
+  pv = SvPVbytex(POPs, len);
+  Newx(bytes, len, char);
+  Copy(pv, bytes, len, char);
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+  return neo4j_bytes(bytes, len);
 }
 
 neo4j_value_t AV_to_neo4j_list(AV *av) {
@@ -740,8 +768,10 @@ SV* neo4j_bool_to_SViv( neo4j_value_t value) {
 }
 
 SV* neo4j_bytes_to_SVpv( neo4j_value_t value ) {
-  return newSVpvn( neo4j_bytes_value(value),
-		   neo4j_bytes_length(value) );
+  HV* bytes_stash = gv_stashpv("Neo4j::Bolt::Bytes", GV_ADD);
+  SV* scalar = newSVpvn( neo4j_bytes_value(value),
+                         neo4j_bytes_length(value) );
+  return sv_bless(newRV_noinc(scalar), bytes_stash);
 }
 
 SV* neo4j_float_to_SVnv( neo4j_value_t value ) {
