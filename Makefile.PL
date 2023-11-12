@@ -64,6 +64,11 @@ my @ccflags;
 #  Neo4j::Types methods instead. This works just as well, but is slower.
 push @ccflags, '-DNEO4J_BOLT_TYPES_FAST' unless $ENV{NO_NEO4J_BOLT_TYPES_FAST};
 
+# NEO4J_CORE_BOOLS sets the boolean values returned from Neo4j to be Perl core
+#  "distinguished" booleans on Perl v5.36 and newer. Without it, blessed
+#  JSON::PP::Boolean instances will always be used, even on Perl v5.36+.
+push @ccflags, '-DNEO4J_CORE_BOOLS' unless $ENV{NO_NEO4J_CORE_BOOLS};
+
 WriteMakefile(
   NAME => 'Neo4j::Bolt',
   VERSION_FROM => 'lib/Neo4j/Bolt.pm',

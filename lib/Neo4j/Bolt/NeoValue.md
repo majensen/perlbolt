@@ -54,6 +54,15 @@ ways.
 
     Class method. Syntactic sugar; runs ["\_as\_perl()"](#_as_perl) on the arguments.
 
+# FUNCTIONS
+
+- is\_bool($scalar)
+
+        $boolean = Neo4j::Bolt::NeoValue::is_bool( $value );
+
+    Returns true iff Neo4j::Bolt would treat this Perl value as
+    a boolean when found in a query parameter.
+
 # AUTHOR
 
     Mark A. Jensen

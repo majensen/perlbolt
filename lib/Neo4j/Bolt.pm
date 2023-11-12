@@ -87,7 +87,7 @@ references. These represent Neo4j types according to the following:
  Neo4j type       Perl representation
  ----- ----       ---- --------------
  Null             undef
- Bool             JSON::PP::Boolean (acts like 0 or 1)
+ Bool             Perl core bool (v5.36+) or JSON::PP::Boolean
  Int              scalar
  Float            scalar
  String           scalar

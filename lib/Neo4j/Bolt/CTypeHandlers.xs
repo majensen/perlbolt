@@ -197,6 +197,11 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     
   }
   else { // scalar
+#if PERL_VERSION_GE(5,36,0)
+    if (SvIsBOOL(sv)) {
+      return neo4j_bool( SvTRUE(sv) );
+    }
+#endif
     if (SvNIOK(sv) && ! SvPOK(sv)) { // created_as_number
       if (SvIOK(sv)) {
         return SViv_to_neo4j_int(sv);
@@ -762,9 +767,13 @@ long long neo4j_identity_value(neo4j_value_t value)
 
 
 SV* neo4j_bool_to_SViv( neo4j_value_t value) {
+#if defined(NEO4J_CORE_BOOLS) && PERL_VERSION_GE(5,36,0)
+  return newSVsv(neo4j_bool_value(value) ? &PL_sv_yes : &PL_sv_no);
+#else
   HV* boolean_stash = gv_stashpv("JSON::PP::Boolean", GV_ADD);
   SV* scalar = newSViv( (IV) neo4j_bool_value(value) );
   return sv_bless(newRV_noinc(scalar), boolean_stash);
+#endif /* NEO4J_CORE_BOOLS */
 }
 
 SV* neo4j_bytes_to_SVpv( neo4j_value_t value ) {
