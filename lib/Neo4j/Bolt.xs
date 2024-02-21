@@ -100,6 +100,13 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   return cxn_ref;
 }
 
+static const char * _check_neo4j_omni_version (int major, int minor, int patch)
+{
+  int min_version = (major << 20) | (minor << 12) | (patch << 4);
+  return 0 < min_version && min_version <= NEO4J_VERSION_NUMBER
+    ? NULL : NEO4J_VERSION;
+}
+
 
 MODULE = Neo4j::Bolt  PACKAGE = Neo4j::Bolt  
 
@@ -121,4 +128,10 @@ int
 set_log_level (classname, lvl)
         const char* classname
         const char* lvl
-	
+
+const char *
+_check_neo4j_omni_version (major, minor, patch)
+        int major
+        int minor
+        int patch
+

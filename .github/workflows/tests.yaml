@@ -52,15 +52,23 @@ jobs:
     runs-on: ubuntu-latest
     name: "Perl ${{ matrix.perl }} / Neo4j ${{ matrix.neo4j }}"
     strategy:
-      fail-fast: true
       matrix:
         include:
-          - neo4j: "5.6.0"   # Neo4j 5
+          - neo4j: "5.13.0"  # Neo4j 5.13 = Bolt 5.0-5.4
+            perl: "5.38"
+          - neo4j: "5.12.0"  # Neo4j 5.12 = Bolt 5.0-5.3
+            perl: "5.38"
+          - neo4j: "5.8.0"   # Neo4j 5.8  = Bolt 5.0-5.2
+            perl: "5.38"
+          - neo4j: "5.6.0"   # Neo4j 5.6  = Bolt 5.0-5.1
+            perl: "5.38"
+          - neo4j: "5.4.0"   # Neo4j 5.4  = Bolt 5.0
             perl: "5.38"
           - neo4j: "4.4.23"  # Neo4j 4
             perl: "5.30"
           - neo4j: "3.5.35"  # Neo4j 3
             perl: "5.16"
+      fail-fast: false
     env:
       TEST_NEO4J_PASSWORD: xkcd_792
       NEO4J: ${{ matrix.neo4j }}

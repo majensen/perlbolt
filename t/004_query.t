@@ -29,6 +29,7 @@ if ($neo_info->{user}) {
 }
 
 ok my $cxn = Neo4j::Bolt->connect($url->as_string), "attempt connection";
+ok $cxn->connected, "server connection successful for requested DB tests";
 unless ($cxn->connected) {
   diag $cxn->errmsg;
 }
@@ -36,6 +37,7 @@ unless ($cxn->connected) {
 SKIP: {
   skip "Couldn't connect to server", 1 unless $cxn->connected;
   like $cxn->protocol_version, qr/^[0-9]+\.[0-9]+$/, "protocol version returned";
+  diag "Bolt version " . $cxn->protocol_version;  # debug aid
   ok my $stream = $cxn->run_query_(
     "MATCH (a) RETURN labels(a) as lbl, count(a) as ct",
     {},0,$Neo4j::Bolt::DEFAULT_DB
@@ -62,10 +64,18 @@ SKIP: {
     is ref $pth, 'Neo4j::Bolt::Path', 'got path as Neo4j::Bolt::Path';
     is scalar @$pth, 3, 'path array length';
     is ref $pth->[0], 'Neo4j::Bolt::Node', 'got start node as Neo4j::Bolt::Node';
+    ok defined $pth->[0]->{element_id}, 'node element_id defined';
+    diag $pth->[0]->{element_id};
     is ref $pth->[2], 'Neo4j::Bolt::Node', 'got end node as Neo4j::Bolt::Node';
     is ref $pth->[1], 'Neo4j::Bolt::Relationship', 'relationship is a Neo4j::Bolt::Relationship';
     is $pth->[1]->{start}, $pth->[0]->{id}, 'relationship start correct';
     is $pth->[1]->{end}, $pth->[2]->{id}, 'relationship end correct';
+    ok defined $pth->[1]->{element_id}, 'relationship element id defined';
+    diag $pth->[1]->{element_id};    
+    ok defined $pth->[1]->{start_element_id}, 'relationship start element id defined';
+    diag $pth->[1]->{start_element_id};    
+    ok defined $pth->[1]->{end_element_id}, 'relationship end element id defined';
+    diag $pth->[1]->{end_element_id};        
   }
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
   
