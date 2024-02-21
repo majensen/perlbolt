@@ -1,6 +1,6 @@
 Revision history for Perl module Neo4j::Bolt
-0.5000 2023-04-18
-    - Update for Neo4j v5.0 / libneo4j-client v5.0.0+ (Neo4j::Client 0.51+)
+0.5000 2024-02-21
+    - Update for Neo4j v5.0+ / libneo4j-client v5.0.4+ (Neo4j::Client 0.53+)
     - Include element_id where appropriate
     - Add types for date/time, duration, point, bytes
     - Support for Perl core distinguished booleans on Perl v5.36+

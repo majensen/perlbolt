@@ -76,7 +76,7 @@ WriteMakefile(
   CONFIGURE_REQUIRES => {
     'Alien::OpenSSL' => 0,
     'ExtUtils::MakeMaker' => '7.12',
-    'Neo4j::Client' => '0.46',
+    'Neo4j::Client' => '0.53',
     'Try::Tiny' => 0,
   },
   BUILD_REQUIRES => {
@@ -85,7 +85,7 @@ WriteMakefile(
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,
     'DateTime' => 0,
-    'Neo4j::Client' => '0.51',
+    'Neo4j::Client' => '0.53',
     'Neo4j::Types' => '2.00',
     'JSON::PP' => 0,
     'URI' => 0,

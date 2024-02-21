@@ -10,6 +10,12 @@ BEGIN {
   require XSLoader;
   XSLoader::load();
 
+  my @min_lib_version = (5,0,4);
+  if (my $lib_version = _check_neo4j_omni_version(@min_lib_version)) {
+    warnings::warnif( "misc", sprintf
+      "Neo4j::Client is outdated and should be upgraded (want libneo4j-omni %i.%i.%i, found %s)",
+      @min_lib_version, $lib_version );
+  }
 }
 our $DEFAULT_DB = "neo4j";
 
