@@ -1,6 +1,6 @@
 package Neo4j::Bolt::CTypeHandlers;
 BEGIN {
-  our $VERSION = "0.4203";
+  our $VERSION = "0.5000";
   require XSLoader;
   XSLoader::load();
 }
@@ -9,6 +9,10 @@ use JSON::PP; # operator overloading for boolean values
 use Neo4j::Bolt::Node;
 use Neo4j::Bolt::Relationship;
 use Neo4j::Bolt::Path;
+use Neo4j::Bolt::Point;
+use Neo4j::Bolt::DateTime;
+use Neo4j::Bolt::Duration;
+use Neo4j::Bolt::Bytes;
 
 =head1 NAME
 

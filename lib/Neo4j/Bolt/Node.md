@@ -8,6 +8,7 @@ Neo4j::Bolt::Node - Representation of a Neo4j Node
     $node = ( $cxn->run_query($q)->fetch_next )[0];
     
     $node_id    = $node->{id};
+    $node_eltid = $node->{element_id};
     $labels     = $node->{labels} // [];
     @labels     = @$labels;
     $properties = $node->{properties} // {};
@@ -60,7 +61,7 @@ The following additional method is provided:
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Node](https://metacpan.org/pod/Neo4j::Types::Node)
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Node](/lib/Neo4j/Types/Node.md)
 
 # AUTHOR
 
@@ -69,7 +70,7 @@ The following additional method is provided:
 
 # LICENSE
 
-This software is Copyright (c) 2019-2021 by Arne Johannessen.
+This software is Copyright (c) 2019-2023 by Arne Johannessen.
 
 This is free software, licensed under:
 

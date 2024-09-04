@@ -1,12 +1,39 @@
 package Neo4j::Bolt::Relationship;
 # ABSTRACT: Representation of Neo4j Relationship
 
-$Neo4j::Bolt::Relationship::VERSION = '0.4205';
+$Neo4j::Bolt::Relationship::VERSION = '0.5000';
 
 use strict;
 use warnings;
 
 use parent 'Neo4j::Types::Relationship';
+
+sub element_id {
+  my $self = shift;
+  if ($self->{element_id} eq $self->{id}) {
+    warnings::warnif 'Neo4j::Types', 'element_id unavailable';
+    return $self->{id};
+  }
+  return $self->{element_id};
+}
+
+sub start_element_id {
+  my $self = shift;
+  if ($self->{start_element_id} eq $self->{start}) {
+    warnings::warnif 'Neo4j::Types', 'start_element_id unavailable';
+    return $self->{start};
+  }
+  return $self->{start_element_id};
+}
+
+sub end_element_id {
+  my $self = shift;
+  if ($self->{end_element_id} eq $self->{end}) {
+    warnings::warnif 'Neo4j::Types', 'end_element_id unavailable';
+    return $self->{end};
+  }
+  return $self->{end_element_id};
+}
 
 sub id { shift->{id} }
 sub start_id { shift->{start} }
@@ -25,8 +52,11 @@ sub as_simple {
   my $self = shift;
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_relationship} = $self->{id};
+  $simple{_element_id} = $self->{element_id};
   $simple{_start} = $self->{start};
+  $simple{_start_element_id} = $self->{start_element_id};
   $simple{_end} = $self->{end};
+  $simple{_end_element_id} = $self->{end_element_id};
   $simple{_type} = $self->{type};
   return \%simple;
 }
@@ -124,7 +154,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Relationship>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2020-2021 by Arne Johannessen
+This software is Copyright (c) 2020-2023 by Arne Johannessen
 
 This is free software, licensed under:
 

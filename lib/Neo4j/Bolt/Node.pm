@@ -1,12 +1,21 @@
 package Neo4j::Bolt::Node;
 # ABSTRACT: Representation of Neo4j Node
 
-$Neo4j::Bolt::Node::VERSION = '0.4205';
+$Neo4j::Bolt::Node::VERSION = '0.5000';
 
 use strict;
 use warnings;
 
 use parent 'Neo4j::Types::Node';
+
+sub element_id {
+  my $self = shift;
+  if ($self->{element_id} eq $self->{id}) {
+    warnings::warnif 'Neo4j::Types', 'element_id unavailable';
+    return $self->{id};
+  }
+  return $self->{element_id};
+}
 
 sub id { shift->{id} }
 
@@ -28,6 +37,7 @@ sub as_simple {
   my $self = shift;
   my %simple = defined $self->{properties} ? %{$self->{properties}} : ();
   $simple{_node} = $self->{id};
+  $simple{_element_id} = $self->{element_id};
   $simple{_labels} = defined $self->{labels} ? $self->{labels} : [];
   return \%simple;
 }
@@ -46,6 +56,7 @@ Neo4j::Bolt::Node - Representation of a Neo4j Node
  $node = ( $cxn->run_query($q)->fetch_next )[0];
  
  $node_id    = $node->{id};
+ $node_eltid = $node->{element_id};
  $labels     = $node->{labels} // [];
  @labels     = @$labels;
  $properties = $node->{properties} // {};
@@ -118,7 +129,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Node>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2021 by Arne Johannessen.
+This software is Copyright (c) 2019-2023 by Arne Johannessen.
 
 This is free software, licensed under:
 

@@ -54,7 +54,7 @@ The following additional method is provided:
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Path](https://metacpan.org/pod/Neo4j::Types::Path)
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Path](/lib/Neo4j/Types/Path.md)
 
 # AUTHOR
 
@@ -63,7 +63,7 @@ The following additional method is provided:
 
 # LICENSE
 
-This software is Copyright (c) 2020-2021 by Arne Johannessen.
+This software is Copyright (c) 2020-2023 by Arne Johannessen.
 
 This is free software, licensed under:
 

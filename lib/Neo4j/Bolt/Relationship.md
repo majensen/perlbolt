@@ -65,7 +65,7 @@ The following additional method is provided:
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship)
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Relationship](/lib/Neo4j/Types/Relationship.md)
 
 # AUTHOR
 
@@ -74,7 +74,7 @@ The following additional method is provided:
 
 # LICENSE
 
-This software is Copyright (c) 2020-2021 by Arne Johannessen
+This software is Copyright (c) 2020-2023 by Arne Johannessen
 
 This is free software, licensed under:
 
