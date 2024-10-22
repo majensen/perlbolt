@@ -79,16 +79,6 @@ HV* neo4j_duration_to_HV(neo4j_value_t value);
 HV* neo4j_point_to_HV(neo4j_value_t value);
 
 long long neo4j_identity_value(neo4j_value_t value);
-char *neo4j_string_to_alloc_str(neo4j_value_t value);
-
-char *neo4j_string_to_alloc_str(neo4j_value_t value) {
-  assert(neo4j_type(value) == NEO4J_STRING || neo4j_type(value) == NEO4J_ELEMENTID);
-  char *s;
-  int nlength;
-  nlength = (int) neo4j_string_length(value);
-  Newx(s,nlength+1,char);
-  return neo4j_string_value(value,s,(size_t) nlength+1);
-}
 
 neo4j_value_t SViv_to_neo4j_bool (SV *sv) {
   return neo4j_bool( (bool) SvIV(sv) );
@@ -795,7 +785,7 @@ SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
   STRLEN len;
   SV* pv;
   len = neo4j_string_length(value);
-  pv = newSVpvn(neo4j_string_to_alloc_str(value), len);
+  pv = len ? newSVpvn(neo4j_ustring_value(value), len) : newSVpvs("");
   sv_utf8_decode(pv);
   return pv;
 }
@@ -897,7 +887,7 @@ AV* neo4j_list_to_AV( neo4j_value_t value ) {
 HV* neo4j_map_to_HV( neo4j_value_t value ) {
   int i,n;
   I32 klen;
-  char *ks;
+  const char *ks;
   const neo4j_map_entry_t *entry;
   HV *hv;
   SV *sv;
@@ -905,10 +895,9 @@ HV* neo4j_map_to_HV( neo4j_value_t value ) {
   n = (int) neo4j_map_size(value);
   for (i=0;i<n;i++) {
     entry = neo4j_map_getentry(value,i);
-    ks = neo4j_string_to_alloc_str(entry->key);
-    sv = neo4j_value_to_SV(entry->value);
-    SvREFCNT_inc(sv);
     klen = neo4j_string_length(entry->key);
+    ks = klen ? neo4j_ustring_value(entry->key) : "";
+    sv = neo4j_value_to_SV(entry->value);
     if (! is_utf8_invariant_string((U8 *)ks, (STRLEN)klen)) {
       // treat key as utf8 (as opposed to single-byte)
       klen = -klen;
