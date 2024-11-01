@@ -15,6 +15,10 @@ on configure => sub {
   requires 'Try::Tiny';
 };
 
+on build => sub {
+  requires 'ExtUtils::Typemaps', '3.24';  # embedded typemap
+};
+
 on test => sub {
   requires 'Carp';
   requires 'Cwd';

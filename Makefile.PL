@@ -80,7 +80,7 @@ WriteMakefile(
     'Try::Tiny' => 0,
   },
   BUILD_REQUIRES => {
-    # Nothing beyond CONFIGURE_REQUIRES, so we're all set here!
+    'ExtUtils::Typemaps' => '3.24',  # embedded typemap
   },
   PREREQ_PM => {
     'Alien::OpenSSL' => 0,

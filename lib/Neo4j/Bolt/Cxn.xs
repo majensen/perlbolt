@@ -109,7 +109,9 @@ const char *protocol_version_(SV *cxn_ref) {
 
 void DESTROY (SV *cxn_ref)
 {
-  neo4j_close( C_PTR_OF(cxn_ref,cxn_obj_t)->connection );
+  cxn_obj_t *cxn_obj = C_PTR_OF(cxn_ref,cxn_obj_t);
+  neo4j_close(cxn_obj->connection);
+  Safefree(cxn_obj);
   return;
 }
 

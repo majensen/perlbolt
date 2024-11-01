@@ -107,6 +107,10 @@ const char *errmsg_(SV *txn_ref) {
 
 MODULE = Neo4j::Bolt::Txn  PACKAGE = Neo4j::Bolt::Txn  
 
+TYPEMAP: <<END
+txn_obj_t *    T_PTRREF
+END
+
 PROTOTYPES: DISABLE
 
 
@@ -140,4 +144,11 @@ errnum_ (txn_ref)
 const char *
 errmsg_ (txn_ref)
 	SV *	txn_ref
+
+void
+DESTROY (txn_obj)
+        txn_obj_t *    txn_obj
+    CODE:
+        neo4j_free_tx(txn_obj->tx);
+        Safefree(txn_obj);
 
