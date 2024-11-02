@@ -41,11 +41,12 @@ jobs:
           rm -f Neo4j-Bolt-*
           make distdir
           mv -v Neo4j-Bolt-* build_dir
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build_dir
           path: build_dir
           retention-days: 1
+          include-hidden-files: true  # .sample.cypher
 
   test-job:
     needs: dist-job
@@ -85,7 +86,7 @@ jobs:
           install-modules: ExtUtils::MakeMaker~6.78
           enable-modules-cache: false
       - name: Get distribution
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: build_dir
           path: .
