@@ -801,7 +801,14 @@ SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
 }
 
 SV* neo4j_elementid_to_SVpv( neo4j_value_t value ) {
-    return neo4j_string_to_SVpv(value);
+  if (neo4j_type(value) == NEO4J_NULL) {
+    return newSV(0);
+    /* Undefined element IDs exist for nodes in unbound relationships.
+     * neo4j_relationship_to_HV() first needs to insert placeholders, before
+     * neo4j_path_to_AV() can store the correct node element IDs in the HV.
+     */
+  }
+  return neo4j_string_to_SVpv(value);
 }
 
 SV* neo4j_value_to_SV( neo4j_value_t value ) {
