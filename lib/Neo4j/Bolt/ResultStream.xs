@@ -165,6 +165,9 @@ void DESTROY (SV *rs_ref) {
   rs_obj_t *rs_obj;
   rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
   neo4j_close_results(rs_obj->res_stream);
+  Safefree(rs_obj->eval_errcode);
+  Safefree(rs_obj->eval_errmsg);
+  Safefree(rs_obj->strerror);
   Safefree(rs_obj->stats->update_counts);
   Safefree(rs_obj->stats);
   Safefree(rs_obj);
