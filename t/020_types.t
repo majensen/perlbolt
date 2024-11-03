@@ -18,6 +18,13 @@ $i = "Hey dude";
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "String", "String";
 is $v->_as_perl, $i, "roundtrip";
+SKIP: {
+  skip "no stable tracking of IOK/POK flags", 1 if $^V lt "v5.36";
+  $i = 200;
+  {my $x = "xx $i"}
+  $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
+  is $v->_neotype, "Integer", "created as int";
+}
 
 $i = decode_json('[true]')->[0];
 $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
@@ -29,6 +36,11 @@ $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
 is $v->_neotype, "Boolean", "Boolean";
 ok ! $v->_as_perl, "Boolean false is not truthy";
 ok Neo4j::Bolt::NeoValue::is_bool($v->_as_perl), "Boolean false type";
+SKIP: {
+  skip "no core bools", 1 if $^V lt "v5.36";
+  $v = Neo4j::Bolt::NeoValue->_new_from_perl(!!0);
+  is $v->_neotype, "Boolean", "Boolean builtin";
+}
 
 $v = Neo4j::Bolt::NeoValue->_new_from_perl(["this", "is",1,"array"]);
 is $v->_neotype, "List", "List";

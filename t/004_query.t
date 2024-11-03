@@ -34,8 +34,7 @@ unless ($cxn->connected) {
   diag $cxn->errmsg;
 }
 
-SKIP: {
-  skip "Couldn't connect to server", 1 unless $cxn->connected;
+if ($cxn->connected) {
   like $cxn->protocol_version, qr/^[0-9]+\.[0-9]+$/, "protocol version returned";
   diag "Bolt version " . $cxn->protocol_version;  # debug aid
   ok my $stream = $cxn->run_query_(
@@ -106,7 +105,7 @@ SKIP: {
   }
 
   SKIP : {
-    skip "Add/delete tests not requested", 1 unless $neo_info->{tests};
+    skip "Add/delete tests not requested", 9 unless $neo_info->{tests};
     ok $stream = $cxn->do_query('CREATE (a:Boog:Frelb {prop1: "goob"})'), 'create a node and a property';
     ok $stream->success, 'q succeeds';
 #    $stream->fetch_next_;
