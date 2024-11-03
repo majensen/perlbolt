@@ -14,10 +14,10 @@ jobs:
     name: Build distribution
     runs-on: ubuntu-latest
     container:
-      image: perldocker/perl-tester:5.38
+      image: perldocker/perl-tester:5.40
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           cpanm --cpanfile cpanfile --installdeps --skip-satisfied \
@@ -55,22 +55,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - neo4j: "5.13.0"  # Neo4j 5.13 = Bolt 5.0-5.4
-            perl: "5.38"
-          - neo4j: "5.12.0"  # Neo4j 5.12 = Bolt 5.0-5.3
-            perl: "5.38"
+          - neo4j: "5.25.1"  # Neo4j 5.25 = Bolt 5.0-5.6
+            perl: "5.40"
+          - neo4j: "5.16.0"  # Neo4j 5.16 = Bolt 5.0-5.4
+            perl: "5.26"
           - neo4j: "5.8.0"   # Neo4j 5.8  = Bolt 5.0-5.2
-            perl: "5.38"
-          - neo4j: "5.6.0"   # Neo4j 5.6  = Bolt 5.0-5.1
-            perl: "5.38"
-          - neo4j: "5.4.0"   # Neo4j 5.4  = Bolt 5.0
-            perl: "5.38"
-          - neo4j: "4.4.23"  # Neo4j 4
-            perl: "5.30"
-          - neo4j: "3.5.35"  # Neo4j 3
             perl: "5.16"
+          - neo4j: "4.4.38"  # Neo4j 4
+            perl: "5.38"
+          - neo4j: "3.5.35"  # Neo4j 3
+            perl: "5.36"
       fail-fast: false
     env:
+      CI: 1
       TEST_NEO4J_PASSWORD: xkcd_792
       NEO4J: ${{ matrix.neo4j }}
     steps:
