@@ -139,8 +139,10 @@ WriteMakefile(
     },
   },
   META_MERGE => $META,
-    
- );
+  dist => {
+    TAR => 'ptar',  # avoid extended headers in tarball
+  },
+);
 
 sub MY::postamble {
   # Generate ppport.h automatically (keep it out of the repository)
