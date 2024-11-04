@@ -26,7 +26,7 @@ a Cypher query that returns relationships from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This class performs the [Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship) role, which
+This class conforms to the [Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship) API, which
 offers an object-oriented interface to the relationship's
 properties and metadata. This is entirely optional to use.
 
@@ -65,7 +65,7 @@ The following additional method is provided:
 
 # SEE ALSO
 
-[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Relationship](/lib/Neo4j/Types/Relationship.md)
+[Neo4j::Bolt](/lib/Neo4j/Bolt.md), [Neo4j::Types::Relationship](https://metacpan.org/pod/Neo4j::Types::Relationship)
 
 # AUTHOR
 
@@ -74,7 +74,7 @@ The following additional method is provided:
 
 # LICENSE
 
-This software is Copyright (c) 2020-2023 by Arne Johannessen
+This software is Copyright (c) 2020-2024 by Arne Johannessen
 
 This is free software, licensed under:
 

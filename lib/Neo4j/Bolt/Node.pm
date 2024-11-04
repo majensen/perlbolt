@@ -74,7 +74,7 @@ a Cypher query that returns nodes from a Neo4j database.
 Their properties and metadata can be accessed as shown in the
 synopsis above.
 
-This class performs the L<Neo4j::Types::Node> role, which
+This class conforms to the L<Neo4j::Types::Node> API, which
 offers an object-oriented interface to the node's
 properties and metadata. This is entirely optional to use.
 
@@ -129,7 +129,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Node>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2023 by Arne Johannessen.
+This software is Copyright (c) 2019-2024 by Arne Johannessen.
 
 This is free software, licensed under:
 

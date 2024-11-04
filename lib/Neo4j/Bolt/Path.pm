@@ -61,7 +61,7 @@ a Cypher query that returns paths from a Neo4j database.
 Their nodes, relationships and metadata can be accessed
 as shown in the synopsis above.
 
-This class performs the L<Neo4j::Types::Path> role, which
+This class conforms to the L<Neo4j::Types::Path> API, which
 offers an object-oriented interface to the paths's
 elements and metadata. This is entirely optional to use.
 
@@ -109,7 +109,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Path>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2020-2023 by Arne Johannessen.
+This software is Copyright (c) 2020-2024 by Arne Johannessen.
 
 This is free software, licensed under:
 

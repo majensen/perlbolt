@@ -89,7 +89,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::ByteArray>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2023 by Arne Johannessen.
+This software is Copyright (c) 2024 by Arne Johannessen.
 
 This is free software, licensed under:
 

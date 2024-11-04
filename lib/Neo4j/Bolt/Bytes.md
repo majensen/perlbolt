@@ -37,9 +37,9 @@ possible for backwards compatibility, but it issues a
 deprecation warning and will likely be removed in a future
 version.
 
-This class performs the [Neo4j::Types::ByteArray](https://metacpan.org/pod/Neo4j::Types::ByteArray) role, which
-offers an object-oriented interface to the underlying byte
-string. This is entirely optional to use.
+This class conforms to the [Neo4j::Types::ByteArray](https://metacpan.org/pod/Neo4j::Types::ByteArray) API,
+which offers an object-oriented interface to the underlying
+byte string. This is entirely optional to use.
 
 # METHODS
 
@@ -59,7 +59,7 @@ This class provides the following method defined by
 
 # LICENSE
 
-This software is Copyright (c) 2023 by Arne Johannessen.
+This software is Copyright (c) 2024 by Arne Johannessen.
 
 This is free software, licensed under:
 

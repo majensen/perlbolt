@@ -2,7 +2,7 @@ package Neo4j::Bolt;
 use Cwd qw/realpath getcwd/;
 
 BEGIN {
-  our $VERSION = "0.5000";
+  our $VERSION = "0.5000"; # TRIAL
   require Neo4j::Bolt::Cxn;
   require Neo4j::Bolt::Txn;
   require Neo4j::Bolt::ResultStream;
@@ -206,7 +206,7 @@ L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>, L<Neo4j::Types>.
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2023 by Mark A. Jensen.
+This software is Copyright (c) 2019-2024 by Mark A. Jensen.
 
 This is free software, licensed under:
 

@@ -65,7 +65,7 @@ L<libneo4j-client API|http://neo4j-client.net/doc/latest/neo4j-client_8h.html>.
 
 =head1 LICENSE
 
-This software is Copyright (c) 2019-2021 by Mark A. Jensen.
+This software is Copyright (c) 2019-2024 by Mark A. Jensen.
 
 This is free software, licensed under:
 

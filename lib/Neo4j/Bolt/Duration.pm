@@ -111,7 +111,7 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Duration>, L<DateTime>, L<DateTime::Duration>
 
 =head1 LICENSE
 
-This software is Copyright (c) 2023 by Mark A. Jensen.
+This software is Copyright (c) 2024 by Mark A. Jensen.
 
 This is free software, licensed under:
 
