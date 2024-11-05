@@ -15,8 +15,14 @@ my $LDDLFLAGS = $Config{lddlflags};
 
 my $META = {
   resources => {
-    bugtracker => 'https://github.com/majensen/perlbolt/issues',
-    repository => 'https://github.com/majensen/perlbolt.git',
+    bugtracker => {
+      web => 'https://github.com/majensen/perlbolt/issues',
+    },
+    repository => {
+      type => 'git',
+      url => 'https://github.com/majensen/perlbolt.git',
+      web => 'https://github.com/majensen/perlbolt',
+    },
   },
   x_contributors => [
     'Mark A. Jensen <majensen@cpan.org>',
