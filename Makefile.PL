@@ -47,7 +47,6 @@ my $META = {
     },
   },
   'meta-spec' => { version => 2 },
-  release_status => 'testing',
 };
 
 my $neo_info = prompt_for_db();

@@ -1,6 +1,6 @@
 Revision history for Perl module Neo4j::Bolt
 
-0.5000  2024-11-04  TRIAL RELEASE
+0.5000  2024-11-08
     - Update for Neo4j v5.0+ / libneo4j-omni v5.0.4 (Neo4j::Client 0.54)
     - Include element_id where appropriate
     - Add types for date/time, duration, point, bytes
