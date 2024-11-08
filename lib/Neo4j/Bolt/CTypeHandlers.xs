@@ -778,7 +778,12 @@ SV* neo4j_float_to_SVnv( neo4j_value_t value ) {
 }
 
 SV* neo4j_int_to_SViv( neo4j_value_t value ) {
+#if IVSIZE > 4
   return newSViv( (IV) neo4j_int_value( value ) );
+#else
+  long long i = neo4j_int_value( value );
+  return (i < IV_MIN || i > IV_MAX) ? newSVnv( (NV)i ) : newSViv( (IV)i );
+#endif /* IVSIZE */
 }
 
 SV* neo4j_string_to_SVpv( neo4j_value_t value ) {
@@ -1028,7 +1033,11 @@ HV* neo4j_time_to_HV( neo4j_value_t value) {
     nsecs = neo4j_time_nsecs(value);
     offset_secs = neo4j_time_secs_offset(value);
     hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
+#if IVSIZE > 4
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+#else
+    hv_stores(hv, "nsecs", newSVnv( (NV) nsecs ));
+#endif /* IVSIZE */
     hv_stores(hv, "offset_secs", newSViv( (IV) offset_secs ));
     return hv;
 }
@@ -1039,7 +1048,11 @@ HV* neo4j_localtime_to_HV( neo4j_value_t value) {
     hv = newHV();
     nsecs = neo4j_localtime_nsecs(value);
     hv_stores(hv, "neo4j_type", neo4j_type_svpv(value));
+#if IVSIZE > 4
     hv_stores(hv, "nsecs", newSViv( (IV) nsecs ));
+#else
+    hv_stores(hv, "nsecs", newSVnv( (NV) nsecs ));
+#endif /* IVSIZE */
     return hv;
 }
 
