@@ -32,13 +32,13 @@ $p2m->parse_file("$pm");
 
 $mdstr =~ s/%3A%3A/::/g;
 $mdstr =~ s{(\][(]github::[^)]*[)])}
-	   {
-	     $_ = $1;
-	     s|github::|/lib/|;
-	     s|::|/|g;
-	     s|[)]$|.md)|;
-	     $_
-	   }eg;
+           {
+             $_ = $1;
+             s|github::|/lib/|;
+             s|::|/|g;
+             s|[)]$|.md)|;
+             $_
+           }eg;
 if (length $mdstr > 1) {
   my $fh = $md->openw();
   print $fh $mdstr;

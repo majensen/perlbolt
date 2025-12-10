@@ -66,18 +66,18 @@ Neo4j::Bolt::Cxn - Container for a Neo4j Bolt connection
 
 =head1 SYNOPSIS
 
- use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
- unless ($cxn->connected) {
-   die "Problem connecting: ".$cxn->errmsg;
- }
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
- );
- if ($stream->failure) {
-   print STDERR "Problem with query run: ".
-                 ($stream->client_errmsg || $stream->server_errmsg);
- }
+  use Neo4j::Bolt;
+  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
+  unless ($cxn->connected) {
+    die "Problem connecting: ".$cxn->errmsg;
+  }
+  $stream = $cxn->run_query(
+    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
+  );
+  if ($stream->failure) {
+    print STDERR "Problem with query run: ".
+                  ($stream->client_errmsg || $stream->server_errmsg);
+  }
 
 =head1 DESCRIPTION
 
@@ -95,7 +95,7 @@ L</"errmsg()">.
 
 =item protocol_version()
 
-Returns a string representing the major and minor Bolt protocol version of the 
+Returns a string representing the major and minor Bolt protocol version of the
 server, as "<major>.<minor>", or the empty string if not connected.
 
 =item run_query($cypher_query, [$param_hash], [$db_name])
@@ -135,14 +135,14 @@ the current transaction.
 
 Current error state of the connection. If
 
- $cxn->connected == $cxn->errnum == 0
+  $cxn->connected == $cxn->errnum == 0
 
 then you have a virgin Cxn object that came from someplace other than
 C<< Neo4j::Bolt->connect() >>, which would be weird.
 
 =item server_id()
 
- print $cxn->server_id;  # "Neo4j/3.3.9"
+  print $cxn->server_id;  # "Neo4j/3.3.9"
 
 Get the server ID string, including the version number. C<undef> if
 connecting wasn't successful or the server didn't identify itself.
@@ -155,9 +155,9 @@ L<Neo4j::Bolt>, L<Neo4j::Bolt::ResultStream>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

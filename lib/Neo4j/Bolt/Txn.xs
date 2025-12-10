@@ -7,7 +7,9 @@
 #include "connection.h"
 #include "transaction.h"
 
-void new_txn_obj( txn_obj_t **txn_obj) {
+
+void new_txn_obj( txn_obj_t **txn_obj)
+{
   Newx(*txn_obj,1,txn_obj_t);
   (*txn_obj)->tx = NULL;
   (*txn_obj)->errnum = 0;
@@ -15,8 +17,10 @@ void new_txn_obj( txn_obj_t **txn_obj) {
   return;
 }
 
+
 // class method
-SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode, const char *dbname) {
+SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode, const char *dbname)
+{
   txn_obj_t *txn_obj;
   char climsg[BUFLEN];
   new_txn_obj(&txn_obj);
@@ -37,7 +41,9 @@ SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode
   return txn_ref;
 }
 
-int commit_(SV *txn_ref) {
+
+int commit_(SV *txn_ref)
+{
   txn_obj_t *t = C_PTR_OF(txn_ref,txn_obj_t);
   int i = -1;
   if (neo4j_tx_is_open(t->tx)) {
@@ -46,7 +52,9 @@ int commit_(SV *txn_ref) {
   return i;
 }
 
-int rollback_(SV *txn_ref) {
+
+int rollback_(SV *txn_ref)
+{
   txn_obj_t *t = C_PTR_OF(txn_ref,txn_obj_t);
   int i = -1;
   if (neo4j_tx_is_open(t->tx)) {
@@ -55,7 +63,9 @@ int rollback_(SV *txn_ref) {
   return i;
 }
 
-SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) {
+
+SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send)
+{
   neo4j_result_stream_t *res_stream;
   txn_obj_t *txn_obj;
   neo4j_transaction_t *tx;
@@ -82,8 +92,8 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
     return &PL_sv_undef;
   }
   res_stream = (send >= 1 ?
-		neo4j_send_to_tx(tx, cypher_query, params_p) :
-		neo4j_run_in_tx(tx, cypher_query, params_p));
+                neo4j_send_to_tx(tx, cypher_query, params_p) :
+                neo4j_run_in_tx(tx, cypher_query, params_p));
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
   if (send >= 1) {
@@ -96,16 +106,20 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
   return rs_ref;
 }
 
-int errnum_(SV *txn_ref) {
+
+int errnum_(SV *txn_ref)
+{
   return C_PTR_OF(txn_ref,txn_obj_t)->errnum;
 }
 
-const char *errmsg_(SV *txn_ref) {
+
+const char *errmsg_(SV *txn_ref)
+{
   return C_PTR_OF(txn_ref,txn_obj_t)->strerror;
 }
 
 
-MODULE = Neo4j::Bolt::Txn  PACKAGE = Neo4j::Bolt::Txn  
+MODULE = Neo4j::Bolt::Txn  PACKAGE = Neo4j::Bolt::Txn
 
 TYPEMAP: <<END
 txn_obj_t *    T_PTRREF
@@ -116,40 +130,40 @@ PROTOTYPES: DISABLE
 
 SV *
 begin_ (classname, cxn_ref, tx_timeout, mode, dbname)
-	const char *	classname
-	SV *	cxn_ref
-	int	tx_timeout
-	const char *	mode
-	const char *	dbname
+    const char *classname
+    SV         *cxn_ref
+    int         tx_timeout
+    const char *mode
+    const char *dbname
 
 int
 commit_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 int
 rollback_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 SV *
 run_query_ (txn_ref, cypher_query, params_ref, send)
-	SV *	txn_ref
-	const char *	cypher_query
-	SV *	params_ref
-	int	send
+    SV         *txn_ref
+    const char *cypher_query
+    SV         *params_ref
+    int         send
 
 int
 errnum_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 const char *
 errmsg_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 void
 DESTROY (txn_obj)
-        txn_obj_t *    txn_obj
-    CODE:
-        neo4j_free_tx(txn_obj->tx);
-        Safefree(txn_obj->strerror);
-        Safefree(txn_obj);
+    txn_obj_t *txn_obj
+  CODE:
+    neo4j_free_tx(txn_obj->tx);
+    Safefree(txn_obj->strerror);
+    Safefree(txn_obj);
 

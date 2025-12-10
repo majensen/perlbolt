@@ -11,11 +11,11 @@ use File::Spec;
 my $neo_info;
 my $nif = File::Spec->catfile('t','neo_info');
 if (-e $nif ) {
-    local $/;
-    open my $fh, "<", $nif or die $!;
-    my $val = <$fh>;
-    $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
-    eval $val;
+  local $/;
+  open my $fh, "<", $nif or die $!;
+  my $val = <$fh>;
+  $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
+  eval $val;
 }
 
 unless (defined $neo_info && $neo_info->{tests}) {
@@ -58,7 +58,7 @@ SKIP: {
   ok !$rs->fetch_next, "now you dont";
   my $badrs = $txn->run_query("match (a) return count(a)");
   ok !$badrs->success, "run query doesn't work on closed txn";
-  
+
 }
 
 done_testing;

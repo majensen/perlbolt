@@ -24,11 +24,11 @@ sub update_counts {
   my $self = shift;
   my %uc;
   my @tags = qw/nodes_created nodes_deleted
-		relationships_created relationships_deleted
-		properties_set
-		labels_added labels_removed
-		indexes_added indexes_removed
-		constraints_added constraints_removed/;
+                relationships_created relationships_deleted
+                properties_set
+                labels_added labels_removed
+                indexes_added indexes_removed
+                constraints_added constraints_removed/;
   my @vals = $self->update_counts_;
   return unless @vals;
   @uc{@tags} = @vals;
@@ -41,23 +41,23 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
 
 =head1 SYNOPSIS
 
- use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
+  use Neo4j::Bolt;
+  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
 
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
- );
- while ( my @row = $stream->fetch_next ) {
-   print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
- }
- # check that the stream emptied cleanly...
- unless ( $stream->success ) {
-   print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
- }
+  $stream = $cxn->run_query(
+    "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
+  );
+  while ( my @row = $stream->fetch_next ) {
+    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
+  }
+  # check that the stream emptied cleanly...
+  unless ( $stream->success ) {
+    print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
+  }
 
 =head1 DESCRIPTION
 
-L<Neo4j::Bolt::ResultStream> objects are created by a successful query 
+L<Neo4j::Bolt::ResultStream> objects are created by a successful query
 performed on a L<Neo4j::Bolt::Cxn>. They are iterated to obtain the rows
 of the response as Perl arrays (not arrayrefs).
 
@@ -75,17 +75,17 @@ If a write query is successful, returns a hashref containing the
 numbers of items created or removed in the query. The keys indicate
 the items, as follows:
 
- nodes_created
- nodes_deleted
- relationships_created
- relationships_deleted
- properties_set
- labels_added
- labels_removed
- indexes_added
- indexes_removed
- constraints_added
- constraints_removed
+  nodes_created
+  nodes_deleted
+  relationships_created
+  relationships_deleted
+  properties_set
+  labels_added
+  labels_removed
+  indexes_added
+  indexes_removed
+  constraints_added
+  constraints_removed
 
 If query is unsuccessful, or the stream is not completely fetched yet,
 returns undef (check L</"server_errmsg()">).
@@ -100,8 +100,8 @@ Obtain the number of fields in the response row as an integer.
 
 =item success(), failure()
 
-Use these to check whether fetch_next() succeeded. They indicate the 
-current error state of the result stream. If 
+Use these to check whether fetch_next() succeeded. They indicate the
+current error state of the result stream. If
 
   $stream->success == $stream->failure == -1
 
@@ -132,10 +132,10 @@ particular, Cypher syntax errors will appear here.
 
 =item consumed_after()
 
-These are performance numbers that the server provides after the 
+These are performance numbers that the server provides after the
 stream has been fetched out. result_count_() is the number of rows
-returned, available_after() is the time in ms it took the server to 
-provide the stream, and consumed_after() is the time it took the 
+returned, available_after() is the time in ms it took the server to
+provide the stream, and consumed_after() is the time it took the
 client (you) to pull them all.
 
 =back
@@ -154,9 +154,9 @@ L<Neo4j::Bolt>, L<Neo4j::Bolt::Cxn>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

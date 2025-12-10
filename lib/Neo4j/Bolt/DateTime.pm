@@ -131,17 +131,17 @@ Neo4j::Bolt::DateTime - Representation of a Neo4j date/time related structure
 
 =head1 SYNOPSIS
 
- $q = "RETURN datetime('2021-01-21T12:00:00-0500')";
- $dt = ( $cxn->run_query($q)->fetch_next )[0];
+  $q = "RETURN datetime('2021-01-21T12:00:00-0500')";
+  $dt = ( $cxn->run_query($q)->fetch_next )[0];
 
- $neo4j_type = $dt->{neo4j_type}; # Date, Time, DateTime, LocalDateTime, LocalTime
- $epoch_days = $dt->{epoch_days};
- $epoch_secs = $dt->{epoch_secs};
- $secs = $dt->{secs};
- $nanosecs = $dt->{nsecs};
- $offset_secs = $dt->{offset_secs};
+  $neo4j_type = $dt->{neo4j_type}; # Date, Time, DateTime, LocalDateTime, LocalTime
+  $epoch_days = $dt->{epoch_days};
+  $epoch_secs = $dt->{epoch_secs};
+  $secs = $dt->{secs};
+  $nanosecs = $dt->{nsecs};
+  $offset_secs = $dt->{offset_secs};
 
- $perl_dt = $node->as_DateTime;
+  $perl_dt = $node->as_DateTime;
 
 =head1 DESCRIPTION
 
@@ -190,12 +190,12 @@ The following additional method is provided:
 
 =item as_DateTime()
 
- $perl_dt  = $dt->as_DateTime;
- 
- $node_id = $simple->{_node};
- @labels  = @{ $simple->{_labels} };
- $value1  = $simple->{property1};
- $value2  = $simple->{property2};
+  $perl_dt  = $dt->as_DateTime;
+
+  $node_id = $simple->{_node};
+  @labels  = @{ $simple->{_labels} };
+  $value1  = $simple->{property1};
+  $value2  = $simple->{property2};
 
 Obtain a L<DateTime> object equivalent to the Neo4j structure returned
 by the database. Time and LocalTime objects generate a DateTime whose date is the
@@ -209,8 +209,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::DateTime>, L<DateTime>
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
+  Mark A. Jensen
+  CPAN: MAJENSEN
 
 =head1 LICENSE
 

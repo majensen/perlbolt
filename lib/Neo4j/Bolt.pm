@@ -51,7 +51,7 @@ sub connect_tls {
     $tls->{ca_file} // $default_ca{SSL_ca_file} // "",
     $tls->{pk_file} || "",
     $tls->{pk_pass} || ""
-   );
+  );
 }
 
 
@@ -64,23 +64,23 @@ Neo4j::Bolt - query Neo4j using Bolt protocol
 
 =head1 SYNOPSIS
 
- use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
-   {} # parameter hash required
- );
- @names = $stream->field_names;
- while ( my @row = $stream->fetch_next ) {
-   print "For label '$row[0]' there are $row[1] nodes.\n";
- }
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
-   {} # parameter hash required
- );
- while ( my @row = $stream->fetch_next ) {
-   print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
- }
+  use Neo4j::Bolt;
+  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
+  $stream = $cxn->run_query(
+    "MATCH (a) RETURN head(labels(a)) as lbl, count(a) as ct",
+    {} # parameter hash required
+  );
+  @names = $stream->field_names;
+  while ( my @row = $stream->fetch_next ) {
+    print "For label '$row[0]' there are $row[1] nodes.\n";
+  }
+  $stream = $cxn->run_query(
+    "MATCH (a) RETURN labels(a) as lbls, count(a) as ct",
+    {} # parameter hash required
+  );
+  while ( my @row = $stream->fetch_next ) {
+    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
+  }
 
 =head1 DESCRIPTION
 
@@ -95,54 +95,54 @@ library version is detected.
 
 =head2 Return Types
 
-L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made 
+L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made
 via a L<Neo4j::Bolt::Cxn>. These rows are simple arrays of scalars and/or
 references. These represent Neo4j types according to the following:
 
- Neo4j type       Perl representation
- ----- ----       ---- --------------
- Null             undef
- Bool             Perl core bool (v5.36+) or JSON::PP::Boolean
- Int              scalar
- Float            scalar
- String           scalar
- Bytes            scalarref (Neo4j::Bolt::Bytes)
- DateTime         hashref   (Neo4j::Bolt::DateTime)
- Duration         hashref   (Neo4j::Bolt::Duration)
- Point            hashref   (Neo4j::Bolt::Point)
- List             arrayref
- Map              hashref
- Node             hashref   (Neo4j::Bolt::Node)
- Relationship     hashref   (Neo4j::Bolt::Relationship)
- Path             arrayref  (Neo4j::Bolt::Path)
+  Neo4j type       Perl representation
+  ----- ----       ---- --------------
+  Null             undef
+  Bool             Perl core bool (v5.36+) or JSON::PP::Boolean
+  Int              scalar
+  Float            scalar
+  String           scalar
+  Bytes            scalarref (Neo4j::Bolt::Bytes)
+  DateTime         hashref   (Neo4j::Bolt::DateTime)
+  Duration         hashref   (Neo4j::Bolt::Duration)
+  Point            hashref   (Neo4j::Bolt::Point)
+  List             arrayref
+  Map              hashref
+  Node             hashref   (Neo4j::Bolt::Node)
+  Relationship     hashref   (Neo4j::Bolt::Relationship)
+  Path             arrayref  (Neo4j::Bolt::Path)
 
 L<Nodes|Neo4j::Bolt::Node>, L<Relationships|Neo4j::Bolt::Relationship> and
 L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
 
- # Node:
- bless {
-   id => $node_id,  element_id => $node_eid,
-   labels => [$label1, $label2, ...],
-   properties => {prop1 => $value1, prop2 => $value2, ...}
- }, 'Neo4j::Bolt::Node'
+  # Node:
+  bless {
+    id => $node_id,  element_id => $node_eid,
+    labels => [$label1, $label2, ...],
+    properties => {prop1 => $value1, prop2 => $value2, ...}
+  }, 'Neo4j::Bolt::Node'
 
- # Relationship:
- bless {
-   id    => $reln_id,        element_id       => $reln_eid,
-   start => $start_node_id,  start_element_id => $start_node_eid,
-   end   => $end_node_id,    end_element_id   => $end_node_eid,
-   type  => $reln_type,
-   properties => {prop1 => $value1, prop2 => $value2, ...}
- }, 'Neo4j::Bolt::Relationship'
+  # Relationship:
+  bless {
+    id    => $reln_id,        element_id       => $reln_eid,
+    start => $start_node_id,  start_element_id => $start_node_eid,
+    end   => $end_node_id,    end_element_id   => $end_node_eid,
+    type  => $reln_type,
+    properties => {prop1 => $value1, prop2 => $value2, ...}
+  }, 'Neo4j::Bolt::Relationship'
 
- # Path:
- bless [
-   $node1, $reln12, $node2, $reln23, $node3, ...
- ], 'Neo4j::Bolt::Path'
+  # Path:
+  bless [
+    $node1, $reln12, $node2, $reln23, $node3, ...
+  ], 'Neo4j::Bolt::Path'
 
 For further details, see the individual modules:
 
-=over 
+=over
 
 =item * L<Neo4j::Bolt::Bytes>
 
@@ -162,7 +162,7 @@ For further details, see the individual modules:
 
 =head1 METHODS
 
-=over 
+=over
 
 =item connect($url), connect_tls($url,$tls_hash)
 
@@ -204,9 +204,9 @@ L<Neo4j::Bolt::Cxn>, L<Neo4j::Bolt::ResultStream>, L<Neo4j::Types>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 CONTRIBUTORS
 

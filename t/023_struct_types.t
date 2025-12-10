@@ -65,11 +65,11 @@ is_deeply $vv,$i,"Point roundtrip";
 
 SKIP: {
   skip "DateTime module", 4 unless eval { require DateTime; 1 };
-  
+
   $i = bless { epoch_secs => $v = 29*365*86000, neo4j_type => 'LocalDateTime' }, "Neo4j::Bolt::DateTime";
   isa_ok $vv = $i->as_DateTime(), 'DateTime';
   is $vv->epoch(), $v, 'DateTime epoch';
-  
+
   $i = bless { months => 1, days => 2, secs => 3, nsecs => 4 }, "Neo4j::Bolt::Duration";
   isa_ok $vv = $i->as_DTDuration(), 'DateTime::Duration';
   is $vv->in_units('days'), 2, 'DateTime::Duration days';

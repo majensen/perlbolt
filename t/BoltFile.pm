@@ -35,7 +35,8 @@ struct neovalue {
 };
 typedef struct neovalue neovalue_t;
 
-SV* open_bf(const char *classname, const char *fn, int flags) {
+SV* open_bf(const char *classname, const char *fn, int flags)
+{
   bolt_file_t *bf;
   struct neo4j_mpool bt_mpool;
   SV *bsv, *bsv_ref;
@@ -61,28 +62,33 @@ SV* open_bf(const char *classname, const char *fn, int flags) {
   return bsv_ref;
 }
 
-void close_bf (SV* obj) {
+void close_bf (SV* obj)
+{
   bolt_file_t* bf = C_PTR_OF(obj,bolt_file_t);
   bf->fs->close(bf->fs);
   return;
 }
-const char *get_fn (SV* obj) {
+
+const char *get_fn (SV* obj)
+{
   return C_PTR_OF(obj,bolt_file_t)->fn;
 }
 
-SV *_create_neovalue (SV *obj, neo4j_value_t *v) {
-   SV *neosv, *neosv_ref;
-   neovalue_t *o;
-   Newx(o,1,neovalue_t);
-   o->value = *v;
-   neosv = newSViv((IV) o);
-   neosv_ref = newRV_noinc(neosv);
-   sv_bless(neosv_ref, gv_stashpv(NVCLASS, GV_ADD));
-   SvREADONLY_on(neosv);
-   return neosv_ref;
+SV *_create_neovalue (SV *obj, neo4j_value_t *v)
+{
+  SV *neosv, *neosv_ref;
+  neovalue_t *o;
+  Newx(o,1,neovalue_t);
+  o->value = *v;
+  neosv = newSViv((IV) o);
+  neosv_ref = newRV_noinc(neosv);
+  sv_bless(neosv_ref, gv_stashpv(NVCLASS, GV_ADD));
+  SvREADONLY_on(neosv);
+  return neosv_ref;
 }
 
-SV *_read_value (SV *obj) {
+SV *_read_value (SV *obj)
+{
   bolt_file_t *bf;
   neo4j_value_t *value;
   bf = C_PTR_OF(obj,bolt_file_t);
@@ -96,11 +102,13 @@ SV *_read_value (SV *obj) {
   }
 }
 
-int _write_neovalue (SV*obj,SV*neov) {
+int _write_neovalue (SV*obj,SV*neov)
+{
   return 1+neo4j_serialize(C_PTR_OF(neov,neovalue_t)->value, C_PTR_OF(obj,bolt_file_t)->fs);
 }
 
-void DESTROY(SV* obj) {
+void DESTROY(SV* obj)
+{
   bolt_file_t* bf = C_PTR_OF(obj,bolt_file_t);
   // bf->fs->close(bf->fs);
   Safefree(bf->fn);

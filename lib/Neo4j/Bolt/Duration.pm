@@ -32,7 +32,7 @@ sub as_DTDuration {
     days => $self->{days},
     seconds => $self->{secs},
     nanoseconds => $self->{nsecs},
-    );
+  );
 }
 
 1;
@@ -45,15 +45,15 @@ Neo4j::Bolt::Duration - Representation of a Neo4j duration structure
 
 =head1 SYNOPSIS
 
- $q = "RETURN datetime('P1Y10MT5H30S')";
- $dt = ( $cxn->run_query($q)->fetch_next )[0];
+  $q = "RETURN datetime('P1Y10MT5H30S')";
+  $dt = ( $cxn->run_query($q)->fetch_next )[0];
 
- $months = $dt->{months};
- $days = $dt->{days};
- $secs = $dt->{secs};
- $nanosecs = $dt->{nsecs};
+  $months = $dt->{months};
+  $days = $dt->{days};
+  $secs = $dt->{secs};
+  $nanosecs = $dt->{nsecs};
 
- $perl_dt = $node->as_DTDuration;
+  $perl_dt = $node->as_DTDuration;
 
 =head1 DESCRIPTION
 
@@ -96,7 +96,7 @@ The following additional method is provided:
 
 =item as_DTDuration()
 
- $perl_dt  = $dt->as_DTDuration;
+  $perl_dt  = $dt->as_DTDuration;
 
 =back
 
@@ -106,8 +106,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Duration>, L<DateTime>, L<DateTime::Duration>
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
+  Mark A. Jensen
+  CPAN: MAJENSEN
 
 =head1 LICENSE
 

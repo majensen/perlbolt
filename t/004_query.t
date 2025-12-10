@@ -11,11 +11,11 @@ use File::Spec;
 my $neo_info;
 my $nif = File::Spec->catfile('t','neo_info');
 if (-e $nif ) {
-    local $/;
-    open my $fh, "<", $nif or die $!;
-    my $val = <$fh>;
-    $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
-    eval $val;
+  local $/;
+  open my $fh, "<", $nif or die $!;
+  my $val = <$fh>;
+  $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
+  eval $val;
 }
 
 
@@ -53,12 +53,12 @@ if ($cxn->connected) {
     }
     $total_nodes += $row[1];
   }
-  
+
   ok $stream = $cxn->run_query("MATCH (a) RETURN count(a)"), 'total count query';
   is (($stream->fetch_next)[0], $total_nodes, "total nodes check");
-  
+
   ok $stream = $cxn->run_query("MATCH p = (a)-->(b) RETURN p LIMIT 1"), 'path query';
-  
+
   my ($pth) = $stream->fetch_next;
   if (defined $pth) {
     is ref $pth, 'Neo4j::Bolt::Path', 'got path as Neo4j::Bolt::Path';
@@ -71,16 +71,16 @@ if ($cxn->connected) {
     is $pth->[1]->{start}, $pth->[0]->{id}, 'relationship start correct';
     is $pth->[1]->{end}, $pth->[2]->{id}, 'relationship end correct';
     ok defined $pth->[1]->{element_id}, 'relationship element id defined';
-    diag $pth->[1]->{element_id};    
+    diag $pth->[1]->{element_id};
     ok defined $pth->[1]->{start_element_id}, 'relationship start element id defined';
-    diag $pth->[1]->{start_element_id};    
+    diag $pth->[1]->{start_element_id};
     ok defined $pth->[1]->{end_element_id}, 'relationship end element id defined';
-    diag $pth->[1]->{end_element_id};        
+    diag $pth->[1]->{end_element_id};
   }
   ok $stream = $cxn->run_query("MATCH p = (a)<--(b) RETURN p LIMIT 1"), 'path query 2';
-  
+
   ($pth) = $stream->fetch_next;
-  if (defined $pth) {  
+  if (defined $pth) {
     is ref $pth, 'Neo4j::Bolt::Path', 'got path 2 as Neo4j::Bolt::Path';
     is scalar @$pth, 3, 'path array length';
     is ref $pth->[0], 'Neo4j::Bolt::Node', 'got start node 2 as Neo4j::Bolt::Node';
@@ -96,7 +96,7 @@ if ($cxn->connected) {
   while ( my @row = $stream->fetch_next ) {
     push @lbl, $row[0];
   }
-  
+
   for (@lbl) {
     ok $stream = $cxn->run_query(
       'MATCH (a) WHERE $lbl in labels(a) RETURN count(a)',
@@ -116,16 +116,16 @@ if ($cxn->connected) {
 #    $stream->fetch_next;
     is $stream->update_counts->{labels_removed}, 1;
     ok $stream = $cxn->do_query('MATCH (a:Frelb) WHERE a.prop1 = "goob" DELETE a'), 'delete them';
-    ok $stream->success, 'q succeeds';    
+    ok $stream->success, 'q succeeds';
 #    $stream->fetch_next;
-    is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added','nodes_deleted')}], [0,0,0,1];    
+    is_deeply [@{$stream->update_counts}{('nodes_created','properties_set','labels_added','nodes_deleted')}], [0,0,0,1];
 
   }
-  
+
   like $cxn->server_id, qr(^Neo4j/\d+\.\d+\.\d), 'server ID';
-  
+
 }
-  
-  
+
+
 done_testing;
 

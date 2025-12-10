@@ -11,11 +11,11 @@ use File::Spec;
 my $neo_info;
 my $nif = File::Spec->catfile('t','neo_info');
 if (-e $nif ) {
-    local $/;
-    open my $fh, "<", $nif or die $!;
-    my $val = <$fh>;
-    $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
-    eval $val;
+  local $/;
+  open my $fh, "<", $nif or die $!;
+  my $val = <$fh>;
+  $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
+  eval $val;
 }
 
 unless (defined $neo_info) {
@@ -54,7 +54,7 @@ SKIP: {
   $cxn = Neo4j::Bolt->connect('snarf://localhost:7687');
   like $cxn->errmsg, qr/scheme/, "got errmsg";
   is $cxn->errnum, -12, "got error";
-  
+
   $url->userinfo($neo_info->{user}.':blarf');
   SKIP: {
     skip "no neo_info pass", 2 unless $neo_info->{pass};
@@ -62,7 +62,7 @@ SKIP: {
     ok (!$cxn->connected, "bad pass, not connected");
     like $cxn->errmsg, qr/password is invalid/, "got unauthorized";
   }
-  
+
 }
 
 done_testing;

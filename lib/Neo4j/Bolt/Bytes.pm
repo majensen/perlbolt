@@ -16,8 +16,8 @@ sub as_string {
 use overload '""' => \&_qq, fallback => 1;
 
 sub _qq {
-	warnings::warnif deprecated => "String access to byte arrays is deprecated; dereference using ->\$* first";
-	return ${+shift} . '';
+  warnings::warnif deprecated => "String access to byte arrays is deprecated; dereference using ->\$* first";
+  return ${+shift} . '';
 }
 
 1;
@@ -30,12 +30,12 @@ Neo4j::Bolt::Bytes - Representation of a Neo4j byte array
 
 =head1 SYNOPSIS
 
- # Neo4j::Bolt byte arrays are a blessed reference to
- # a string, the bytes of which represent the array
- 
- $string = $bytes->$*;
- 
- $bytes = bless \$string, 'Neo4j::Bolt::Bytes';
+  # Neo4j::Bolt byte arrays are a blessed reference to
+  # a string, the bytes of which represent the array
+
+  $string = $bytes->$*;
+
+  $bytes = bless \$string, 'Neo4j::Bolt::Bytes';
 
 =head1 DESCRIPTION
 
@@ -53,8 +53,8 @@ However, database plugin libraries may add functions able
 to create them through Cypher statements without the use of
 parameters. For example:
 
- # https://neo4j.com/docs/apoc/5/overview/apoc.util/
- RETURN apoc.util.compress("data", {compression: "NONE"})
+  # https://neo4j.com/docs/apoc/5/overview/apoc.util/
+  RETURN apoc.util.compress("data", {compression: "NONE"})
 
 Before Neo4j::Bolt version 0.5000, byte arrays were returned
 from the database as unblessed strings instead. Accessing
@@ -84,8 +84,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::ByteArray>
 
 =head1 AUTHOR
 
- Arne Johannessen
- CPAN: AJNN
+  Arne Johannessen
+  CPAN: AJNN
 
 =head1 LICENSE
 

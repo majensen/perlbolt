@@ -8,7 +8,9 @@
 static uint_fast8_t LOG_LEVEL = NEO4J_LOG_TRACE+1;
 static uint_fast32_t LOGGER_FLAGS = 0;
 
-void new_cxn_obj(cxn_obj_t **cxn_obj) {
+
+void new_cxn_obj(cxn_obj_t **cxn_obj)
+{
   Newx(*cxn_obj, 1, cxn_obj_t);
   (*cxn_obj)->connection = (neo4j_connection_t *)NULL;
   (*cxn_obj)->connected = 0;
@@ -16,37 +18,33 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   int major_version = 0;
   int minor_version = 0;
   (*cxn_obj)->strerror = savepvs("");
-}		 
+}
+
 
 int set_log_level( const char* classname, const char* lvl )
 {
-    if(strcmp(lvl,"NONE")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_TRACE+1;
-    }
-    if(strcmp(lvl,"ERROR")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_ERROR;
-    }
-    if(strcmp(lvl,"WARN")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_WARN;
-    }
-    if(strcmp(lvl,"INFO")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_INFO;
-    }
-    if(strcmp(lvl,"DEBUG")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_DEBUG;
-    }
-    if(strcmp(lvl,"TRACE")==0)
-    {
-	LOG_LEVEL = NEO4J_LOG_TRACE;
-    }
-    return (int) LOG_LEVEL;
+  if (strcmp(lvl,"NONE") == 0) {
+    LOG_LEVEL = NEO4J_LOG_TRACE+1;
+  }
+  if (strcmp(lvl,"ERROR") == 0) {
+    LOG_LEVEL = NEO4J_LOG_ERROR;
+  }
+  if (strcmp(lvl,"WARN") == 0) {
+    LOG_LEVEL = NEO4J_LOG_WARN;
+  }
+  if (strcmp(lvl,"INFO") == 0) {
+    LOG_LEVEL = NEO4J_LOG_INFO;
+  }
+  if (strcmp(lvl,"DEBUG") == 0) {
+    LOG_LEVEL = NEO4J_LOG_DEBUG;
+  }
+  if (strcmp(lvl,"TRACE") == 0) {
+    LOG_LEVEL = NEO4J_LOG_TRACE;
+  }
+  return (int) LOG_LEVEL;
 }
-    
+
+
 SV* connect_ ( const char* classname, const char* neo4j_url,
                int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
@@ -62,20 +60,19 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   config = neo4j_new_config();
   config->connect_timeout = (time_t) timeout;
   if (strlen(tls_ca_dir)) {
-      ignore_unused_result(neo4j_config_set_TLS_ca_dir(config, tls_ca_dir));
+    ignore_unused_result(neo4j_config_set_TLS_ca_dir(config, tls_ca_dir));
   }
   if (strlen(tls_ca_file)) {
-      ignore_unused_result(neo4j_config_set_TLS_ca_file(config, tls_ca_file));
+    ignore_unused_result(neo4j_config_set_TLS_ca_file(config, tls_ca_file));
   }
   if (strlen(tls_pk_file)) {
-      ignore_unused_result(neo4j_config_set_TLS_private_key(config, tls_pk_file));
+    ignore_unused_result(neo4j_config_set_TLS_private_key(config, tls_pk_file));
   }
   if (strlen(tls_pk_pass)) {
-      ignore_unused_result(neo4j_config_set_TLS_private_key_password(config, tls_pk_pass));
+    ignore_unused_result(neo4j_config_set_TLS_private_key_password(config, tls_pk_pass));
   }
-  if (LOG_LEVEL <= NEO4J_LOG_TRACE)
-  {
-      neo4j_config_set_logger_provider(config, neo4j_std_logger_provider(stderr, LOG_LEVEL, LOGGER_FLAGS));
+  if (LOG_LEVEL <= NEO4J_LOG_TRACE) {
+    neo4j_config_set_logger_provider(config, neo4j_std_logger_provider(stderr, LOG_LEVEL, LOGGER_FLAGS));
   }
   cxn_obj->connection = neo4j_connect( neo4j_url, config,
                                        encrypt ? 0 : NEO4J_INSECURE );
@@ -99,6 +96,7 @@ SV* connect_ ( const char* classname, const char* neo4j_url,
   return cxn_ref;
 }
 
+
 static const char * _check_neo4j_omni_version (int major, int minor, int patch)
 {
   int min_version = (major << 20) | (minor << 12) | (patch << 4);
@@ -107,30 +105,30 @@ static const char * _check_neo4j_omni_version (int major, int minor, int patch)
 }
 
 
-MODULE = Neo4j::Bolt  PACKAGE = Neo4j::Bolt  
+MODULE = Neo4j::Bolt  PACKAGE = Neo4j::Bolt
 
 PROTOTYPES: DISABLE
 
 
 SV *
 connect_ (classname, neo4j_url, timeout, encrypt, tls_ca_dir, tls_ca_file, tls_pk_file, tls_pk_pass)
-	const char *	classname
-	const char *	neo4j_url
-	int	timeout
-	bool	encrypt
-	const char *	tls_ca_dir
-	const char *	tls_ca_file
-	const char *	tls_pk_file
-	const char *	tls_pk_pass
+    const char *classname
+    const char *neo4j_url
+    int         timeout
+    bool        encrypt
+    const char *tls_ca_dir
+    const char *tls_ca_file
+    const char *tls_pk_file
+    const char *tls_pk_pass
 
 int
 set_log_level (classname, lvl)
-        const char* classname
-        const char* lvl
+    const char *classname
+    const char *lvl
 
 const char *
 _check_neo4j_omni_version (major, minor, patch)
-        int major
-        int minor
-        int patch
+    int major
+    int minor
+    int patch
 

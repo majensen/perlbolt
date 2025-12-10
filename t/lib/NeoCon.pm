@@ -60,11 +60,11 @@ sub start {
     my $success;
     for (my $i=0;$i<$RETRIES;$i++) {
       if ( $success = run(['docker','exec', $self->name, '/bin/bash', '-c', 'cypher-shell'],\$in,\$out,\$err) ) {
-	last;
+        last;
       }
       else {
-	print STDERR "*";
-	sleep $self->delay;
+        print STDERR "*";
+        sleep $self->delay;
       }
     }
     if (!$success) {
