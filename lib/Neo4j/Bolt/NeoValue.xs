@@ -68,7 +68,7 @@ void DESTROY(SV *obj) {
 }
 
 
-MODULE = Neo4j::Bolt::NeoValue  PACKAGE = Neo4j::Bolt::NeoValue  
+MODULE = Neo4j::Bolt::NeoValue  PACKAGE = Neo4j::Bolt::NeoValue
 
 PROTOTYPES: DISABLE
 

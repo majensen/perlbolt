@@ -95,7 +95,7 @@ L</"errmsg()">.
 
 =item protocol_version()
 
-Returns a string representing the major and minor Bolt protocol version of the 
+Returns a string representing the major and minor Bolt protocol version of the
 server, as "<major>.<minor>", or the empty string if not connected.
 
 =item run_query($cypher_query, [$param_hash], [$db_name])

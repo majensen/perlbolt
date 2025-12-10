@@ -57,7 +57,7 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
 
 =head1 DESCRIPTION
 
-L<Neo4j::Bolt::ResultStream> objects are created by a successful query 
+L<Neo4j::Bolt::ResultStream> objects are created by a successful query
 performed on a L<Neo4j::Bolt::Cxn>. They are iterated to obtain the rows
 of the response as Perl arrays (not arrayrefs).
 
@@ -100,8 +100,8 @@ Obtain the number of fields in the response row as an integer.
 
 =item success(), failure()
 
-Use these to check whether fetch_next() succeeded. They indicate the 
-current error state of the result stream. If 
+Use these to check whether fetch_next() succeeded. They indicate the
+current error state of the result stream. If
 
   $stream->success == $stream->failure == -1
 
@@ -132,10 +132,10 @@ particular, Cypher syntax errors will appear here.
 
 =item consumed_after()
 
-These are performance numbers that the server provides after the 
+These are performance numbers that the server provides after the
 stream has been fetched out. result_count_() is the number of rows
-returned, available_after() is the time in ms it took the server to 
-provide the stream, and consumed_after() is the time it took the 
+returned, available_after() is the time in ms it took the server to
+provide the stream, and consumed_after() is the time it took the
 client (you) to pull them all.
 
 =back

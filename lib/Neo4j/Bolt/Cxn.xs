@@ -29,7 +29,7 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send,
     return &PL_sv_undef;
   }
   cxn = cxn_obj->connection;
-  
+
   // extract params
   if (SvROK(params_ref) && (SvTYPE(SvRV(params_ref))==SVt_PVHV)) {
     params_p = SV_to_neo4j_value(params_ref);
@@ -115,7 +115,7 @@ void DESTROY (SV *cxn_ref)
 }
 
 
-MODULE = Neo4j::Bolt::Cxn  PACKAGE = Neo4j::Bolt::Cxn  
+MODULE = Neo4j::Bolt::Cxn  PACKAGE = Neo4j::Bolt::Cxn
 
 PROTOTYPES: DISABLE
 

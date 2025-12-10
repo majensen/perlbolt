@@ -58,7 +58,7 @@ SKIP: {
   ok !$rs->fetch_next, "now you dont";
   my $badrs = $txn->run_query("match (a) return count(a)");
   ok !$badrs->success, "run query doesn't work on closed txn";
-  
+
 }
 
 done_testing;

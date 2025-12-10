@@ -103,7 +103,7 @@ if (defined $neo_info && $neo_info->{tests}) {
 SKIP: {
   skip "statement tests require server connection", 18 unless $cxn && $cxn->connected;
   my ($q, $id);
-  
+
   use utf8;
   $i = "\x{100}";
   $q = "RETURN '$i'";
@@ -112,7 +112,7 @@ SKIP: {
   is to_hex($v), to_hex($i), "Unicode char in Cxn run_query";
   (undef, $v) = $cxn->do_query($q);
   is to_hex($v->[0]), to_hex($i), "Unicode char in Cxn do_query";
-  
+
   no utf8;
   $i = "\x{c4}\x{80}";
   $q = "RETURN '$i'";
@@ -123,10 +123,10 @@ SKIP: {
   (undef, $v) = $cxn->do_query($q);
   isnt to_hex($v->[0]), "U 100", "bytes in Cxn do_query - input not treated as UTF-8";
   ok utf8::is_utf8($v->[0]), "bytes in Cxn do_query - output encoded in UTF-8";
-  
+
   skip "transaction tests require Bolt version 3+", 12 if $cxn->protocol_version lt "3.0";
   ok my $txn = Neo4j::Bolt::Txn->new($cxn), "begin transaction";
-  
+
   use utf8;
   $i = "\x{100}";
   eval { Encode::_utf8_on($i) };  # SVf_UTF8 should already be on...
@@ -138,7 +138,7 @@ SKIP: {
   ($v, $o) = $txn->run_query("MATCH (n) WHERE id(n) = \$id RETURN n.t, '$i'", $id)->fetch_next;
   is to_hex($v), to_hex($i), "Unicode char in Txn send_query";
   is to_hex($o), to_hex($i), "Unicode char in Txn run_query";
-  
+
   no utf8;
   $i = "\x{c4}\x{80}";
   eval { Encode::_utf8_off($i) };  # SVf_UTF8 should already be off...
@@ -153,7 +153,7 @@ SKIP: {
   ok utf8::is_utf8($v), "bytes in Txn send_query - output encoded in UTF-8";
   isnt to_hex($o), "U 100", "bytes in Txn run_query - input not treated as UTF-8";
   ok utf8::is_utf8($o), "bytes in Txn run_query - output encoded in UTF-8";
-  
+
   $txn->rollback;
 }
 

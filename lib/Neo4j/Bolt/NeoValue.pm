@@ -38,10 +38,10 @@ Neo4j::Bolt::NeoValue - Container to hold Bolt-encoded values
 =head1 SYNOPSIS
 
   use Neo4j::Bolt::NeoValue;
-  
+
   $neo_int = Neo4j::Bolt::NeoValue->of( 42 );
   $i = $neo_int->_as_perl;
-  $neo_node = Neo4j::Bolt::NeoValue->of( 
+  $neo_node = Neo4j::Bolt::NeoValue->of(
     bless { id => 1,
       labels => ['thing','chose'],
       properties => {
@@ -54,7 +54,7 @@ Neo4j::Bolt::NeoValue - Container to hold Bolt-encoded values
   }
 
   %node = %{ Neo4j::Bolt::NeoValue->is($neo_node)->as_simple };
-  
+
   ($h,$j) = Neo4j::Bolt::NeoValue->are($neo_node, $neo_int);
 
 =head1 DESCRIPTION

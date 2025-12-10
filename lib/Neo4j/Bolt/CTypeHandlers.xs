@@ -112,7 +112,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
 #ifdef NEO4J_BOLT_TYPES_FAST
   bool is_zoned;
 #endif /* NEO4J_BOLT_TYPES_FAST */
-  
+
   if ( !SvOK(sv) ) {
     return neo4j_null;
   }
@@ -120,7 +120,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
   if (SvROK(sv)) {
     ref = SvRV(sv);
     reftype = SvTYPE(ref);
-    
+
     if (SvOBJECT(ref)) {
       if (reftype < SVt_PVAV) { // blessed scalar ref
         if (sv_isa(sv, "JSON::PP::Boolean")) {
@@ -169,7 +169,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
       }
       return object_to_neo4j_value(sv);
     }
-    
+
     if (reftype < SVt_PVAV) { // unblessed scalar ref
       if (SvIOK(ref) && SvIV(ref) >> 1 == 0) { // literal \1 or \0
         return SViv_to_neo4j_bool(ref);
@@ -184,7 +184,7 @@ neo4j_value_t SV_to_neo4j_value(SV *sv) {
     }
     warn("Unknown reference type (%i) encountered", reftype);
     return neo4j_null;
-    
+
   }
   else { // scalar
 #if PERL_VERSION_GE(5,36,0)
@@ -214,10 +214,10 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
   I32 count;
   SV *ref;
   svtype reftype;
-  
+
   ENTER;
   SAVETMPS;
-  
+
   enum {
     DateTime, Duration, Point, Bytes
   } type;
@@ -241,11 +241,11 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
       break;
     }
   }
-  
+
   PUTBACK;
   FREETMPS;
   LEAVE;
-  
+
   switch (type) {
     case DateTime:
       return object_to_neo4j_datetime( sv );
@@ -256,7 +256,7 @@ neo4j_value_t object_to_neo4j_value(SV *sv) {
     case Bytes:
       return object_to_neo4j_bytes( sv );
   }
-  
+
   ref = SvRV(sv);
   reftype = SvTYPE(ref);
   warn("Class %s is not a Neo4j::Types implementation", sv_reftype(ref, 1));
@@ -278,10 +278,10 @@ neo4j_value_t object_to_neo4j_datetime(SV *sv) {
   IV iv[4];
   SV *iv_sv, *tz_name_sv;
   neo4j_value_t tz_name, *fields;
-  
+
   ENTER;
   SAVETMPS;
-  
+
   enum {
     days, seconds, nanos, tz_offset
   };
@@ -301,7 +301,7 @@ neo4j_value_t object_to_neo4j_datetime(SV *sv) {
     ok[i] = SvOK(iv_sv);
     iv[i] = ok[i] ? SvIV(iv_sv) : 0;
   }
-  
+
   PUSHMARK(SP);
   XPUSHs(sv);
   PUTBACK;
@@ -315,11 +315,11 @@ neo4j_value_t object_to_neo4j_datetime(SV *sv) {
   if (tz_name_ok) {
     tz_name = SVpv_to_neo4j_string(tz_name_sv);
   }
-  
+
   PUTBACK;
   FREETMPS;
   LEAVE;
-  
+
   if (ok[seconds] || ok[nanos]) {
     if (ok[days]) {
       if (ok[tz_offset] || tz_name_ok) { // ZONED DATETIME
@@ -373,10 +373,10 @@ neo4j_value_t object_to_neo4j_duration(SV *sv) {
   int i;
   neo4j_value_t *fields;
   Newx(fields, 4, neo4j_value_t);
-  
+
   ENTER;
   SAVETMPS;
-  
+
   static const char * const methods[4] = {
     "months", "days", "seconds", "nanoseconds"
   };
@@ -391,7 +391,7 @@ neo4j_value_t object_to_neo4j_duration(SV *sv) {
     SPAGAIN;
     fields[i] = neo4j_int( POPi );
   }
-  
+
   PUTBACK;
   FREETMPS;
   LEAVE;
@@ -404,10 +404,10 @@ neo4j_value_t object_to_neo4j_point(SV *sv) {
   I32 count;
   neo4j_value_t *fields;
   Newx(fields, 4, neo4j_value_t);
-  
+
   ENTER;
   SAVETMPS;
-  
+
   PUSHMARK(SP);
   XPUSHs(sv);
   PUTBACK;
@@ -417,7 +417,7 @@ neo4j_value_t object_to_neo4j_point(SV *sv) {
   }
   SPAGAIN;
   fields[0] = neo4j_int( POPi );
-  
+
   PUSHMARK(SP);
   XPUSHs(sv);
   PUTBACK;
@@ -427,11 +427,11 @@ neo4j_value_t object_to_neo4j_point(SV *sv) {
   fields[3] = neo4j_float( count >= 3 ? POPn : 0.0 ); // z
   fields[2] = neo4j_float( count >= 2 ? POPn : 0.0 ); // y
   fields[1] = neo4j_float( count >= 1 ? POPn : 0.0 ); // x
-  
+
   PUTBACK;
   FREETMPS;
   LEAVE;
-  
+
   if (count == 3) {
     return neo4j_point3d(fields);
   }
@@ -648,7 +648,7 @@ neo4j_value_t HV_to_neo4j_time(HV *hv) {
   Newx(fields, 2, neo4j_value_t);
   nsecs_p = hv_fetchs(hv, "nsecs", 0);
   offset_secs_p = hv_fetchs(hv, "offset_secs", 0);
-  
+
   fields[0] = neo4j_int( nsecs_p ? SvIV( *nsecs_p ) : -1 );
   fields[1] = neo4j_int( offset_secs_p ? SvIV( *offset_secs_p ) : 0);
   return neo4j_time(fields);
@@ -733,7 +733,7 @@ neo4j_value_t HV_to_neo4j_point(HV *hv) {
   x_p = hv_fetchs(hv, "x", 0);
   y_p = hv_fetchs(hv, "y", 0);
   z_p = hv_fetchs(hv, "z", 0);
-  srid_p = hv_fetchs(hv, "srid", 0);  
+  srid_p = hv_fetchs(hv, "srid", 0);
 
   fields[0] = neo4j_int( srid_p ? SvIV( *srid_p ) : -1 );
   fields[1] = neo4j_float( x_p ? SvNV( *x_p ) : 0.0 );
@@ -949,15 +949,15 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
   start_id = neo4j_identity_value(neo4j_relationship_start_node_identity(value));
   start_elt_id = neo4j_relationship_start_node_elementid(value);
   end_id = neo4j_identity_value(neo4j_relationship_end_node_identity(value));
-  end_elt_id = neo4j_relationship_end_node_elementid(value);  
+  end_elt_id = neo4j_relationship_end_node_elementid(value);
   type = neo4j_string_to_SVpv(neo4j_relationship_type(value));
   props_hv = neo4j_map_to_HV(neo4j_relationship_properties(value));
   hv_stores(hv, "id", newSViv( (IV) reln_id ));
-  hv_stores(hv, "element_id", neo4j_elementid_to_SVpv( elt_id ));  
+  hv_stores(hv, "element_id", neo4j_elementid_to_SVpv( elt_id ));
   hv_stores(hv, "start", newSViv( (IV) start_id ));
-  hv_stores(hv, "start_element_id", neo4j_elementid_to_SVpv( start_elt_id ));  
+  hv_stores(hv, "start_element_id", neo4j_elementid_to_SVpv( start_elt_id ));
   hv_stores(hv, "end", newSViv( (IV) end_id ));
-  hv_stores(hv, "end_element_id", neo4j_elementid_to_SVpv( end_elt_id ));    
+  hv_stores(hv, "end_element_id", neo4j_elementid_to_SVpv( end_elt_id ));
   SvPV(type,len);
   retlen = (I32) len;
   if (retlen) {
@@ -971,7 +971,7 @@ HV* neo4j_relationship_to_HV( neo4j_value_t value ) {
 
 AV* neo4j_path_to_AV( neo4j_value_t value) {
   int i,n,last_node_id,node_id;
-  
+
   AV* av;
   struct neo4j_struct *v;
   _Bool dir;

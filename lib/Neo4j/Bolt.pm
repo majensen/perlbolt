@@ -95,7 +95,7 @@ library version is detected.
 
 =head2 Return Types
 
-L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made 
+L<Neo4j::Bolt::ResultStream> returns rows resulting from queries made
 via a L<Neo4j::Bolt::Cxn>. These rows are simple arrays of scalars and/or
 references. These represent Neo4j types according to the following:
 
@@ -142,7 +142,7 @@ L<Paths|Neo4j::Bolt::Path> are represented in the following formats:
 
 For further details, see the individual modules:
 
-=over 
+=over
 
 =item * L<Neo4j::Bolt::Bytes>
 
@@ -162,7 +162,7 @@ For further details, see the individual modules:
 
 =head1 METHODS
 
-=over 
+=over
 
 =item connect($url), connect_tls($url,$tls_hash)
 

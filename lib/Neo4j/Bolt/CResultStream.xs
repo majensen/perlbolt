@@ -32,8 +32,8 @@ void new_rs_obj (rs_obj_t **rs_obj) {
   rs_stats_t *stats;
   Newx(*rs_obj, 1, rs_obj_t);
   new_rs_stats(&stats);
-  (*rs_obj)->succeed = -1;  
-  (*rs_obj)->fail = -1;  
+  (*rs_obj)->succeed = -1;
+  (*rs_obj)->fail = -1;
   (*rs_obj)->fetched = 0;
   (*rs_obj)->failure_details = (struct neo4j_failure_details *) NULL;
   (*rs_obj)->stats = stats;
@@ -48,8 +48,8 @@ void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
   Safefree(rs_obj->eval_errcode);
   Safefree(rs_obj->eval_errmsg);
   Safefree(rs_obj->strerror);
-  rs_obj->succeed = -1;  
-  rs_obj->fail = -1;  
+  rs_obj->succeed = -1;
+  rs_obj->fail = -1;
   rs_obj->failure_details = (struct neo4j_failure_details *) NULL;
   rs_obj->eval_errcode = savepvs("");
   rs_obj->eval_errmsg = savepvs("");

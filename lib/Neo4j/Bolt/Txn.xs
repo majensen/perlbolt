@@ -105,7 +105,7 @@ const char *errmsg_(SV *txn_ref) {
 }
 
 
-MODULE = Neo4j::Bolt::Txn  PACKAGE = Neo4j::Bolt::Txn  
+MODULE = Neo4j::Bolt::Txn  PACKAGE = Neo4j::Bolt::Txn
 
 TYPEMAP: <<END
 txn_obj_t *    T_PTRREF

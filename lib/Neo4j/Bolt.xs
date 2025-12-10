@@ -16,7 +16,7 @@ void new_cxn_obj(cxn_obj_t **cxn_obj) {
   int major_version = 0;
   int minor_version = 0;
   (*cxn_obj)->strerror = savepvs("");
-}		 
+}
 
 int set_log_level( const char* classname, const char* lvl )
 {
@@ -46,7 +46,7 @@ int set_log_level( const char* classname, const char* lvl )
   }
   return (int) LOG_LEVEL;
 }
-    
+
 SV* connect_ ( const char* classname, const char* neo4j_url,
                int timeout, bool encrypt,
                const char* tls_ca_dir, const char* tls_ca_file,
@@ -107,7 +107,7 @@ static const char * _check_neo4j_omni_version (int major, int minor, int patch)
 }
 
 
-MODULE = Neo4j::Bolt  PACKAGE = Neo4j::Bolt  
+MODULE = Neo4j::Bolt  PACKAGE = Neo4j::Bolt
 
 PROTOTYPES: DISABLE
 

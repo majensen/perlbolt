@@ -134,7 +134,7 @@ SV *get_failure_details(SV *rs_ref) {
   SvREADONLY_on(sv);
   return sv;
 }
-    
+
 
 void update_counts_ (SV *rs_ref) {
   struct neo4j_update_counts *uc;
@@ -175,7 +175,7 @@ void DESTROY (SV *rs_ref) {
 }
 
 
-MODULE = Neo4j::Bolt::ResultStream  PACKAGE = Neo4j::Bolt::ResultStream  
+MODULE = Neo4j::Bolt::ResultStream  PACKAGE = Neo4j::Bolt::ResultStream
 
 PROTOTYPES: DISABLE
 
