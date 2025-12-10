@@ -86,11 +86,11 @@ for (my $k = 0; $k < @seq; ) {
 my $neo_info;
 my $nif = File::Spec->catfile('t','neo_info');
 if (-e $nif ) {
-    local $/;
-    open my $fh, "<", $nif or die $!;
-    my $val = <$fh>;
-    $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
-    eval $val;
+  local $/;
+  open my $fh, "<", $nif or die $!;
+  my $val = <$fh>;
+  $val =~ s/^.*?(=.*)$/\$neo_info $1/s;
+  eval $val;
 }
 
 my $cxn;

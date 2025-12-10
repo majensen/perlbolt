@@ -106,9 +106,9 @@ a boolean when found in a query parameter.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

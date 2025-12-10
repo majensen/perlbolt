@@ -28,8 +28,8 @@ SKIP: {
 }
 
 {
-no warnings 'deprecated';
-is "$vv", $$ba, "qq overloaded for Bytes";
+  no warnings 'deprecated';
+  is "$vv", $$ba, "qq overloaded for Bytes";
 }
 
 done_testing;

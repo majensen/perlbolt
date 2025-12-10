@@ -80,9 +80,9 @@ is_deeply $v->_as_perl,$i,"Rel with no type roundtrip";
 TODO: {
   local $TODO = "Implement paths";
   $i = bless [
-  	bless({ id => 1234 }, "Neo4j::Bolt::Node"),
-  	bless({ id => 523, start => 1234, end => 5678, type => "try" }, "Neo4j::Bolt::Relationship"),
-  	bless({ id => 5678 }, "Neo4j::Bolt::Node"),
+    bless({ id => 1234 }, "Neo4j::Bolt::Node"),
+    bless({ id => 523, start => 1234, end => 5678, type => "try" }, "Neo4j::Bolt::Relationship"),
+    bless({ id => 5678 }, "Neo4j::Bolt::Node"),
   ], "Neo4j::Bolt::Path";
   $v = Neo4j::Bolt::NeoValue->_new_from_perl($i);
   is $v->_neotype, "Path", "Path";

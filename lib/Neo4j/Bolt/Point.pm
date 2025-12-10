@@ -9,12 +9,12 @@ use warnings;
 use parent 'Neo4j::Types::Point';
 
 sub srid {
-	shift->{srid}
+  shift->{srid}
 }
 
 sub coordinates {
-	my $self = shift;
-	return map {$self->{$_}} defined $self->{'z'} ? qw(x y z) : qw(x y);
+  my $self = shift;
+  return map {$self->{$_}} defined $self->{'z'} ? qw(x y z) : qw(x y);
 }
 
 1;
@@ -27,13 +27,13 @@ Neo4j::Bolt::Point - Representation of a Neo4j geographic point structure
 
 =head1 SYNOPSIS
 
- $q = "RETURN point({latitude:55.944167, longitude:-3.161944});"
- $point = ( $cxn->run_query($q)->fetch_next )[0];
+  $q = "RETURN point({latitude:55.944167, longitude:-3.161944});"
+  $point = ( $cxn->run_query($q)->fetch_next )[0];
 
- $srid = $point->{srid};
- $latitude = $point->{y};
- $longitude = $point->{x};
- 
+  $srid = $point->{srid};
+  $latitude = $point->{y};
+  $longitude = $point->{x};
+
 =head1 DESCRIPTION
 
 L<Neo4j::Bolt::Point> instances are created by executing
@@ -70,8 +70,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Point>
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
+  Mark A. Jensen
+  CPAN: MAJENSEN
 
 =head1 LICENSE
 

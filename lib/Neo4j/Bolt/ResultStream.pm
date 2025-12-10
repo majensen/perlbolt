@@ -24,11 +24,11 @@ sub update_counts {
   my $self = shift;
   my %uc;
   my @tags = qw/nodes_created nodes_deleted
-		relationships_created relationships_deleted
-		properties_set
-		labels_added labels_removed
-		indexes_added indexes_removed
-		constraints_added constraints_removed/;
+                relationships_created relationships_deleted
+                properties_set
+                labels_added labels_removed
+                indexes_added indexes_removed
+                constraints_added constraints_removed/;
   my @vals = $self->update_counts_;
   return unless @vals;
   @uc{@tags} = @vals;
@@ -41,19 +41,19 @@ Neo4j::Bolt::ResultStream - Iterator on Neo4j Bolt query response
 
 =head1 SYNOPSIS
 
- use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
+  use Neo4j::Bolt;
+  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
 
- $stream = $cxn->run_query(
-   "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
- );
- while ( my @row = $stream->fetch_next ) {
-   print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
- }
- # check that the stream emptied cleanly...
- unless ( $stream->success ) {
-   print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
- }
+  $stream = $cxn->run_query(
+    "MATCH (a) RETURN labels(a) as lbls, count(a) as ct"
+  );
+  while ( my @row = $stream->fetch_next ) {
+    print "For label set [".join(',',@{$row[0]})."] there are $row[1] nodes.\n";
+  }
+  # check that the stream emptied cleanly...
+  unless ( $stream->success ) {
+    print STDERR "Uh oh: ".($stream->client_errmsg || $stream->server_errmsg);
+  }
 
 =head1 DESCRIPTION
 
@@ -75,17 +75,17 @@ If a write query is successful, returns a hashref containing the
 numbers of items created or removed in the query. The keys indicate
 the items, as follows:
 
- nodes_created
- nodes_deleted
- relationships_created
- relationships_deleted
- properties_set
- labels_added
- labels_removed
- indexes_added
- indexes_removed
- constraints_added
- constraints_removed
+  nodes_created
+  nodes_deleted
+  relationships_created
+  relationships_deleted
+  properties_set
+  labels_added
+  labels_removed
+  indexes_added
+  indexes_removed
+  constraints_added
+  constraints_removed
 
 If query is unsuccessful, or the stream is not completely fetched yet,
 returns undef (check L</"server_errmsg()">).
@@ -154,9 +154,9 @@ L<Neo4j::Bolt>, L<Neo4j::Bolt::Cxn>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

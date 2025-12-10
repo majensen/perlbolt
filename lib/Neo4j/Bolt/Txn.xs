@@ -82,8 +82,8 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
     return &PL_sv_undef;
   }
   res_stream = (send >= 1 ?
-		neo4j_send_to_tx(tx, cypher_query, params_p) :
-		neo4j_run_in_tx(tx, cypher_query, params_p));
+                neo4j_send_to_tx(tx, cypher_query, params_p) :
+                neo4j_run_in_tx(tx, cypher_query, params_p));
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
   if (send >= 1) {
@@ -116,40 +116,40 @@ PROTOTYPES: DISABLE
 
 SV *
 begin_ (classname, cxn_ref, tx_timeout, mode, dbname)
-	const char *	classname
-	SV *	cxn_ref
-	int	tx_timeout
-	const char *	mode
-	const char *	dbname
+    const char *classname
+    SV         *cxn_ref
+    int         tx_timeout
+    const char *mode
+    const char *dbname
 
 int
 commit_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 int
 rollback_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 SV *
 run_query_ (txn_ref, cypher_query, params_ref, send)
-	SV *	txn_ref
-	const char *	cypher_query
-	SV *	params_ref
-	int	send
+    SV         *txn_ref
+    const char *cypher_query
+    SV         *params_ref
+    int         send
 
 int
 errnum_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 const char *
 errmsg_ (txn_ref)
-	SV *	txn_ref
+    SV *txn_ref
 
 void
 DESTROY (txn_obj)
-        txn_obj_t *    txn_obj
-    CODE:
-        neo4j_free_tx(txn_obj->tx);
-        Safefree(txn_obj->strerror);
-        Safefree(txn_obj);
+    txn_obj_t *txn_obj
+  CODE:
+    neo4j_free_tx(txn_obj->tx);
+    Safefree(txn_obj->strerror);
+    Safefree(txn_obj);
 

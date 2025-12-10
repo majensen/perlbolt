@@ -71,23 +71,23 @@ Neo4j::Bolt::Relationship - Representation of a Neo4j Relationship
 
 =head1 SYNOPSIS
 
- $q = 'MATCH ()-[r]-() RETURN r';
- $reln = ( $cxn->run_query($q)->fetch_next )[0];
- 
- $reln_id       = $reln->{id};
- $reln_eltid    = $reln->{element_id};
- $reln_type     = $reln->{type};
- $start_node_id = $reln->{start};
- $start_node_el = $reln->{start_element_id};
- $end_node_id   = $reln->{end};
- $end_node_el   = $reln->{end_element_id};
- $properties    = $reln->{properties} // {};
- %properties    = %$properties;
- 
- $value1 = $reln->{properties}->{property1};
- $value2 = $reln->{properties}->{property2};
- 
- $hashref = $reln->as_simple;
+  $q = 'MATCH ()-[r]-() RETURN r';
+  $reln = ( $cxn->run_query($q)->fetch_next )[0];
+
+  $reln_id       = $reln->{id};
+  $reln_eltid    = $reln->{element_id};
+  $reln_type     = $reln->{type};
+  $start_node_id = $reln->{start};
+  $start_node_el = $reln->{start_element_id};
+  $end_node_id   = $reln->{end};
+  $end_node_el   = $reln->{end_element_id};
+  $properties    = $reln->{properties} // {};
+  %properties    = %$properties;
+
+  $value1 = $reln->{properties}->{property1};
+  $value2 = $reln->{properties}->{property2};
+
+  $hashref = $reln->as_simple;
 
 =head1 DESCRIPTION
 
@@ -136,17 +136,17 @@ The following additional method is provided:
 
 =item as_simple()
 
- $simple = $reln->as_simple;
- 
- $reln_id       = $simple->{_relationship};
- $reln_el       = $simple->{_element_id};
- $reln_type     = $simple->{_type};
- $start_node_id = $simple->{_start};
- $start_node_el = $simple->{_start_element_id};
- $end_node_id   = $simple->{_end};
- $end_node_el   = $simple->{_end_element_id};
- $value1        = $simple->{property1};
- $value2        = $simple->{property2};
+  $simple = $reln->as_simple;
+
+  $reln_id       = $simple->{_relationship};
+  $reln_el       = $simple->{_element_id};
+  $reln_type     = $simple->{_type};
+  $start_node_id = $simple->{_start};
+  $start_node_el = $simple->{_start_element_id};
+  $end_node_id   = $simple->{_end};
+  $end_node_el   = $simple->{_end_element_id};
+  $value1        = $simple->{property1};
+  $value2        = $simple->{property2};
 
 Get relationship as a simple hashref in the style of L<REST::Neo4p>.
 
@@ -162,8 +162,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Relationship>
 
 =head1 AUTHOR
 
- Arne Johannessen
- CPAN: AJNN
+  Arne Johannessen
+  CPAN: AJNN
 
 =head1 LICENSE
 

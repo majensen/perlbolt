@@ -71,15 +71,15 @@ const char *get_fn (SV* obj) {
 }
 
 SV *_create_neovalue (SV *obj, neo4j_value_t *v) {
-   SV *neosv, *neosv_ref;
-   neovalue_t *o;
-   Newx(o,1,neovalue_t);
-   o->value = *v;
-   neosv = newSViv((IV) o);
-   neosv_ref = newRV_noinc(neosv);
-   sv_bless(neosv_ref, gv_stashpv(NVCLASS, GV_ADD));
-   SvREADONLY_on(neosv);
-   return neosv_ref;
+  SV *neosv, *neosv_ref;
+  neovalue_t *o;
+  Newx(o,1,neovalue_t);
+  o->value = *v;
+  neosv = newSViv((IV) o);
+  neosv_ref = newRV_noinc(neosv);
+  sv_bless(neosv_ref, gv_stashpv(NVCLASS, GV_ADD));
+  SvREADONLY_on(neosv);
+  return neosv_ref;
 }
 
 SV *_read_value (SV *obj) {

@@ -23,7 +23,7 @@ Neo4j::Bolt::TypeHandlersC - Low level Perl to Bolt converters
 
 =head1 SYNOPSIS
 
- // how Neo4j::Bolt::ResultStream uses it
+  // how Neo4j::Bolt::ResultStream uses it
   for (i=0; i<n; i++) {
     value = neo4j_result_field(result, i);
     perl_value = neo4j_value_to_SV(value);
@@ -62,9 +62,9 @@ L<libneo4j-client API|http://neo4j-client.net/doc/latest/neo4j-client_8h.html>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

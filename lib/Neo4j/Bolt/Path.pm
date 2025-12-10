@@ -40,19 +40,19 @@ Neo4j::Bolt::Path - Representation of a Neo4j Path
 
 =head1 SYNOPSIS
 
- $q = 'MATCH p=(n1)-[r]->(n2) RETURN p';
- $path = ( $cxn->run_query($q)->fetch_next )[0];
- 
- ($n1, $r, $n2) = @$path;
- 
- @nodes         = grep { ref eq 'Neo4j::Bolt::Node' } @$path;
- @relationships = grep { ref eq 'Neo4j::Bolt::Relationship' } @$path;
- 
- $start_node = $path->[0];
- $end_node   = $path->[@$path - 1];
- $length     = @$path >> 1;  # number of relationships
- 
- $arrayref = $path->as_simple;
+  $q = 'MATCH p=(n1)-[r]->(n2) RETURN p';
+  $path = ( $cxn->run_query($q)->fetch_next )[0];
+
+  ($n1, $r, $n2) = @$path;
+
+  @nodes         = grep { ref eq 'Neo4j::Bolt::Node' } @$path;
+  @relationships = grep { ref eq 'Neo4j::Bolt::Relationship' } @$path;
+
+  $start_node = $path->[0];
+  $end_node   = $path->[@$path - 1];
+  $length     = @$path >> 1;  # number of relationships
+
+  $arrayref = $path->as_simple;
 
 =head1 DESCRIPTION
 
@@ -89,7 +89,7 @@ The following additional method is provided:
 
 =item as_simple()
 
- $simple  = $path->as_simple;
+  $simple  = $path->as_simple;
 
 Get path as a simple arrayref in the style of L<REST::Neo4p>.
 
@@ -104,8 +104,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Path>
 
 =head1 AUTHOR
 
- Arne Johannessen
- CPAN: AJNN
+  Arne Johannessen
+  CPAN: AJNN
 
 =head1 LICENSE
 

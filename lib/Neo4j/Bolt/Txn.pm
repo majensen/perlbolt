@@ -82,23 +82,23 @@ Neo4j::Bolt::Txn - Container for a Neo4j Bolt explicit transaction
 
 =head1 SYNOPSIS
 
- use Neo4j::Bolt;
- $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
- unless ($cxn->connected) {
-   print STDERR "Problem connecting: ".$cxn->errmsg;
- }
- $txn = Neo4j::Bolt::Txn->new($cxn);
- $stream = $txn->run_query(
-   "CREATE (a:booga {this:'that'}) RETURN a;"
- );
- if ($stream->failure) {
-   print STDERR "Problem with query run: ".
-                 ($stream->client_errmsg || $stream->server_errmsg);
-   $txn->rollback;
- }
- else {
-   $txn->commit;
- }
+  use Neo4j::Bolt;
+  $cxn = Neo4j::Bolt->connect("bolt://localhost:7687");
+  unless ($cxn->connected) {
+    print STDERR "Problem connecting: ".$cxn->errmsg;
+  }
+  $txn = Neo4j::Bolt::Txn->new($cxn);
+  $stream = $txn->run_query(
+    "CREATE (a:booga {this:'that'}) RETURN a;"
+  );
+  if ($stream->failure) {
+    print STDERR "Problem with query run: ".
+                  ($stream->client_errmsg || $stream->server_errmsg);
+    $txn->rollback;
+  }
+  else {
+    $txn->commit;
+  }
 
 =head1 DESCRIPTION
 
@@ -129,9 +129,9 @@ Completely analogous to same functions in L<Neo4j::Bolt::Cxn>.
 
 =head1 AUTHOR
 
- Mark A. Jensen
- CPAN: MAJENSEN
- majensen -at- cpan -dot- org
+  Mark A. Jensen
+  CPAN: MAJENSEN
+  majensen -at- cpan -dot- org
 
 =head1 LICENSE
 

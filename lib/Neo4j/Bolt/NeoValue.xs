@@ -75,38 +75,38 @@ PROTOTYPES: DISABLE
 
 SV *
 _new_from_perl (classname, v)
-	const char *	classname
-	SV *	v
+    const char *classname
+    SV         *v
 
 const char *
 _neotype (obj)
-	SV *	obj
+    SV *obj
 
 SV *
 _as_perl (obj)
-	SV *	obj
+    SV *obj
 
 int
 _map_size (obj)
-	SV *	obj
+    SV *obj
 
 SV *
 is_bool (obj)
-	SV *	obj
+    SV *obj
 
 void
 DESTROY (obj)
-	SV *	obj
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        DESTROY(obj);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+    SV *obj
+  PREINIT:
+    I32 *temp;
+  PPCODE:
+    temp = PL_markstack_ptr++;
+    DESTROY(obj);
+    if (PL_markstack_ptr != temp) {
+      /* truly void, because dXSARGS not invoked */
+      PL_markstack_ptr = temp;
+      XSRETURN_EMPTY; /* return empty stack */
+    }
+    /* must have used dXSARGS; list context implied */
+    return; /* assume stack size is correct */
 

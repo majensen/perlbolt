@@ -40,15 +40,15 @@ SV *run_query_( SV *cxn_ref, const char *cypher_query, SV *params_ref, int send,
   }
   if (cxn->version < 4)
   {
-      res_stream = (send >= 1 ?
-		    neo4j_send(cxn, cypher_query, params_p) :
-		    neo4j_run(cxn, cypher_query, params_p));
+    res_stream = (send >= 1 ?
+                  neo4j_send(cxn, cypher_query, params_p) :
+                  neo4j_run(cxn, cypher_query, params_p));
   }
   else
   {
-      res_stream = (send >= 1 ?
-		    neo4j_send_to_db(cxn, cypher_query, params_p, dbname) :
-		    neo4j_run_in_db(cxn, cypher_query, params_p, dbname));
+    res_stream = (send >= 1 ?
+                  neo4j_send_to_db(cxn, cypher_query, params_p, dbname) :
+                  neo4j_run_in_db(cxn, cypher_query, params_p, dbname));
   }
   rs_obj->res_stream = res_stream;
   fail = update_errstate_rs_obj(rs_obj);
@@ -94,15 +94,15 @@ const char *server_id_(SV *cxn_ref) {
 }
 
 char *protocol_version_(SV *cxn_ref) {
-    if (C_PTR_OF(cxn_ref,cxn_obj_t)->connected)
-    {
-	uint32_t V = C_PTR_OF(cxn_ref,cxn_obj_t)->major_version;
-	uint32_t v = C_PTR_OF(cxn_ref,cxn_obj_t)->minor_version;
-	return Perl_form(aTHX_ "%d.%d", (int)V, (int)v);
-    }
-    else {
-	return "";
-    }
+  if (C_PTR_OF(cxn_ref,cxn_obj_t)->connected)
+  {
+    uint32_t V = C_PTR_OF(cxn_ref,cxn_obj_t)->major_version;
+    uint32_t v = C_PTR_OF(cxn_ref,cxn_obj_t)->minor_version;
+    return Perl_form(aTHX_ "%d.%d", (int)V, (int)v);
+  }
+  else {
+    return "";
+  }
 }
 
 void DESTROY (SV *cxn_ref)
@@ -122,61 +122,61 @@ PROTOTYPES: DISABLE
 
 SV *
 run_query_ (cxn_ref, cypher_query, params_ref, send, dbname)
-	SV *	cxn_ref
-	const char *	cypher_query
-	SV *	params_ref
-	int	send
-        const char *    dbname
+    SV         *cxn_ref
+    const char *cypher_query
+    SV         *params_ref
+    int         send
+    const char *dbname
 
 int
 connected (cxn_ref)
-	SV *	cxn_ref
+    SV *cxn_ref
 
 int
 errnum_ (cxn_ref)
-	SV *	cxn_ref
+    SV *cxn_ref
 
 const char *
 errmsg_ (cxn_ref)
-	SV *	cxn_ref
+    SV *cxn_ref
 
 void
 reset_ (cxn_ref)
-	SV *	cxn_ref
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        reset_(cxn_ref);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+    SV *cxn_ref
+  PREINIT:
+    I32 *temp;
+  PPCODE:
+    temp = PL_markstack_ptr++;
+    reset_(cxn_ref);
+    if (PL_markstack_ptr != temp) {
+      /* truly void, because dXSARGS not invoked */
+      PL_markstack_ptr = temp;
+      XSRETURN_EMPTY; /* return empty stack */
+    }
+    /* must have used dXSARGS; list context implied */
+    return; /* assume stack size is correct */
 
 const char *
 server_id_ (cxn_ref)
-	SV *	cxn_ref
+    SV *cxn_ref
 
 const char *
 protocol_version_ (cxn_ref)
-        SV *    cxn_ref
+    SV *cxn_ref
 
 void
 DESTROY (cxn_ref)
-	SV *	cxn_ref
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        DESTROY(cxn_ref);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+    SV *cxn_ref
+  PREINIT:
+    I32 *temp;
+  PPCODE:
+    temp = PL_markstack_ptr++;
+    DESTROY(cxn_ref);
+    if (PL_markstack_ptr != temp) {
+      /* truly void, because dXSARGS not invoked */
+      PL_markstack_ptr = temp;
+      XSRETURN_EMPTY; /* return empty stack */
+    }
+    /* must have used dXSARGS; list context implied */
+    return; /* assume stack size is correct */
 

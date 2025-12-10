@@ -52,20 +52,20 @@ Neo4j::Bolt::Node - Representation of a Neo4j Node
 
 =head1 SYNOPSIS
 
- $q = 'MATCH (n) RETURN n';
- $node = ( $cxn->run_query($q)->fetch_next )[0];
- 
- $node_id    = $node->{id};
- $node_eltid = $node->{element_id};
- $labels     = $node->{labels} // [];
- @labels     = @$labels;
- $properties = $node->{properties} // {};
- %properties = %$properties;
- 
- $value1 = $node->{properties}->{property1};
- $value2 = $node->{properties}->{property2};
- 
- $hashref = $node->as_simple;
+  $q = 'MATCH (n) RETURN n';
+  $node = ( $cxn->run_query($q)->fetch_next )[0];
+
+  $node_id    = $node->{id};
+  $node_eltid = $node->{element_id};
+  $labels     = $node->{labels} // [];
+  @labels     = @$labels;
+  $properties = $node->{properties} // {};
+  %properties = %$properties;
+
+  $value1 = $node->{properties}->{property1};
+  $value2 = $node->{properties}->{property2};
+
+  $hashref = $node->as_simple;
 
 =head1 DESCRIPTION
 
@@ -106,13 +106,13 @@ The following additional method is provided:
 
 =item as_simple()
 
- $simple  = $node->as_simple;
- 
- $node_id = $simple->{_node};
- $eid     = $simple->{_element_id};
- @labels  = @{ $simple->{_labels} };
- $value1  = $simple->{property1};
- $value2  = $simple->{property2};
+  $simple  = $node->as_simple;
+
+  $node_id = $simple->{_node};
+  $eid     = $simple->{_element_id};
+  @labels  = @{ $simple->{_labels} };
+  $value1  = $simple->{property1};
+  $value2  = $simple->{property2};
 
 Get node as a simple hashref in the style of L<REST::Neo4p>.
 
@@ -127,8 +127,8 @@ L<Neo4j::Bolt>, L<Neo4j::Types::Node>
 
 =head1 AUTHOR
 
- Arne Johannessen
- CPAN: AJNN
+  Arne Johannessen
+  CPAN: AJNN
 
 =head1 LICENSE
 
