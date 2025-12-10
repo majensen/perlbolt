@@ -7,7 +7,9 @@
 #include "connection.h"
 #include "transaction.h"
 
-void new_txn_obj( txn_obj_t **txn_obj) {
+
+void new_txn_obj( txn_obj_t **txn_obj)
+{
   Newx(*txn_obj,1,txn_obj_t);
   (*txn_obj)->tx = NULL;
   (*txn_obj)->errnum = 0;
@@ -15,8 +17,10 @@ void new_txn_obj( txn_obj_t **txn_obj) {
   return;
 }
 
+
 // class method
-SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode, const char *dbname) {
+SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode, const char *dbname)
+{
   txn_obj_t *txn_obj;
   char climsg[BUFLEN];
   new_txn_obj(&txn_obj);
@@ -37,7 +41,9 @@ SV *begin_( const char* classname, SV *cxn_ref, int tx_timeout, const char *mode
   return txn_ref;
 }
 
-int commit_(SV *txn_ref) {
+
+int commit_(SV *txn_ref)
+{
   txn_obj_t *t = C_PTR_OF(txn_ref,txn_obj_t);
   int i = -1;
   if (neo4j_tx_is_open(t->tx)) {
@@ -46,7 +52,9 @@ int commit_(SV *txn_ref) {
   return i;
 }
 
-int rollback_(SV *txn_ref) {
+
+int rollback_(SV *txn_ref)
+{
   txn_obj_t *t = C_PTR_OF(txn_ref,txn_obj_t);
   int i = -1;
   if (neo4j_tx_is_open(t->tx)) {
@@ -55,7 +63,9 @@ int rollback_(SV *txn_ref) {
   return i;
 }
 
-SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) {
+
+SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send)
+{
   neo4j_result_stream_t *res_stream;
   txn_obj_t *txn_obj;
   neo4j_transaction_t *tx;
@@ -96,11 +106,15 @@ SV *run_query_(SV *txn_ref, const char *cypher_query, SV *params_ref, int send) 
   return rs_ref;
 }
 
-int errnum_(SV *txn_ref) {
+
+int errnum_(SV *txn_ref)
+{
   return C_PTR_OF(txn_ref,txn_obj_t)->errnum;
 }
 
-const char *errmsg_(SV *txn_ref) {
+
+const char *errmsg_(SV *txn_ref)
+{
   return C_PTR_OF(txn_ref,txn_obj_t)->strerror;
 }
 

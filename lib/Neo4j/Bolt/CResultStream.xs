@@ -1,7 +1,9 @@
 #include "perlbolt.h"
 #include <stdio.h>
 
-void new_rs_uc( struct neo4j_update_counts **uc) {
+
+void new_rs_uc( struct neo4j_update_counts **uc)
+{
   Newx(*uc, 1, struct neo4j_update_counts);
   (*uc)->nodes_created=0;
   (*uc)->nodes_deleted=0;
@@ -17,7 +19,9 @@ void new_rs_uc( struct neo4j_update_counts **uc) {
   return;
 }
 
-void new_rs_stats( rs_stats_t **stats ) {
+
+void new_rs_stats( rs_stats_t **stats )
+{
   struct neo4j_update_counts *uc;
   new_rs_uc(&uc);
   Newx(*stats, 1, rs_stats_t);
@@ -28,7 +32,9 @@ void new_rs_stats( rs_stats_t **stats ) {
   return;
 }
 
-void new_rs_obj (rs_obj_t **rs_obj) {
+
+void new_rs_obj (rs_obj_t **rs_obj)
+{
   rs_stats_t *stats;
   Newx(*rs_obj, 1, rs_obj_t);
   new_rs_stats(&stats);
@@ -44,7 +50,9 @@ void new_rs_obj (rs_obj_t **rs_obj) {
   return;
 }
 
-void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
+
+void reset_errstate_rs_obj (rs_obj_t *rs_obj)
+{
   Safefree(rs_obj->eval_errcode);
   Safefree(rs_obj->eval_errmsg);
   Safefree(rs_obj->strerror);
@@ -58,7 +66,9 @@ void reset_errstate_rs_obj (rs_obj_t *rs_obj) {
   return;
 }
 
-int update_errstate_rs_obj (rs_obj_t *rs_obj) {
+
+int update_errstate_rs_obj (rs_obj_t *rs_obj)
+{
   char climsg[BUFLEN];
   int fail;
   fail = neo4j_check_failure(rs_obj->res_stream);
@@ -85,6 +95,7 @@ int update_errstate_rs_obj (rs_obj_t *rs_obj) {
   }
   return fail;
 }
+
 
 MODULE = Neo4j::Bolt::CResultStream  PACKAGE = Neo4j::Bolt::CResultStream
 

@@ -1,7 +1,9 @@
 #include "perlbolt.h"
 #include "ingyINLINE.h"
 
-void fetch_next_ (SV *rs_ref) {
+
+void fetch_next_ (SV *rs_ref)
+{
   SV *perl_value;
   rs_obj_t *rs_obj;
   neo4j_result_t *result;
@@ -53,11 +55,15 @@ void fetch_next_ (SV *rs_ref) {
   return;
 }
 
-int nfields_(SV *rs_ref) {
+
+int nfields_(SV *rs_ref)
+{
   return neo4j_nfields( C_PTR_OF(rs_ref,rs_obj_t)->res_stream );
 }
 
-void fieldnames_ (SV *rs_ref) {
+
+void fieldnames_ (SV *rs_ref)
+{
   neo4j_result_stream_t *rs;
   int nfields;
   int i;
@@ -65,46 +71,72 @@ void fieldnames_ (SV *rs_ref) {
   nfields = neo4j_nfields(rs);
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i = 0; i < nfields; i++)
+  for (i = 0; i < nfields; i++) {
     Inline_Stack_Push(sv_2mortal(newSVpv(neo4j_fieldname(rs,i),0)));
+  }
   Inline_Stack_Done;
   return;
 }
 
-int success_ (SV *rs_ref) {
+
+int success_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->succeed;
 }
-int failure_ (SV *rs_ref) {
+
+
+int failure_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->fail;
 }
-int client_errnum_ (SV *rs_ref) {
+
+
+int client_errnum_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->errnum;
 }
-const char *server_errcode_ (SV *rs_ref) {
+
+
+const char *server_errcode_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->eval_errcode;
 }
-const char *server_errmsg_ (SV *rs_ref) {
+
+
+const char *server_errmsg_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->eval_errmsg;
 }
-const char *client_errmsg_ (SV *rs_ref) {
+
+
+const char *client_errmsg_ (SV *rs_ref)
+{
   return C_PTR_OF(rs_ref,rs_obj_t)->strerror;
 }
 
-UV result_count_ (SV *rs_ref) {
+
+UV result_count_ (SV *rs_ref)
+{
  if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
    return C_PTR_OF(rs_ref,rs_obj_t)->stats->result_count;
  } else {
    return 0;
  }
 }
-UV available_after_ (SV *rs_ref) {
+
+
+UV available_after_ (SV *rs_ref)
+{
  if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
    return C_PTR_OF(rs_ref,rs_obj_t)->stats->available_after;
  } else {
    return 0;
  }
 }
-UV consumed_after_ (SV *rs_ref) {
+
+
+UV consumed_after_ (SV *rs_ref)
+{
  if (C_PTR_OF(rs_ref,rs_obj_t)->fetched == 1) {
    return C_PTR_OF(rs_ref,rs_obj_t)->stats->consumed_after;
  } else {
@@ -112,7 +144,9 @@ UV consumed_after_ (SV *rs_ref) {
  }
 }
 
-SV *get_failure_details(SV *rs_ref) {
+
+SV *get_failure_details(SV *rs_ref)
+{
   rs_obj_t *rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
   neo4j_result_stream_t *rs = rs_obj->res_stream;
   const struct neo4j_failure_details *faild = neo4j_failure_details(rs_obj->res_stream);
@@ -136,7 +170,8 @@ SV *get_failure_details(SV *rs_ref) {
 }
 
 
-void update_counts_ (SV *rs_ref) {
+void update_counts_ (SV *rs_ref)
+{
   struct neo4j_update_counts *uc;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
@@ -161,7 +196,9 @@ void update_counts_ (SV *rs_ref) {
   return;
 }
 
-void DESTROY (SV *rs_ref) {
+
+void DESTROY (SV *rs_ref)
+{
   rs_obj_t *rs_obj;
   rs_obj = C_PTR_OF(rs_ref,rs_obj_t);
   neo4j_close_results(rs_obj->res_stream);

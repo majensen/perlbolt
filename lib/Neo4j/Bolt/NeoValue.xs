@@ -8,7 +8,9 @@ struct neovalue {
 };
 typedef struct neovalue neovalue_t;
 
-SV *_new_from_perl (const char* classname, SV *v) {
+
+SV *_new_from_perl (const char* classname, SV *v)
+{
    SV *neosv, *neosv_ref;
    neovalue_t *obj;
    Newx(obj, 1, neovalue_t);
@@ -20,24 +22,32 @@ SV *_new_from_perl (const char* classname, SV *v) {
    return neosv_ref;
 }
 
-const char* _neotype (SV *obj) {
+
+const char* _neotype (SV *obj)
+{
   neo4j_value_t v;
   v = C_PTR_OF(obj,neovalue_t)->value;
   return neo4j_typestr( neo4j_type( v ) );
 }
 
-SV* _as_perl (SV *obj) {
+
+SV* _as_perl (SV *obj)
+{
   SV *ret;
   ret = newSV(0);
   sv_setsv(ret,neo4j_value_to_SV( C_PTR_OF(obj, neovalue_t)->value ));
   return ret;
 }
 
-int _map_size (SV *obj) {
+
+int _map_size (SV *obj)
+{
   return neo4j_map_size( C_PTR_OF(obj, neovalue_t)->value );
 }
 
-SV* is_bool (SV *sv) {
+
+SV* is_bool (SV *sv)
+{
   SV *ref;
   if (! SvOK(sv)) {
     return &PL_sv_no;
@@ -62,7 +72,9 @@ SV* is_bool (SV *sv) {
   return &PL_sv_no;
 }
 
-void DESTROY(SV *obj) {
+
+void DESTROY(SV *obj)
+{
   neo4j_value_t *val = C_PTR_OF(obj, neo4j_value_t);
   return;
 }
