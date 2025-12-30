@@ -26,7 +26,7 @@ sub run_query {
   unless ($query) {
     croak "Arg 1 should be Cypher query string";
   }
-  if ($parms && !(ref $parms == 'HASH')) {
+  if (defined $parms && ref $parms ne 'HASH') {
     croak "Arg 2 should be a hashref of { param => \$value, ... }";
   }
   croak "No connection" unless $self->connected;
@@ -40,7 +40,7 @@ sub send_query {
   unless ($query) {
     croak "Arg 1 should be Cypher query string";
   }
-  if ($parms && !(ref $parms == 'HASH')) {
+  if (defined $parms && ref $parms ne 'HASH') {
     croak "Arg 2 should be a hashref of { param => \$value, ... }";
   }
   croak "No connection" unless $self->connected;
