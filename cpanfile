@@ -26,6 +26,7 @@ on test => sub {
   requires 'Test::Exception';
   requires 'Test::More';
   requires 'Test::Neo4j::Types', '0.06';
+  requires 'Test2::V0';
   requires 'Try::Tiny';
   requires 'blib';
   recommends 'Test::CPAN::Changes';  # 099_cpan_changes.t
